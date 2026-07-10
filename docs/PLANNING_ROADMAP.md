@@ -4,289 +4,429 @@
 
 This document is the project's working memory.
 
-It exists so that a future session can quickly understand:
-- what the game is,
+It records:
+- what CrimeWorld is,
 - what has already been decided,
+- which design layers are complete,
 - what is currently in scope,
-- what should be planned next,
-- what should not be expanded yet.
+- what should be planned or implemented next,
+- and what should not be expanded yet.
 
-This document is not a final design bible.
-It is the planning guide for how the design bible should continue to evolve.
+This is not the final design bible. It is the planning guide that keeps future work aligned with the current project state.
 
 ---
 
 # 1. Project summary
 
-CrimeWorld is a grand-strategy crime sandbox set in real-world cities.
-The player starts as a single nobody and builds a criminal organization through planning, recruitment, legal and illegal businesses, pressure management, and territorial influence.
+CrimeWorld is an open-ended grand-strategy crime sandbox set in real-world-inspired cities.
 
-The long-term fantasy is not just crime.
-It is the growth of a criminal dynasty or empire that can spread from a district to a city, then to a region, and eventually to larger networks.
+The player begins as a single unknown character and builds a criminal organization through planning, recruitment, legal and illegal businesses, pressure management, diplomacy, territorial influence, succession, and long-term organizational survival.
 
-The game is entertainment-focused and does not try to be a realistic criminal training simulator.
+The long-term fantasy is not merely committing crimes. It is building and maintaining an organization that can survive leadership changes, collapse, betrayal, institutional pressure, and decades of history.
+
+The game is entertainment-focused and must not become a realistic criminal training simulator.
 
 ---
 
-# 2. What has already been decided
+# 2. Core decisions already established
 
 ## Core fantasy
 
-- The player starts as one character with no power.
-- The player grows from a tiny base of operations.
-- The player plans actions while NPCs execute them.
-- The game is about building an organization, not just completing missions.
-- The world should keep reacting even when the player is not directly acting.
+- The player starts as one character with no meaningful power.
+- The player plans actions while NPCs and crews execute most operations.
+- The player is a vulnerable character inside the simulation, not a detached cursor.
+- The game is about building an organization, not completing a linear mission campaign.
+- The world continues to act and react without waiting for the player.
+- The organization can outlive individual bosses through succession.
 
 ## World structure
 
-- Real cities are the strategic board.
-- OpenStreetMap is the long-term map source.
-- The world is abstracted at strategy level, not fully simulated at interior level.
-- Buildings exist as map objects and strategic targets.
-- Roads from real maps should matter.
+- Cities are the strategic board.
+- OpenStreetMap is the long-term map source, but it is not a prerequisite for the first playable version.
+- The world is abstracted at strategy level rather than simulated as detailed interiors.
+- Buildings, roads, districts, businesses, routes, and institutions are strategic objects.
+- Districts are local simulation nodes with distinct economic, political, social, and criminal identities.
 
 ## Gameplay structure
 
-- Time passes continuously.
-- Time can be paused and sped up.
-- The player starts with one character and a minimal base.
-- Operations are the atomic actions of the game.
-- Legal and illegal systems are interconnected.
-- Pressure systems are broader than simple police heat.
+- Time passes continuously and can be paused or accelerated.
+- Operations are the atomic intentional actions of organizations.
+- Economy, crime, legal business, diplomacy, pressure, and territorial influence are interconnected.
+- Pressure is broader than a single police heat meter.
+- Outcomes are not purely binary and should create world-state consequences.
+- Growth increases capability while also creating exposure, complexity, and new threats.
 
-## Progression structure
+## Campaign structure
 
-- The player can grow from small operations to larger influence.
-- Expansion is local first, then regional, then global.
-- The model is hybrid: local control matters, but reputation, logistics, and reach can carry across regions.
+- CrimeWorld is an endless sandbox without a mandatory victory condition.
+- Optional milestones recognize achievements but do not end or fundamentally alter the campaign.
+- Bankruptcy, imprisonment, loss of territory, and organizational collapse are recoverable setbacks.
+- The only true game-over condition is the death of the current boss when no valid successor or transfer mechanism exists.
+- Organization history, leadership reigns, wars, betrayals, collapse, and recovery should persist as campaign memory.
 
 ## MVP decisions
 
-- MVP uses one city only.
-- MVP should prove the core loop.
-- MVP should not include global politics.
-- MVP should not include full succession systems.
-- MVP should not depend on full OpenStreetMap generation first.
-- A controlled map or simplified city shell is acceptable for MVP.
-- The start should be difficult but not frustrating.
+- MVP uses one controlled city or city shell.
+- MVP must prove the loop of planning, operations, growth, pressure, reaction, and survival.
+- MVP does not need full OpenStreetMap generation.
+- MVP does not need full dynasty, family, global politics, or multi-city systems.
+- MVP should contain only enough content to validate repeated strategic decisions.
+- The start should be difficult and vulnerable without becoming arbitrary or frustrating.
 
 ---
 
-# 3. Existing documentation in the repository
-
-All documents are in `docs/`. Below is the full list organized by category.
+# 3. Documentation status
 
 ## Vision and foundations
 
-- `00_VISION.md` — overall concept and player fantasy
-- `01_CORE_PILLARS.md` — non-negotiable design principles
-- `GDD_INDEX.md` — entry point and read order for the design bible
-- `README.md` — project overview
-- `PROJECT_ARCHITECTURE.md` — technical architecture overview
+Completed:
+- `00_VISION.md`
+- `01_CORE_PILLARS.md`
 
-## Core simulation systems (v1)
+## Core simulation systems
 
-- `02_WORLD_SIMULATION.md` — how the world works as a simulation
-- `03_ECONOMY.md` — money, sectors, and influence
-- `04_ORGANIZATIONS.md` — criminal groups and rivals
-- `05_NPCS.md` — important character simulation
-- `06_SUCCESSION.md` — death, prison, heirs, internal power struggles
-- `07_GAMEPLAY_LOOP.md` — early to late game flow
-- `08_INFLUENCE_AND_EXPANSION.md` — local, regional, and global influence
-- `09_OPERATIONS.md` — the action system
-- `10_POLICE_AND_PRESSURE.md` — the reaction systems
-- `11_CITY_GENERATION.md` — converting real map data into gameplay
-- `12_UI_AND_CONTROLS.md` — interface and player controls
-- `13_SAVE_AND_SIMULATION_TICKS.md` — save structure and time ticks
+Completed:
+- `02_WORLD_SIMULATION.md`
+- `03_ECONOMY.md`
+- `04_ORGANIZATIONS.md`
+- `05_NPCS.md`
+- `06_SUCCESSION.md`
+- `07_GAMEPLAY_LOOP.md`
+- `08_INFLUENCE_AND_EXPANSION.md`
+- `09_OPERATIONS.md`
+- `10_POLICE_AND_PRESSURE.md`
+- `11_CITY_GENERATION.md`
+- `12_UI_AND_CONTROLS.md`
+- `13_SAVE_AND_SIMULATION_TICKS.md`
 
-## MVP documents
+## Existing MVP planning
 
-- `14_MVP_SCOPE.md` — what the MVP must prove and what it excludes
-- `15_MVP_GAME_LOOP.md` — the playable loop for MVP
-- `16_MVP_CONTENT_LIST.md` — content required for MVP
-- `17_MVP_TECH_PLAN.md` — technology and implementation plan for MVP
-- `18_MVP_BALANCING.md` — balance targets and tuning principles
+Present but requiring validation and revision:
+- `14_MVP_SCOPE.md`
+- `15_MVP_GAME_LOOP.md`
+- `16_MVP_CONTENT_LIST.md`
+- `17_MVP_TECH_PLAN.md`
+- `18_MVP_BALANCING.md`
 
-## Deep system models (v2 — added after initial MVP planning)
+## Deep simulation models
 
-- `19_WORLD_DEPENDENCY_GRAPH.md` — full dependency graph of all game systems
-- `20_LIVING_WORLD_BEHAVIOR.md` — how the world behaves without player input
-- `21_AI_PRIORITY_MODEL.md` — how organizations, gangs, and police choose actions
-- `22_CRIME_ECOSYSTEM.md` — criminal supply chains and the illegal economy
-- `23_EMERGENT_STORY_SYSTEM.md` — how memorable stories emerge from systems
+Completed:
+- `19_WORLD_DEPENDENCY_GRAPH.md`
+- `20_LIVING_WORLD_BEHAVIOR.md`
+- `21_AI_PRIORITY_MODEL.md`
+- `22_CRIME_ECOSYSTEM.md`
+- `23_EMERGENT_STORY_SYSTEM.md`
 
-## City, district, and organization models (v3 — current layer)
+## Component and campaign models
 
-- `24_CITY_ECONOMY_MODEL.md` — how the city generates and distributes economic value
-- `25_DISTRICT_MODEL.md` — districts as local simulation nodes with strategic identity
-- `26_ORGANIZATION_MODEL.md` — organizations as living strategic entities
-- `27_OPERATION_MODEL.md` — operations as the active link between organizations and the world
-- `28_PRESSURE_REACTION_MODEL.md` — how the city, institutions, and rivals react to pressure
+Completed:
+- `24_CITY_ECONOMY_MODEL.md`
+- `25_DISTRICT_MODEL.md`
+- `26_ORGANIZATION_MODEL.md`
+- `27_OPERATION_MODEL.md`
+- `28_PRESSURE_REACTION_MODEL.md`
+- `29_PLAYER_MODEL.md`
+- `30_DIPLOMACY_MODEL.md`
+- `31_PROGRESSION_MODEL.md`
+- `32_ENDGAME_MODEL.md`
+- `33_ORGANIZATION_HISTORY_AND_LEGACY.md`
 
 ---
 
 # 4. Design layer summary
 
-The documentation has been built in three layers.
+| Layer | Documents | Status | Purpose |
+|---|---|---|---|
+| Vision | 00–01 | Complete | Defines the fantasy and non-negotiable principles |
+| Core systems | 02–13 | Complete at high level | Defines the original simulation and player-facing systems |
+| MVP planning | 14–18 | Needs validation | Defines the first playable version, but predates later models |
+| Deep models | 19–23 | Complete at design level | Connects the world, AI, criminal economy, and emergent stories |
+| Component models | 24–30 | Complete at design level | Defines city, district, organization, operations, pressure, player, and diplomacy |
+| Campaign models | 31–33 | Complete at design level | Defines progression, endless play, succession continuity, and historical memory |
 
-| Layer | Documents | What it establishes |
-|---|---|---|
-| v1 — Core | 00–13 | Vision, world rules, core systems, UI, save |
-| MVP | 14–18 | Scope, loop, content, tech, balance |
-| v2 — Deep models | 19–23 | Dependency graph, living world, AI, crime economy, story |
-| v3 — Component models | 24–28 | City, district, organization, operation, pressure |
+The high-level design phase is sufficiently complete to stop adding broad systems.
 
-The v3 layer closes the loop between the abstract systems (v1/v2) and the concrete mechanics that will be implemented.
-
----
-
-# 5. What still needs to be designed
-
-The v3 layer is now complete for the core simulation.
-The following areas remain open.
-
-## A. Player model
-
-A dedicated document defining the player character as a game entity.
-
-Questions to answer:
-- What stats or properties does the player character have?
-- How does the player grow and change over time?
-- What does the player risk personally (arrest, death, betrayal)?
-- How does the player character differ from NPC bosses?
-- What is the player's relationship to their organization?
-
-## B. Diplomacy and inter-organization relations
-
-Organizations interact with each other and with the player.
-A dedicated document is needed for how these relationships are modeled.
-
-Questions to answer:
-- What relationship states exist between organizations (neutral, allied, hostile, subordinate)?
-- How are truces, deals, and betrayals structured?
-- How do organizations negotiate?
-- How does reputation affect diplomatic options?
-- Can the player use diplomacy offensively?
-
-## C. Progression and unlock model
-
-How does the player advance beyond the early game?
-
-Questions to answer:
-- What gates late-game content (scale, reputation, influence, time)?
-- How does the organization grow in capability, not just size?
-- Are there research or upgrade trees?
-- How do milestones work?
-
-## D. Endgame and win/loss conditions
-
-What does it mean to win, lose, or end a campaign?
-
-Questions to answer:
-- Is the game open-ended or does it have campaign goals?
-- What causes a game over?
-- What constitutes a meaningful victory?
-- Can the player recover from near-collapse?
-
-## E. Technical architecture update
-
-`PROJECT_ARCHITECTURE.md` should be reviewed and updated to reflect the v3 models.
-
-Questions to answer:
-- How do the component models (district, organization, operation, pressure) map to code modules?
-- What is the data model for each component?
-- How are ticks structured now that operations, pressure, and districts interact?
+The project should now move from design expansion toward scope validation, technical alignment, and implementation planning.
 
 ---
 
-# 6. Current design philosophy
+# 5. Current priority: MVP validation pass
 
-## Avoid overbuilding isolated systems
+The next task is to revise documents `14`–`18` against the completed models `24`–`33`.
 
-A new feature should only be added if it creates a meaningful decision or a new strategic interaction.
+The MVP must answer one central question:
 
-## Prefer dependencies over standalone bonuses
+> Is the repeated loop of identifying an opportunity, planning and assigning an operation, receiving an outcome, managing pressure, reacting to rivals, and expanding capability compelling enough to support repeated play?
 
-A system should be both a cause and a consequence.
+## MVP validation goals
 
-## Prefer abstraction over over-simulation
+The revised MVP documents must define:
+- the exact starting state,
+- the minimum map and district structure,
+- the minimum player and organization data,
+- the first available operations,
+- operation planning and assignment,
+- basic economic flows,
+- the minimum rival AI loop,
+- the minimum pressure and reaction loop,
+- the first meaningful expansion decision,
+- collapse and recovery boundaries,
+- the first-session success criteria,
+- and explicit exclusions.
 
-The game should simulate enough to create interesting outcomes, but not so much that the project becomes impossible to build.
+## MVP inclusion principle
 
-## Prefer one strong loop over many weak loops
+A system belongs in MVP only if it is required to prove the core strategic loop.
 
-The core loop is more important than content volume.
+A system should be excluded or simplified if it mainly supports:
+- long campaigns,
+- multi-generation continuity,
+- regional or global scale,
+- advanced politics,
+- large content variety,
+- or simulation depth that does not change the first repeated decisions.
 
-## Build the game as a simulation first
+## Likely MVP simplifications
 
-The UI, mission structure, and content are only interfaces to the simulation.
-
----
-
-# 7. Recommended next planning steps
-
-## Step 1: Player model
-
-Create `29_PLAYER_MODEL.md`.
-Define the player character as a concrete entity within the simulation — properties, risks, growth, and relationship to the organization.
-
-## Step 2: Diplomacy model
-
-Create `30_DIPLOMACY_MODEL.md`.
-Define how organizations form alliances, negotiate, betray, and compete diplomatically.
-
-## Step 3: Progression and unlock model
-
-Create `31_PROGRESSION_MODEL.md`.
-Define how the player advances from small crew to major power — what gates growth and how capability expands.
-
-## Step 4: Endgame conditions
-
-Create `32_ENDGAME_MODEL.md`.
-Define win/loss states, campaign goals, and recovery mechanics.
-
-## Step 5: MVP validation pass
-
-After steps 1–4 are clear, revisit `14_MVP_SCOPE.md` and `15_MVP_GAME_LOOP.md`.
-Verify that the MVP still proves the correct core loop given the deeper models now in place.
-
-## Step 6: Technical architecture update
-
-Update `PROJECT_ARCHITECTURE.md` to align with the v3 component models.
+The validation pass should assume:
+- one player character,
+- one small player organization,
+- a small number of districts,
+- a limited set of buildings and businesses,
+- one or two meaningful rivals,
+- a small operation catalogue,
+- simplified diplomacy,
+- simplified personal exposure,
+- simplified pressure reactions,
+- no full succession gameplay,
+- no multi-city expansion,
+- no full organization history UI,
+- and a controlled map rather than full OSM generation.
 
 ---
 
-# 8. What should not happen yet
+# 6. Required planning sequence
+
+## Step 1: Revise MVP scope
+
+Update `14_MVP_SCOPE.md`.
+
+It must clearly define:
+- the exact systems included,
+- the systems represented only in simplified form,
+- the systems excluded,
+- and the measurable questions the MVP is meant to answer.
+
+## Step 2: Revise MVP game loop
+
+Update `15_MVP_GAME_LOOP.md`.
+
+It must define:
+- the starting situation,
+- the first opportunities,
+- the operation planning flow,
+- world reaction timing,
+- the first expansion choice,
+- and a complete first-session arc.
+
+## Step 3: Revise MVP content list
+
+Update `16_MVP_CONTENT_LIST.md`.
+
+It must specify a finite initial content budget, including:
+- districts,
+- organizations,
+- NPC roles,
+- businesses,
+- operations,
+- events,
+- pressure reactions,
+- and UI screens.
+
+## Step 4: Revise MVP balancing
+
+Update `18_MVP_BALANCING.md`.
+
+It must define:
+- operation durations,
+- income and cost scales,
+- pressure accumulation and decay,
+- recruitment pacing,
+- failure recovery,
+- and expected session progression.
+
+Numbers may remain provisional, but all important tuning relationships must be explicit.
+
+## Step 5: Update technical architecture
+
+Review and update:
+- `17_MVP_TECH_PLAN.md`
+- `PROJECT_ARCHITECTURE.md`
+
+The architecture must map the validated MVP into concrete modules, data structures, simulation order, save state, and implementation boundaries.
+
+## Step 6: Create implementation backlog
+
+After the documents above are aligned, create a concrete development backlog organized into small testable vertical slices.
+
+The first implementation slice should prove one complete operation cycle rather than build disconnected foundations.
+
+---
+
+# 7. MVP validation questions
+
+The next documentation pass must resolve these questions.
+
+## Starting state
+
+- Does the player begin alone or with one helper?
+- What assets and money exist at campaign start?
+- What creates the first opportunity?
+- Which risks are already active?
+
+## First operations
+
+- Which operation types best demonstrate planning, assignment, reward, and pressure?
+- How much information is known before committing?
+- Which resources and crew properties matter in the first version?
+- How are partial success and failure represented?
+
+## Rival behavior
+
+- What is the smallest AI model that creates readable competition?
+- Can rivals recruit, earn, operate, expand, and react using the same core rules?
+- Which rival actions must be visible to the player?
+
+## Pressure and recovery
+
+- Which pressure layers are necessary in MVP?
+- How quickly should consequences appear?
+- What tools allow the player to stabilize after mistakes?
+- How much failure is recoverable before the run becomes strategically lost?
+
+## Expansion
+
+- What is the first meaningful growth decision?
+- Does the player recruit, acquire a business, claim influence, or establish a second operating location first?
+- How does expansion increase both capability and risk?
+
+## Session outcome
+
+- What state represents a successful stabilized first run?
+- What conditions create a soft failure without immediate game over?
+- What should motivate the player to start another run?
+
+---
+
+# 8. Technical alignment requirements
+
+The technical plan must eventually define at least these MVP entities:
+- World
+- City
+- District
+- Building or strategic location
+- Character
+- Organization
+- Membership or role
+- Business or income source
+- Operation
+- Opportunity
+- Relationship
+- Pressure state
+- Investigation or reaction event
+- Historical event record
+
+It must also define:
+- simulation tick order,
+- operation lifecycle,
+- AI decision cadence,
+- event generation,
+- save determinism,
+- random seed handling,
+- and which data is configuration-driven.
+
+The architecture should preserve future extensibility without implementing non-MVP systems prematurely.
+
+---
+
+# 9. What should not happen yet
+
+Do not add more broad design documents unless the MVP validation uncovers a specific missing dependency.
 
 Do not expand into:
 - multi-country politics,
-- global warfare systems,
-- full dynasty simulation,
+- global warfare,
+- detailed international law enforcement,
 - advanced family trees,
-- huge OSM technical work before the core loop is proven,
-- dozens of business types,
+- full dynasty simulation,
+- large-scale historical-era simulation,
+- full OSM generation before the controlled-map loop works,
+- dozens of business categories,
 - dozens of organization archetypes,
-- large-scale systems that do not change player decisions.
+- advanced banking or financial-market simulation,
+- detailed tactical combat,
+- or systems that do not change the MVP's core decisions.
+
+Do not implement every concept from documents `24`–`33` in the MVP.
+Those documents define the long-term architecture, not the initial content commitment.
 
 ---
 
-# 9. Session instructions for future work
+# 10. Current design philosophy
 
-When continuing this project in a new session, begin by reading:
-1. `docs/PLANNING_ROADMAP.md` (this file)
+## Prefer a complete vertical loop over disconnected systems
+
+The first playable build should let the player make one meaningful plan, execute it, receive consequences, and respond.
+
+## Prefer dependencies over isolated bonuses
+
+A mechanic should be both a cause and a consequence inside the simulation.
+
+## Prefer abstraction over unbounded simulation
+
+Simulate only enough detail to produce readable, interesting decisions and emergent outcomes.
+
+## Preserve player agency under failure
+
+Most setbacks should change the player's strategic position rather than immediately terminate the campaign.
+
+## Make growth transform problems
+
+Progression should replace early survival problems with coordination, exposure, dependency, and stability problems.
+
+## Keep the interface explainable
+
+The player should understand why an option is available, why an operation is risky, and why the world reacted.
+
+---
+
+# 11. Instructions for future sessions
+
+When continuing this project, begin by reading:
+
+1. `docs/PLANNING_ROADMAP.md`
 2. `docs/GDD_INDEX.md`
-3. `docs/27_OPERATION_MODEL.md` and `docs/28_PRESSURE_REACTION_MODEL.md` — the most recently completed documents
+3. `docs/14_MVP_SCOPE.md`
+4. `docs/15_MVP_GAME_LOOP.md`
+5. `docs/27_OPERATION_MODEL.md`
+6. `docs/28_PRESSURE_REACTION_MODEL.md`
+7. `docs/31_PROGRESSION_MODEL.md`
 
-Then continue from the next unresolved planning step in section 7 above.
+Then continue with the next unfinished step from section 6.
 
-Do not add random new features.
-Do not restart from scratch.
-Always build on what exists.
+Do not restart the design from scratch.
+Do not add random systems.
+Do not treat every long-term design document as MVP scope.
+Always build on the established model and move toward a testable playable loop.
 
-The current priority order is:
-- player model,
-- diplomacy model,
-- progression model,
-- endgame conditions,
-- MVP validation pass.
+---
+
+# 12. Immediate next task
+
+The next task is:
+
+> Perform the MVP validation pass beginning with `14_MVP_SCOPE.md`.
+
+Before rewriting the file, compare the existing MVP assumptions against the completed operation, pressure, player, diplomacy, progression, endgame, and legacy models.
+
+The output should be a narrow, measurable MVP scope that can be translated into technical architecture and an implementation backlog.
