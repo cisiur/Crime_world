@@ -75,109 +75,132 @@ The game is entertainment-focused and does not try to be a realistic criminal tr
 
 # 3. Existing documentation in the repository
 
+All documents are in `docs/`. Below is the full list organized by category.
+
 ## Vision and foundations
 
-- `docs/00_VISION.md`
-- `docs/01_CORE_PILLARS.md`
-- `docs/GDD_INDEX.md`
+- `00_VISION.md` — overall concept and player fantasy
+- `01_CORE_PILLARS.md` — non-negotiable design principles
+- `GDD_INDEX.md` — entry point and read order for the design bible
+- `README.md` — project overview
+- `PROJECT_ARCHITECTURE.md` — technical architecture overview
 
-## Simulation and systems
+## Core simulation systems (v1)
 
-- `docs/02_WORLD_SIMULATION.md`
-- `docs/03_ECONOMY.md`
-- `docs/04_ORGANIZATIONS.md`
-- `docs/05_NPCS.md`
-- `docs/06_SUCCESSION.md`
-- `docs/07_GAMEPLAY_LOOP.md`
-- `docs/08_INFLUENCE_AND_EXPANSION.md`
-- `docs/09_OPERATIONS.md`
-- `docs/10_POLICE_AND_PRESSURE.md`
-- `docs/11_CITY_GENERATION.md`
-- `docs/12_UI_AND_CONTROLS.md`
-- `docs/13_SAVE_AND_SIMULATION_TICKS.md`
+- `02_WORLD_SIMULATION.md` — how the world works as a simulation
+- `03_ECONOMY.md` — money, sectors, and influence
+- `04_ORGANIZATIONS.md` — criminal groups and rivals
+- `05_NPCS.md` — important character simulation
+- `06_SUCCESSION.md` — death, prison, heirs, internal power struggles
+- `07_GAMEPLAY_LOOP.md` — early to late game flow
+- `08_INFLUENCE_AND_EXPANSION.md` — local, regional, and global influence
+- `09_OPERATIONS.md` — the action system
+- `10_POLICE_AND_PRESSURE.md` — the reaction systems
+- `11_CITY_GENERATION.md` — converting real map data into gameplay
+- `12_UI_AND_CONTROLS.md` — interface and player controls
+- `13_SAVE_AND_SIMULATION_TICKS.md` — save structure and time ticks
 
 ## MVP documents
 
-- `docs/14_MVP_SCOPE.md`
-- `docs/15_MVP_GAME_LOOP.md`
-- `docs/16_MVP_CONTENT_LIST.md`
-- `docs/17_MVP_TECH_PLAN.md`
-- `docs/18_MVP_BALANCING.md`
+- `14_MVP_SCOPE.md` — what the MVP must prove and what it excludes
+- `15_MVP_GAME_LOOP.md` — the playable loop for MVP
+- `16_MVP_CONTENT_LIST.md` — content required for MVP
+- `17_MVP_TECH_PLAN.md` — technology and implementation plan for MVP
+- `18_MVP_BALANCING.md` — balance targets and tuning principles
+
+## Deep system models (v2 — added after initial MVP planning)
+
+- `19_WORLD_DEPENDENCY_GRAPH.md` — full dependency graph of all game systems
+- `20_LIVING_WORLD_BEHAVIOR.md` — how the world behaves without player input
+- `21_AI_PRIORITY_MODEL.md` — how organizations, gangs, and police choose actions
+- `22_CRIME_ECOSYSTEM.md` — criminal supply chains and the illegal economy
+- `23_EMERGENT_STORY_SYSTEM.md` — how memorable stories emerge from systems
+
+## City, district, and organization models (v3 — current layer)
+
+- `24_CITY_ECONOMY_MODEL.md` — how the city generates and distributes economic value
+- `25_DISTRICT_MODEL.md` — districts as local simulation nodes with strategic identity
+- `26_ORGANIZATION_MODEL.md` — organizations as living strategic entities
+- `27_OPERATION_MODEL.md` — operations as the active link between organizations and the world
+- `28_PRESSURE_REACTION_MODEL.md` — how the city, institutions, and rivals react to pressure
 
 ---
 
-# 4. What still needs to be designed
+# 4. Design layer summary
 
-This is the current open planning list.
+The documentation has been built in three layers.
 
-## A. Living World Bible
+| Layer | Documents | What it establishes |
+|---|---|---|
+| v1 — Core | 00–13 | Vision, world rules, core systems, UI, save |
+| MVP | 14–18 | Scope, loop, content, tech, balance |
+| v2 — Deep models | 19–23 | Dependency graph, living world, AI, crime economy, story |
+| v3 — Component models | 24–28 | City, district, organization, operation, pressure |
 
-We still need a document that explains how the world behaves when the player is not actively interacting with it.
-
-Questions to answer:
-- What does a district do over time?
-- How do gangs behave without player input?
-- How does a city evolve organically?
-- What background changes happen between sessions?
-- How do businesses, police, and organizations move independently?
-
-## B. AI Bible
-
-We still need a deeper model for how important NPCs and organizations make decisions.
-
-Questions to answer:
-- What are the AI priorities?
-- How do organizations choose targets?
-- How do police decide where to focus?
-- How do rivals expand, defend, retaliate, or negotiate?
-- How do important NPCs weigh risk, profit, loyalty, and fear?
-
-## C. Story Generator / Emergence Bible
-
-We still need a document describing how memorable stories emerge from systems rather than from fixed quests.
-
-Questions to answer:
-- What kinds of long-term story arcs can emerge naturally?
-- How do betrayals happen?
-- How do succession crises happen?
-- How do rivalries evolve across years?
-- How can the game create repeatable but different campaigns?
-
-## D. Psychological Model
-
-We still need a deeper model for important characters.
-
-Questions to answer:
-- Which character traits matter most?
-- How do fear, ambition, greed, loyalty, stress, trauma, and family change behavior?
-- How do these traits affect alliance stability and betrayal risk?
-
-## E. Crime System Bible
-
-We still need a more complete system description of the criminal ecosystem itself.
-
-Questions to answer:
-- How do illegal goods move?
-- Where do resources come from?
-- What are the main criminal supply chains?
-- How does laundering work in the game model?
-- How do different crime types connect to the economy?
-
-## F. Economy Graph
-
-We need to define the actual dependency graph of the game.
-
-Questions to answer:
-- Which systems cause which other systems?
-- Which systems reinforce each other?
-- Which systems create risk, opportunity, or scarcity?
-- Which dependencies are local and which are global?
-
-This is likely the most important next planning step.
+The v3 layer closes the loop between the abstract systems (v1/v2) and the concrete mechanics that will be implemented.
 
 ---
 
-# 5. Current design philosophy
+# 5. What still needs to be designed
+
+The v3 layer is now complete for the core simulation.
+The following areas remain open.
+
+## A. Player model
+
+A dedicated document defining the player character as a game entity.
+
+Questions to answer:
+- What stats or properties does the player character have?
+- How does the player grow and change over time?
+- What does the player risk personally (arrest, death, betrayal)?
+- How does the player character differ from NPC bosses?
+- What is the player's relationship to their organization?
+
+## B. Diplomacy and inter-organization relations
+
+Organizations interact with each other and with the player.
+A dedicated document is needed for how these relationships are modeled.
+
+Questions to answer:
+- What relationship states exist between organizations (neutral, allied, hostile, subordinate)?
+- How are truces, deals, and betrayals structured?
+- How do organizations negotiate?
+- How does reputation affect diplomatic options?
+- Can the player use diplomacy offensively?
+
+## C. Progression and unlock model
+
+How does the player advance beyond the early game?
+
+Questions to answer:
+- What gates late-game content (scale, reputation, influence, time)?
+- How does the organization grow in capability, not just size?
+- Are there research or upgrade trees?
+- How do milestones work?
+
+## D. Endgame and win/loss conditions
+
+What does it mean to win, lose, or end a campaign?
+
+Questions to answer:
+- Is the game open-ended or does it have campaign goals?
+- What causes a game over?
+- What constitutes a meaningful victory?
+- Can the player recover from near-collapse?
+
+## E. Technical architecture update
+
+`PROJECT_ARCHITECTURE.md` should be reviewed and updated to reflect the v3 models.
+
+Questions to answer:
+- How do the component models (district, organization, operation, pressure) map to code modules?
+- What is the data model for each component?
+- How are ticks structured now that operations, pressure, and districts interact?
+
+---
+
+# 6. Current design philosophy
 
 ## Avoid overbuilding isolated systems
 
@@ -201,36 +224,40 @@ The UI, mission structure, and content are only interfaces to the simulation.
 
 ---
 
-# 6. Recommended next planning steps
+# 7. Recommended next planning steps
 
-## Step 1: Economy graph
+## Step 1: Player model
 
-Create a full dependency graph of the city/world economy.
-This should show how goods, money, pressure, businesses, logistics, crime, corruption, and police influence one another.
+Create `29_PLAYER_MODEL.md`.
+Define the player character as a concrete entity within the simulation — properties, risks, growth, and relationship to the organization.
 
-## Step 2: Living world behavior
+## Step 2: Diplomacy model
 
-Define what happens each day or tick when the player does nothing.
+Create `30_DIPLOMACY_MODEL.md`.
+Define how organizations form alliances, negotiate, betray, and compete diplomatically.
 
-## Step 3: AI priorities
+## Step 3: Progression and unlock model
 
-Define how gangs, police, and important NPCs choose actions.
+Create `31_PROGRESSION_MODEL.md`.
+Define how the player advances from small crew to major power — what gates growth and how capability expands.
 
-## Step 4: Crime ecosystem
+## Step 4: Endgame conditions
 
-Define the criminal supply chains and how the illegal economy plugs into the legal one.
+Create `32_ENDGAME_MODEL.md`.
+Define win/loss states, campaign goals, and recovery mechanics.
 
-## Step 5: Story emergence
+## Step 5: MVP validation pass
 
-Define what kinds of organic narratives the system should be able to produce.
+After steps 1–4 are clear, revisit `14_MVP_SCOPE.md` and `15_MVP_GAME_LOOP.md`.
+Verify that the MVP still proves the correct core loop given the deeper models now in place.
 
-## Step 6: MVP validation pass
+## Step 6: Technical architecture update
 
-After the above is clear, revisit the MVP and check whether it still proves the correct core loop.
+Update `PROJECT_ARCHITECTURE.md` to align with the v3 component models.
 
 ---
 
-# 7. What should not happen yet
+# 8. What should not happen yet
 
 Do not expand into:
 - multi-country politics,
@@ -244,18 +271,22 @@ Do not expand into:
 
 ---
 
-# 8. Session instructions for future work
+# 9. Session instructions for future work
 
-When continuing this project in a new session, begin by checking:
-1. `docs/PLANNING_ROADMAP.md`
+When continuing this project in a new session, begin by reading:
+1. `docs/PLANNING_ROADMAP.md` (this file)
 2. `docs/GDD_INDEX.md`
-3. the current MVP documents
+3. `docs/27_OPERATION_MODEL.md` and `docs/28_PRESSURE_REACTION_MODEL.md` — the most recently completed documents
 
-Then continue the design from the next unresolved planning step, not by adding random new features.
+Then continue from the next unresolved planning step in section 7 above.
+
+Do not add random new features.
+Do not restart from scratch.
+Always build on what exists.
 
 The current priority order is:
-- economy graph,
-- living world behavior,
-- AI priorities,
-- crime ecosystem,
-- story emergence.
+- player model,
+- diplomacy model,
+- progression model,
+- endgame conditions,
+- MVP validation pass.
