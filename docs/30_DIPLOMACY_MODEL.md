@@ -2,382 +2,401 @@
 
 ## Purpose
 
-This document defines how organizations, institutions, and the player interact through negotiation, cooperation, leverage, and betrayal.
+This document defines how criminal organizations and important actors interact through negotiation, leverage, dependency, cooperation, coercion, and betrayal.
 
-Diplomacy is not just flavor text.
-It is a parallel system to war and expansion.
-
-Through diplomacy, the player can:
-- stabilize a contested district without fighting,
-- use rivals as proxies,
-- turn institutions into tools,
-- avoid costly wars by paying tribute or accepting conditions,
-- enable covert operations via secret cooperation.
+Diplomacy is a strategic alternative to open conflict.
+It should change what the player can safely do, where they can operate, and which risks they can transfer to other actors.
 
 ## Core idea
 
-Diplomacy is the layer that turns neutral or hostile actors into usable forces.
+Diplomacy is not a universal menu shared by every faction.
 
-In CrimeWorld, organizations are not just enemies and allies.
-They are strategic entities with:
-- interests,
-- fears,
-- dependencies,
-- leverage over each other,
-- tolerance for risk and exposure.
+CrimeWorld distinguishes between:
+- diplomacy between criminal organizations,
+- personal relationships between important NPCs,
+- institutional influence over police, politics, and administration.
 
-A diplomacy system should reflect this complexity.
+These systems can interact, but they should not be treated as identical.
 
-## Actors in diplomacy
+## Diplomatic actors
 
-Diplomacy in CrimeWorld involves:
+### Criminal organizations
 
-### Player and organization
-- The player leads an organization.
-- The player also has personal traits, contacts, and reputation.
-- The organization has assets, territory, income, and rivalries.
-- Both affect diplomacy: the player through personal influence, the organization through power and position.
+Criminal organizations can:
+- negotiate truces,
+- form pacts,
+- create alliances,
+- exchange access or resources,
+- accept subordination,
+- threaten one another,
+- betray agreements,
+- cooperate covertly.
 
-### Rival organizations
-- Street gangs, mafia families, cartels, hybrid syndicates.
-- Each has its own interests, strengths, weaknesses, and strategic focus.
-- They can form alliances, truces, or subordination deals.
-- They can also engage in covert cooperation or betrayal.
+### Important characters
 
-### Police and law enforcement
-Traktowane asymetrycznie:
-- Nie mają dyplomacji w sensie pełnych sojuszy.
-- Ich relacje są ukierunkowane na:
-  - korupcję,
-  - nacisk,
-  - ochronę,
-  - przeciek,
-  - polityczny crackdown.
-- Policja i śledczy mogą:
-  - przyjąć propozycję spokoju pod warunkiem konkretnych działań,
-  - być wpływowi przez budżet i polityczny nacisk,
-  - współpracować z konkurencjami,
-  - być wykorzystywani w układach.
+Bosses, lieutenants, fixers, officials, and other key NPCs can maintain personal relationships that differ from formal organizational relations.
 
-### Political actors
-Traktowane asymetrycznie:
-- Politycy, urzędnicy, komisarze, lokalne władze.
-- Ich relacje to:
-  - korupcja,
-  - nacisk polityczny,
-  - obietnica ochrony,
-  - wspólne cele policyjne,
-  - przecieki informacyjne.
-- Nie tworzą sojuszy, ale mogą być narzędziem w układach.
+A personal relationship can:
+- preserve communication during conflict,
+- create secret deals,
+- weaken formal agreements,
+- survive leadership changes,
+- become leverage during succession.
 
-## Relation dimensions
+### Institutions
 
-Each active relationship has a set of numeric or bounded values.
+Police, prosecutors, city administration, and political bodies do not participate in diplomacy like criminal organizations.
 
-These are the hidden dimensions:
+The player influences institutions through specific people, offices, budgets, procedures, corruption nodes, political pressure, and legal cover.
+
+Institutional interaction includes:
+- bribery,
+- corruption,
+- political sponsorship,
+- information leaks,
+- protection from specific actions,
+- delayed investigations,
+- procedural obstruction,
+- selective enforcement.
+
+An institution as a whole should not sign an alliance or non-aggression pact with the player.
+
+## Core relationship dimensions
+
+Each active relationship uses four primary dimensions.
 
 ### Trust
-- How much the actor believes the other will act in good faith.
-- Increases after successful cooperation and fulfilled deals.
-- Decreases after betrayal, leaks, or broken promises.
-- High trust enables complex deals and long-term cooperation.
+
+How strongly an actor expects the other side to honor commitments.
+
+Trust increases through:
+- fulfilled deals,
+- reliable support,
+- shared risk,
+- consistent behavior.
+
+Trust decreases through:
+- broken agreements,
+- leaks,
+- deception,
+- abandonment during crisis.
 
 ### Fear
-- How much the other actor can threaten this actor's survival or interests.
-- Based on demonstrated violence, pressure, and strategic leverage.
-- High fear can lead to submission, tribute, or defensive alliances.
-- Low fear encourages aggression and testing of boundaries.
 
-### Leverage
-- How much power one actor has over another through control of:
-  - territory,
-  - resources,
-  - corruption nodes,
-  - criminal supply,
-  - political access.
-- Leverage is asymmetric.
-- High leverage allows coercive diplomacy.
+How strongly an actor believes the other side can harm its interests or survival.
+
+Fear can produce:
+- submission,
+- tribute,
+- caution,
+- defensive coalitions,
+- preemptive betrayal.
 
 ### Dependency
-- How much this actor relies on the other for:
-  - income,
-  - logistics,
-  - protection,
-  - political cover.
-- High dependency increases risk if the relationship breaks.
-- Low dependency allows more freedom of action.
 
-### Respect
-- How much the actor views the other as a credible, consistent, powerful force.
-- Grows with consistent behavior, strength, and reliability.
-- High respect makes negotiation more effective.
-- Low respect encourages testing and undermining.
+How much an actor relies on the other side for:
+- income,
+- logistics,
+- territory access,
+- protection,
+- information,
+- political or legal cover.
+
+Dependency can stabilize a relationship while also creating resentment.
 
 ### Hostility
-- Measured desire to harm, weaken, or destroy the other.
-- Based on past conflicts, territorial disputes, ideological clashes.
-- High hostility makes peace unstable and deals harder.
-- Negative hostility can lead to cooperative interests.
+
+How strongly an actor wants to weaken, punish, or destroy the other side.
+
+Hostility grows through:
+- territorial conflict,
+- betrayal,
+- humiliation,
+- repeated disruption,
+- incompatible long-term interests.
+
+## Derived factors
+
+### Leverage
+
+Leverage is not a permanent relationship stat.
+It is calculated from the current situation.
+
+Sources of leverage include:
+- control of territory,
+- control of supply routes,
+- blackmail material,
+- economic dependency,
+- military advantage,
+- political access,
+- knowledge of secrets.
+
+### Respect
+
+Respect is a modifier derived from reputation, consistency, competence, and demonstrated strength.
+It affects negotiation credibility but does not replace trust or fear.
 
 ### Legitimacy cover
-- How much relationship can be presented as legitimate or indirect.
-- Crucial for deals with institutions and political actors.
-- Higher legitimacy cover reduces risk of exposure and crackdown.
 
-Visible relationship states are derived from these dimensions.
+Legitimacy cover belongs to a specific deal, asset, or channel rather than to the whole relationship.
+It determines how safely an arrangement can be hidden behind legal activity.
 
 ## Formal relationship states
 
-These are the concrete states that can be represented in UI and logic.
-
 ### Neutral
-- No formal agreement.
-- Interactions possible but not protected.
-- Default state between unknown organizations.
+
+No formal agreement exists.
 
 ### Wary
-- Mutual suspicion.
-- Cooperation possible but with high risk of betrayal.
-- Small conflicts easy to escalate.
+
+Both sides expect possible conflict or betrayal.
 
 ### Cold peace
-- Formal non-aggression, but no cooperation.
-- Based on exhaustion or temporary balance.
-- Easily broken if advantage appears.
 
-### Pact (non-aggression)
-- Both sides agree not to fight for a defined period.
-- May include conditions (e.g., no expansion into certain districts).
-- Breach of pact increases hostility and fear.
+Open conflict is avoided, but cooperation remains limited.
+
+### Non-aggression pact
+
+Both sides accept defined restrictions for a limited period.
+
+Possible terms:
+- no attacks,
+- no expansion into named districts,
+- no interference with named businesses,
+- no recruitment from the other side.
 
 ### Truce
-- End of active conflict.
-- Often temporary or conditional.
-- May require tribute or concessions.
+
+An active conflict is suspended.
+A truce may include tribute, concessions, withdrawal, or temporary boundaries.
 
 ### Alliance
-- Both sides agree to cooperate against third parties.
-- May include joint operations, resource sharing, or mutual defense.
-- High trust and respect required.
-- Can be fragile if interests diverge.
 
-#### Alliance types
-- Defensive alliance — mutual defense against aggression.
-- Offensive alliance — joint expansion or targeting of a rival.
-- Situational alliance — cooperation limited to specific goals or districts.
+Organizations cooperate toward shared strategic goals.
+
+Alliance types:
+- defensive,
+- offensive,
+- situational,
+- district-specific,
+- operation-specific.
 
 ### Subordination
-- One organization accepts a subordinate role to another.
-- Subordinate pays tribute, accepts restrictions, follows orders in defined areas.
-- Superior organization gains income, influence, and control.
-- Breach can lead to rebellion or external intervention.
 
-### Corrupt protection (with institutions)
-- Organization pays for protection from police or political action.
-- Institution reduces pressure, delays investigations, or provides warnings.
-- Legitimacy cover is important.
-- Exposure risk high if discovered.
+One organization accepts a lower position.
+
+Possible terms:
+- tribute,
+- territorial restrictions,
+- operational support,
+- resource access,
+- protection,
+- succession approval.
 
 ### Covert cooperation
-- Secret cooperation between rivals or with institutions.
-- Not publicized.
-- May include:
-  - swapping intelligence,
-  - coordinated timing,
-  - silent support in operations.
-- Can be a stepping stone for formal alliances or betrayal.
 
-### Active conflict
-- Open hostility and fighting.
-- No diplomatic cover.
-- All diplomatic actions disabled until ceasefire or truce.
+Secret collaboration without a public formal relationship.
 
-Each state has constraints on:
-- allowed operations,
-- mobility,
-- resource flows,
-- political cover.
-
-## Hidden relationship layer
-
-Not all agreements are visible.
-
-Hidden layer includes:
-- secret deals,
-- informal protection,
-- double agents,
-- covert intelligence sharing,
-- informal tribute,
+Examples:
+- intelligence exchange,
+- coordinated timing,
+- proxy attacks,
+- hidden route sharing,
 - unofficial ceasefire zones.
 
-Hidden agreements:
-- are risky but flexible,
-- can be discovered by rivals or institutions,
-- can be used as leverage for blackmail or betrayal,
-- can lead to sudden public shifts if exposed.
+### Active conflict
 
-Hidden layer interacts with:
-- political pressure,
-- police investigations,
-- rival intelligence operations.
+Open hostility removes most normal diplomatic options until communication or a ceasefire is restored.
+
+## Deal model
+
+A diplomatic agreement should be represented as a concrete deal with:
+- participants,
+- terms,
+- duration,
+- obligations,
+- concessions,
+- enforcement mechanisms,
+- secrecy level,
+- exposure risk,
+- breach consequences.
+
+This is more useful than changing only a generic relation state.
 
 ## Diplomatic actions
 
-Organizations and institutions can perform diplomatic actions.
-
 ### Negotiate
-- Propose a formal or informal deal.
-- Requires some level of trust, respect, or leverage.
-- Can propose:
-  - truce,
-  - pact,
-  - alliance,
-  - subordination,
-  - covert cooperation.
+
+Propose a new deal or modify an existing one.
 
 ### Demand
-- Force terms on the other actor.
-- Requires high leverage or fear.
-- Can demand:
-  - tribute,
-  - territory,
-  - restrictions on operations,
-  - access to resources.
+
+Use leverage or fear to force concessions.
+
+Possible demands:
+- tribute,
+- territory,
+- route access,
+- withdrawal,
+- resource delivery,
+- surrender of an associate.
 
 ### Threaten
-- Escalate pressure without immediate violence.
-- Can lead to negotiation or breakdown.
 
-### Bribe
-- Monetary or resource-based leverage.
-- Mainly used with institutions and political actors.
-- Can buy:
-  - protection,
-  - delay investigations,
-  - warnings,
-  - leaks.
+Increase pressure without immediately starting open conflict.
 
-### Trade favors
-- Exchange of resources, services, or access.
-- Can be used to build trust and dependency.
+### Exchange favors
+
+Trade resources, access, information, or services.
+
+### Offer criminal protection
+
+Offer protection from:
+- rival organizations,
+- street violence,
+- supply disruption,
+- territorial aggression.
+
+This action applies to organizations, businesses, or individuals, not to an institution as a whole.
+
+### Request mediation
+
+Ask a respected third party to reduce hostility or create a truce.
 
 ### Propose ceasefire
-- Offer to end active conflict.
-- May require concessions or tribute.
-- If accepted, may lead to pact or truce.
 
-### Request alliance
-- Propose formal cooperation against third parties.
-- Requires mutual strategic interest.
-
-### Offer protection
-- Offer shield against police or political action.
-- Mainly with institutions or political actors.
+Attempt to pause active conflict under defined terms.
 
 ### Betray
-- Secretly break an agreement.
-- Can involve:
-  - informing to police,
-  - leaking deals,
-  - coordinating attacks with rivals.
-- High risk, high reward.
-- Large drop in trust and respect.
 
-### Warn
-- Informal signal that a relationship is at risk.
-- Can be used to prevent escalation or betrayal.
+Secretly violate an agreement for strategic gain.
 
-Each action has:
-- cost (money, resources, exposure),
-- prerequisites (trust, leverage, fear levels),
-- risk of failure or backlash.
+Betrayal may include:
+- leaking information,
+- coordinating with a rival,
+- breaking territorial terms,
+- withholding promised support,
+- using an agreement as preparation for attack.
 
-## AI evaluation logic
+## Institutional influence
 
-Non-player actors evaluate diplomatic offers using a model.
+Institutional influence is handled through targeted relationships and operations rather than formal diplomacy.
 
-### Decision factors
-- current relation dimensions (trust, fear, leverage, etc.)
-- strategic situation:
-  - pressure level,
-  - district competition,
-  - resource needs,
-  - organizational stability
-- player reputation:
-  - known for keeping deals,
-  - known for violence,
-  - known for betrayal
-- risk exposure:
-  - police pressure,
-  - political scrutiny,
-  - rival interest
+Possible targets:
+- police officer,
+- unit commander,
+- prosecutor,
+- judge,
+- inspector,
+- politician,
+- administrator,
+- union leader,
+- regulator.
 
-### Acceptance criteria
-- Offers are accepted if:
-  - benefits outweigh risks,
-  - the actor feels they can enforce the deal,
-  - there is enough trust or fear to prevent betrayal.
-- Offers are rejected if:
-  - risks are too high,
-  - the actor is already committed to another deal,
-  - trust or fear is too low.
+Possible effects:
+- warning about a raid,
+- slowed investigation,
+- redirected enforcement,
+- ignored violations,
+- protected permit or contract,
+- political pressure on a rival,
+- temporary procedural delay.
 
-### Risk assessment
-- AI considers:
-  - probability of betrayal,
-  - probability of exposure,
-  - cost of failure,
-  - impact on long-term stability.
+Institutional influence should be fragile, personal, and exposed to leadership changes, investigations, and political pressure.
+
+## AI evaluation
+
+AI actors evaluate a proposal using:
+- expected benefit,
+- expected risk,
+- trust,
+- fear,
+- dependency,
+- hostility,
+- current leverage,
+- organization stability,
+- pressure level,
+- rival threats,
+- likelihood of enforcement,
+- likelihood of exposure.
+
+AI should accept deals when they improve its strategic position, not because the player reached an arbitrary relation threshold.
 
 ## Breakdown and betrayal
 
-Relacje są dynamiczne.
+Relationships change when conditions change.
 
-### Natural breakdown
-- If trust decays, agreements become unstable.
-- If dependency drops, actor may become more independent.
-- If fear decreases, actor may test boundaries.
+A deal becomes unstable when:
+- trust declines,
+- dependency disappears,
+- hostility rises,
+- leverage shifts,
+- terms are no longer beneficial,
+- external pressure makes the deal dangerous,
+- leadership changes.
 
-### Forced breakdown
-- External pressure (police crackdown, political action) can force actor to abandon deals.
-- Competing alliances can cause conflict.
+Betrayal should be more likely when:
+- the betrayer has an alternative partner,
+- the victim is weakened,
+- enforcement is weak,
+- secrecy creates opportunity,
+- ambition outweighs fear.
 
-### Betrayal
-- Can be planned or opportunistic.
-- High risk, high reward.
-- AI may prepare betrayal if:
-  - player's power threatens their position,
-  - they have better offers from rivals,
-  - they have high leverage and low fear.
+## Player information
 
-## Player perspective
+The player should see:
+- formal relationship state,
+- known deal terms,
+- broad indicators of trust, fear, dependency, and hostility,
+- warnings about instability,
+- visible leverage sources.
 
-The player sees:
-- formal relationship states,
-- visible diplomatic options,
-- some indicators of trust, fear, and leverage,
-- risk of arrangement breaking.
+The player should not automatically see:
+- exact hidden values,
+- secret deals,
+- internal AI calculations,
+- concealed personal relationships.
 
-The player does not see:
-- exact numeric values,
-- hidden deals,
-- internal calculations of AI.
+Hidden information is uncovered through:
+- intelligence operations,
+- informants,
+- surveillance,
+- blackmail,
+- personal contacts.
 
-To uncover hidden information, player must:
-- use intelligence operations,
-- cultivate informants,
-- blackmail or threaten key actors.
+## Relationship to other systems
+
+Diplomacy connects to:
+- operations,
+- organization AI,
+- district control,
+- supply chains,
+- pressure,
+- succession,
+- personal reputation,
+- emergent stories.
+
+A deal should change what actors can do, not merely display a new label.
 
 ## Design principle
 
-A diplomacy system is well designed if it changes strategic choices.
+Diplomacy is well designed when it creates enforceable commitments, strategic dependencies, credible betrayal risks, and alternatives to direct conflict.
 
-Diplomacy should not be:
-- just a menu of static options,
-- a way to avoid conflict without risk,
-- invisible background logic.
+It should not become a static menu, a universal solution, or a way to neutralize risk permanently.
 
-Diplomacy should be:
-- a tool for managing risk,
-- a way to create long-term advantages,
-- a source of emergent stories through betrayal, alliance, and pressure.
+## Open Questions
+
+- Which deal terms must be supported in the first full version?
+- How are deal violations detected?
+- Can organizations guarantee deals with hostages, collateral, or shared assets?
+- How much of a relationship survives leadership succession?
+
+## Future Extensions
+
+- mediation networks,
+- formal criminal councils,
+- hostage and collateral agreements,
+- cross-city treaties,
+- political patronage blocs,
+- succession recognition deals,
+- more complex proxy conflicts.
