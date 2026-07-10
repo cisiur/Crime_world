@@ -2,6 +2,13 @@
 
 This file is the entry point to the CrimeWorld design documentation.
 
+For active implementation work, begin with:
+
+1. `../CONTEXT.md` — current project state and AI-assisted workflow
+2. `BUILD_ROADMAP.md` — implementation epics and accepted build order
+3. `PROJECT_ARCHITECTURE.md` — architecture constitution
+4. this index — full game-design reading order
+
 ## Recommended read order
 
 ### Vision and foundations
@@ -55,20 +62,28 @@ This file is the entry point to the CrimeWorld design documentation.
 
 ## Supporting project documents
 
-- `README.md` — project overview
-- `PROJECT_ARCHITECTURE.md` — technical architecture overview
-- `PLANNING_ROADMAP.md` — current planning state and next steps
+- `../README.md` — repository overview and primary entry points
+- `../CONTEXT.md` — current implementation context and PM / Codex workflow
+- `BUILD_ROADMAP.md` — executable implementation roadmap
+- `PROJECT_ARCHITECTURE.md` — architecture philosophy and boundaries
+- `PLANNING_ROADMAP.md` — design-planning history and constraints
 
-## Current documentation status
+## Current project status
 
-The high-level game design and the main simulation models are now defined.
+The high-level game design, MVP definition, and implementation architecture are complete enough to begin development.
 
-The current priority is not to add more large standalone systems. The next phase is to:
+The project has moved from design expansion into implementation preparation.
 
-1. validate the MVP against documents `24`–`33`,
-2. revise the MVP scope, loop, content, balancing, and technical plan,
-3. update `PROJECT_ARCHITECTURE.md`,
-4. convert the validated design into an implementation backlog.
+Current priority:
+
+1. compare viable technology stacks,
+2. obtain the project owner's stack decision,
+3. record the decision in `TECH_STACK.md`,
+4. scaffold the repository,
+5. establish tests and build commands,
+6. begin the deterministic domain kernel from `BUILD_ROADMAP.md`.
+
+Do not add another large design system unless implementation reveals a real design gap.
 
 ## Reading paths
 
@@ -84,6 +99,8 @@ Read:
 ### To understand the simulation architecture
 
 Read:
+- `PROJECT_ARCHITECTURE.md`
+- `17_MVP_TECH_PLAN.md`
 - `19_WORLD_DEPENDENCY_GRAPH.md`
 - `20_LIVING_WORLD_BEHAVIOR.md`
 - `21_AI_PRIORITY_MODEL.md`
@@ -92,6 +109,18 @@ Read:
 - `26_ORGANIZATION_MODEL.md`
 - `27_OPERATION_MODEL.md`
 - `28_PRESSURE_REACTION_MODEL.md`
+
+### To implement the MVP
+
+Read:
+- `../CONTEXT.md`
+- `BUILD_ROADMAP.md`
+- `PROJECT_ARCHITECTURE.md`
+- `14_MVP_SCOPE.md`
+- `15_MVP_GAME_LOOP.md`
+- `16_MVP_CONTENT_LIST.md`
+- `17_MVP_TECH_PLAN.md`
+- `18_MVP_BALANCING.md`
 
 ### To understand long-term campaign play
 
@@ -105,4 +134,11 @@ Read:
 
 ## Maintenance rule
 
-Whenever a new design document is added, this index and `PLANNING_ROADMAP.md` should be reviewed and updated in the same planning batch.
+Whenever implementation changes scope, architecture, or accepted behavior, review:
+
+- `../CONTEXT.md`,
+- `BUILD_ROADMAP.md`,
+- `PROJECT_ARCHITECTURE.md`,
+- and the directly affected design document.
+
+Documentation must not claim that implementation exists before a post-push review confirms it.
