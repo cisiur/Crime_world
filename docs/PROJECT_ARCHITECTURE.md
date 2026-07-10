@@ -2,169 +2,712 @@
 
 ## Purpose
 
-This document defines how CrimeWorld is designed and how future design decisions should be made.
+This document defines the top-level product and technical architecture of CrimeWorld.
 
-It is the project's architecture and planning constitution.
-
-If a future session opens only this document, it should still understand:
+It is the project's architecture constitution.
+It explains:
 - what the game is,
-- what the world simulation is supposed to do,
-- what kind of systems are allowed,
-- what kind of systems should be avoided,
-- how new ideas should be evaluated.
+- which systems are authoritative,
+- how the simulation is structured,
+- how code boundaries should be drawn,
+- how the MVP should be implemented,
+- and how future expansion should remain compatible with the core design.
 
-## Core identity of the project
+## Core identity
 
-CrimeWorld is a grand-strategy crime sandbox built around real cities.
+CrimeWorld is a grand-strategy crime sandbox built around cities.
 
-The player starts as a single nobody and builds a criminal organization through planning, recruitment, business control, pressure management, territorial influence, and long-term systemic growth.
+The player starts as a single unknown character and builds a criminal organization through:
+- planning,
+- recruitment,
+- operations,
+- business control,
+- pressure management,
+- territorial influence,
+- diplomacy,
+- and long-term organizational growth.
 
-The game is not centered on action combat.
-It is centered on strategic control, consequences, and emergent stories.
+The game is not centered on direct action combat.
+It is centered on strategic decisions, systemic consequences, and emergent stories.
 
-## Fundamental design layers
+## Architectural priorities
 
-CrimeWorld should be thought of as stacked layers.
+The architecture should optimize for:
+1. a testable simulation,
+2. deterministic behavior where practical,
+3. clear module boundaries,
+4. data-driven content,
+5. save compatibility,
+6. controlled complexity,
+7. and future replacement of the handcrafted MVP city with generated real-world cities.
 
-### 1. World layer
-
-The physical and geographic structure of the city.
-This comes from real-world map data or a simplified city shell in MVP.
-
-### 2. Simulation layer
-
-The hidden logic of the world:
-- districts
-- wealth
-- corruption
-- police pressure
-- businesses
-- influence
-- organizations
-- supply chains
-- local instability
-
-### 3. Character layer
-
-Important NPCs and the player character.
-These characters have goals, loyalties, fears, ambitions, and relationships.
-
-### 4. Organization layer
-
-The player does not really control a list of isolated missions.
-The player controls an organization that acts through plans, people, businesses, and influence.
-
-### 5. Event layer
-
-Operations, retaliation, investigations, recruitment, succession crises, and economic changes are the visible results of the simulation.
+The architecture should not optimize early for:
+- global scale,
+- distributed services,
+- maximum entity count,
+- or speculative future systems that are not needed by the MVP.
 
 ## Source of truth
 
-The source of truth is the simulation model.
+The authoritative source of truth is the simulation state.
 
-Not the UI.
-Not a mission script.
-Not a hand-authored quest chain.
+The UI is a projection of that state.
+Mission text, event descriptions, and notifications explain simulation changes but do not replace them.
 
-If a mechanic cannot be expressed as a meaningful change in the simulation, it probably does not belong in the project.
+A mechanic belongs in the project when it can be expressed as:
+- a command or decision,
+- a state transition,
+- a resolved outcome,
+- and consequences visible to other systems.
+
+## Product layers
+
+CrimeWorld is designed as connected product layers.
+
+### 1. City layer
+
+Represents:
+- districts,
+- roads and connections,
+- strategic locations,
+- businesses,
+- police presence,
+- and local economic conditions.
+
+The MVP uses a controlled city dataset.
+Future city generation may use OpenStreetMap, but the simulation must not depend directly on raw OSM data.
+
+### 2. Actor layer
+
+Represents:
+- the player character,
+- named NPCs,
+- recruits,
+- lieutenants,
+- rival leaders,
+- officials,
+- and other important intermediaries.
+
+Only actors who create meaningful decisions require detailed persistent simulation.
+Background population should remain aggregated or content-driven.
+
+### 3. Organization layer
+
+Represents:
+- criminal organizations,
+- membership,
+- hierarchy,
+- money,
+- assets,
+- influence,
+- relationships,
+- operational capacity,
+- and internal stability.
+
+The player controls an organization through people and plans, not as an omnipotent map cursor.
+
+### 4. Operation layer
+
+Operations are the primary active unit of gameplay.
+
+They connect:
+- opportunities,
+- targets,
+- assigned actors,
+- costs,
+- duration,
+- risk,
+- outcome resolution,
+- and consequences.
+
+All operation types should use one shared lifecycle and resolver wherever possible.
+
+### 5. Reaction layer
+
+Represents how the world responds through:
+- exposure,
+- district tension,
+- investigations,
+- law-enforcement action,
+- rival responses,
+- civilian reactions,
+- and political or institutional pressure.
+
+Reaction systems should create readable chains of consequences rather than arbitrary punishment.
+
+### 6. History layer
+
+Records meaningful events such as:
+- major operations,
+- rivalries,
+- collapses,
+- recoveries,
+- leadership changes,
+- and optional milestone achievements.
+
+History is produced from simulation events.
+It must not become a separate permanent-bonus progression tree.
+
+## Technical architecture
+
+The MVP should be implemented as a modular monolith.
+
+This means:
+- one deployable application,
+- one authoritative simulation process,
+- explicit internal modules,
+- no microservices,
+- and no network boundaries between core gameplay systems.
+
+A modular monolith gives the project strong separation without the cost of distributed architecture.
+
+## Technical layers
+
+### 1. Content layer
+
+Contains authored or generated definitions:
+- city definitions,
+- district templates,
+- operation templates,
+- business archetypes,
+- NPC archetypes,
+- event definitions,
+- and balancing values.
+
+Content definitions should be data-driven and validated at load time.
+They should not contain mutable campaign state.
+
+### 2. Domain layer
+
+Contains authoritative simulation entities and rules.
+
+Primary domain modules:
+- `City`
+- `Districts`
+- `LocationsAndBusinesses`
+- `Characters`
+- `Organizations`
+- `Operations`
+- `Economy`
+- `PressureAndInvestigations`
+- `Diplomacy`
+- `RivalAI`
+- `History`
+- `Progression`
+
+Domain code should not depend on UI frameworks, storage implementations, or external map formats.
+
+### 3. Application layer
+
+Coordinates use cases through commands and queries.
+
+Examples of commands:
+- recruit character,
+- start operation,
+- assign crew,
+- cancel operation,
+- acquire business,
+- propose deal,
+- lay low,
+- advance simulation time.
+
+Examples of queries:
+- district overview,
+- available operations,
+- organization capacity,
+- visible pressure state,
+- known rival information,
+- operation forecast,
+- and event history.
+
+The application layer validates access and orchestration.
+Core outcome rules remain in the domain layer.
+
+### 4. Presentation layer
+
+Contains:
+- map interaction,
+- panels,
+- overlays,
+- notifications,
+- tooltips,
+- operation planning UI,
+- and time controls.
+
+The presentation layer may request projections and send commands.
+It must not directly mutate domain state.
+
+### 5. Infrastructure layer
+
+Contains replaceable technical concerns:
+- save/load,
+- content loading,
+- logging,
+- telemetry,
+- random seed persistence,
+- and future map import adapters.
+
+Infrastructure implements interfaces owned by the inner layers.
+
+## Runtime modules and ownership
+
+### City and districts
+
+Own:
+- district state,
+- location references,
+- adjacency,
+- local modifiers,
+- tension,
+- and district influence summaries.
+
+Do not own organization treasury, NPC loyalty, or operation resolution.
+
+### Characters
+
+Own:
+- identity,
+- skills or capabilities,
+- health and availability,
+- loyalty,
+- relationships,
+- personal exposure,
+- and assignment state.
+
+A character cannot be assigned to incompatible simultaneous activities.
+
+### Organizations
+
+Own:
+- membership,
+- hierarchy,
+- treasury,
+- controlled assets,
+- operational capacity,
+- reputation,
+- and organizational relationships.
+
+### Operations
+
+Own:
+- operation instances,
+- lifecycle state,
+- assigned resources,
+- timing,
+- forecast data,
+- resolution,
+- and immediate generated consequences.
+
+The operation resolver must be centralized and shared across player and AI operations.
+
+### Economy
+
+Own:
+- income and expenses,
+- business cash flow,
+- operation costs,
+- maintenance,
+- and scheduled financial updates.
+
+Money changes should be recorded as transactions or traceable events for debugging.
+
+### Pressure and investigations
+
+Own:
+- organization exposure,
+- personal exposure,
+- district tension,
+- investigation state,
+- escalation thresholds,
+- decay rules,
+- and institutional reactions.
+
+Long-term evidence and active investigations must not disappear merely because the player waits.
+
+### Rival AI
+
+Own:
+- strategic priorities,
+- candidate action generation,
+- utility evaluation,
+- action selection,
+- and cooldown or capacity rules.
+
+AI must use the same operation and consequence systems as the player.
+It should not receive hidden rule-breaking actions unless explicitly documented as an MVP simplification.
+
+### History
+
+Own:
+- durable major-event records,
+- organization chronology,
+- boss reign summaries,
+- milestone records,
+- and campaign report data.
+
+## Core state model
+
+The MVP campaign state should contain at minimum:
+- campaign metadata and schema version,
+- current simulation time,
+- deterministic random state or seed data,
+- city state,
+- district states,
+- location and business states,
+- character states,
+- organization states,
+- relationship states,
+- active operation states,
+- economy state,
+- pressure and investigation states,
+- AI planning state where required,
+- event queue,
+- and history records.
+
+Stable IDs should connect entities.
+Runtime objects should not rely on direct serialized object references.
+
+## Time and tick architecture
+
+Time is continuous from the player's perspective but processed in deterministic simulation steps.
+
+The player may:
+- pause,
+- resume,
+- and change speed.
+
+The simulation should advance through an explicit phase order.
+
+Recommended tick phases:
+1. accept validated player commands,
+2. advance simulation clock,
+3. update active operations,
+4. resolve completed operations,
+5. apply immediate outcome effects,
+6. update economy and recurring costs when due,
+7. update exposure, investigations, and district tension,
+8. evaluate rival AI when due,
+9. execute selected AI commands through normal systems,
+10. update opportunities and event chains,
+11. append history and notifications,
+12. publish a stable read model for the UI.
+
+The order must be documented and tested because changing it may change campaign outcomes.
+
+## Determinism and randomness
+
+Randomness should be seedable and reproducible in tests.
+
+Random rolls should:
+- originate from a controlled random service,
+- be separated by purpose where practical,
+- and record enough diagnostic information to explain operation outcomes during development.
+
+Save/load must preserve the information needed to continue without changing future outcomes unexpectedly.
+
+## Event architecture
+
+Domain events communicate meaningful changes between modules.
+
+Examples:
+- `OperationStarted`
+- `OperationResolved`
+- `CharacterRecruited`
+- `BusinessAcquired`
+- `OrganizationExposureChanged`
+- `InvestigationOpened`
+- `DistrictTensionChanged`
+- `RivalActionSelected`
+- `MilestoneCompleted`
+- `BossDied`
+
+Events should contain facts that occurred.
+Commands express intent and must remain separate from events.
+
+The MVP may process events in-process and synchronously while preserving explicit event contracts.
+
+## Operation lifecycle
+
+All operation instances should follow a common lifecycle:
+
+1. opportunity identified,
+2. operation configured,
+3. prerequisites validated,
+4. people and resources reserved,
+5. operation started,
+6. time advanced,
+7. outcome resolved,
+8. effects emitted,
+9. assigned resources released or changed,
+10. reaction systems updated.
+
+Operation templates should provide configurable rules.
+They should not each implement a completely separate execution engine.
+
+## Save architecture
+
+The MVP should use versioned snapshot saves.
+
+A save should include:
+- complete authoritative campaign state,
+- schema version,
+- content version or compatibility identifier,
+- simulation time,
+- random state,
+- and integrity metadata where practical.
+
+Requirements:
+- save and load must produce equivalent simulation state,
+- IDs must remain stable,
+- active operations must survive reload,
+- future schema migrations must be possible,
+- and UI-only state should be stored separately or omitted.
+
+Full event sourcing is not required for MVP.
+
+## City data boundary
+
+The simulation should consume a neutral `CityDefinition` rather than raw OpenStreetMap entities.
+
+A city definition should describe:
+- districts,
+- locations,
+- location archetypes,
+- district membership,
+- connections,
+- and strategic tags.
+
+For MVP, this data is handcrafted.
+Later, an OSM adapter may generate the same format.
+
+This prevents map ingestion technology from controlling domain architecture.
+
+## Read models
+
+The UI should consume read models designed for player decisions.
+
+Examples:
+- `CityMapView`
+- `DistrictSummaryView`
+- `OrganizationOverviewView`
+- `OperationPlanningView`
+- `OperationResultView`
+- `PressureOverviewView`
+- `CharacterRosterView`
+- `BusinessPortfolioView`
+- `KnownRivalView`
+
+Hidden simulation values should not automatically appear in read models.
+Information access depends on player knowledge and intelligence.
+
+## Testing strategy
+
+### Unit tests
+
+Test isolated rules such as:
+- operation prerequisite validation,
+- outcome modifiers,
+- money transfers,
+- capacity reservation,
+- pressure thresholds,
+- and relationship state derivation.
+
+### Integration tests
+
+Test complete flows such as:
+- starting and resolving an operation,
+- operation consequences opening an investigation,
+- acquiring a business and receiving income,
+- rival retaliation after a player action,
+- and collapse followed by recovery.
+
+### Deterministic simulation tests
+
+Run seeded campaigns for many ticks and assert invariants:
+- no negative reserved capacity,
+- no character in conflicting assignments,
+- no missing entity references,
+- no invalid operation lifecycle transitions,
+- and no impossible treasury mutations.
+
+### Save/load tests
+
+Verify that:
+- the loaded state equals the saved state,
+- active processes continue correctly,
+- and deterministic continuation remains stable.
+
+## Debugging and telemetry
+
+Development builds should expose:
+- current tick and phase,
+- active operations,
+- recent domain events,
+- operation calculations,
+- pressure changes,
+- AI candidate scores,
+- economy transactions,
+- and validation failures.
+
+MVP playtest telemetry should focus on:
+- time to first operation,
+- operation choice distribution,
+- failure and partial-success rates,
+- time to first stable income,
+- pressure escalation pace,
+- recovery rate after setbacks,
+- and reasons players restart or stop.
+
+## MVP implementation sequence
+
+### Phase 1: simulation foundation
+
+- application shell,
+- campaign state,
+- deterministic clock,
+- command/query boundary,
+- content loader,
+- and automated test setup.
+
+### Phase 2: controlled city and core entities
+
+- handcrafted city definition,
+- four districts,
+- strategic locations,
+- player character,
+- organizations,
+- and basic persistence of IDs and state.
+
+### Phase 3: first vertical slice
+
+Implement one complete operation from planning through consequence:
+- select target,
+- assign actor,
+- reserve cost,
+- advance time,
+- resolve outcome,
+- change money,
+- create exposure,
+- show result.
+
+### Phase 4: economy, recruitment, and capacity
+
+- recurring income,
+- expenses,
+- business ownership,
+- recruitment,
+- character availability,
+- and operational capacity.
+
+### Phase 5: pressure and rival loop
+
+- district tension,
+- organization exposure,
+- investigations,
+- law-enforcement reactions,
+- two rival organizations,
+- and utility-based rival decisions.
+
+### Phase 6: content-complete MVP
+
+- all approved MVP operation templates,
+- businesses,
+- named actors,
+- reactions,
+- limited diplomacy,
+- save/load,
+- and required UI read models.
+
+### Phase 7: balancing and validation
+
+- playtest telemetry,
+- seeded simulation runs,
+- pacing adjustments,
+- economy tuning,
+- pressure tuning,
+- and recovery validation.
 
 ## Design rules
 
 ### Rule 1: Prefer systemic interactions over isolated features
 
-A feature should connect to existing systems.
-If it only exists by itself, it is probably weak design.
+Every major feature should connect to existing state and consequences.
 
-### Rule 2: Every major system should create decisions
+### Rule 2: Every major system must create decisions
 
-If the player cannot make meaningful choices because of a system, it is probably unnecessary.
+A system that does not alter meaningful player choices is probably unnecessary.
 
 ### Rule 3: Every system should be both cause and consequence
 
-Good systems change the world and are also changed by the world.
+Systems should change the world and be changed by it.
 
-### Rule 4: Prefer abstraction over over-simulation
+### Rule 4: Prefer abstraction over uncontrolled simulation
 
-CrimeWorld should simulate enough to create believable and interesting outcomes.
-It should not simulate every detail at full cost.
+Simulate enough to create believable outcomes, not every possible detail.
 
-### Rule 5: Build for replayable stories, not only for numbers
+### Rule 5: One rule path for player and AI
 
-The game should create situations the player remembers and wants to replay.
+Player and rival actions should use the same domain systems wherever possible.
 
-### Rule 6: Keep the project buildable
+### Rule 6: Preserve explainability
 
-If a design idea makes the project too big, too expensive, or too hard to balance, it should be simplified or postponed.
+The game must be able to explain why important outcomes occurred.
 
-## What the game should not become
+### Rule 7: Keep the project buildable
 
-CrimeWorld should not drift into:
-- a pure action game,
-- a pure city builder,
-- a pure mission-based crime game,
-- a pure political simulator,
-- a pure dynasty simulator,
-- a pure map visualizer,
-- a feature pile with no common structure.
+A future feature should be simplified or postponed when it threatens the core loop, implementation clarity, or balanceability.
 
-## How to evaluate new ideas
+## Explicitly rejected MVP architecture
 
-Every new feature proposal should answer these questions:
-
-1. What decision does it create for the player?
-2. Which existing systems does it connect to?
-3. What kind of emergent story can it generate?
-4. What does it cost in complexity?
-5. Can it be abstracted without losing the important part?
-6. Is it needed for the core loop or only for future expansion?
-
-If a feature fails most of these questions, it should probably be rejected, reduced, or moved out of the current phase.
-
-## Recommended implementation order
-
-### Phase 1: prove the core loop
-
-- one city
-- one character
-- one organization
-- operations
-- pressure
-- income
-- rival response
-- save/load
-- readable UI
-
-### Phase 2: deepen the simulation
-
-- stronger AI
-- better city behavior
-- stronger organization structure
-- better business interactions
-- more meaningful district differences
-
-### Phase 3: expand the scope
-
-- succession
-- multiple cities
-- regional influence
-- broader economic chains
-- cross-city logistics
-
-### Phase 4: apply real-world map generation
-
-- OpenStreetMap integration
-- city-specific generation rules
-- real-world map based strategic variations
+The MVP should not use:
+- microservices,
+- multiplayer networking,
+- full event sourcing,
+- an ECS without a demonstrated need,
+- a general scripting language for all gameplay,
+- direct domain dependency on OSM schemas,
+- separate simulation processes for districts,
+- or detailed simulation of unnamed citizens.
 
 ## Relationship to other documents
 
-- `docs/PLANNING_ROADMAP.md` is the working memory and navigation guide.
-- `docs/GDD_INDEX.md` is the reading order for the design docs.
-- `docs/PROJECT_ARCHITECTURE.md` is the top-level philosophy and architecture.
-- `docs/19_WORLD_DEPENDENCY_GRAPH.md` should be the next major system model.
+- `PLANNING_ROADMAP.md` defines the current planning phase and next tasks.
+- `GDD_INDEX.md` defines the documentation reading paths.
+- `14_MVP_SCOPE.md` defines the validated MVP boundary.
+- `15_MVP_GAME_LOOP.md` defines the playable MVP loop.
+- `16_MVP_CONTENT_LIST.md` defines the content budget.
+- `17_MVP_TECH_PLAN.md` defines the MVP implementation plan in greater detail.
+- `18_MVP_BALANCING.md` defines tuning hypotheses and playtest targets.
+- `19_WORLD_DEPENDENCY_GRAPH.md` describes the broader system dependency structure.
+- `24_CITY_ECONOMY_MODEL.md` through `33_ORGANIZATION_HISTORY_AND_LEGACY.md` define the deeper long-term models from which MVP subsets are selected.
+
+## Current architecture status
+
+The high-level design phase is complete enough to begin implementation planning.
+
+The next architecture task should not be another broad system document.
+It should be a concrete implementation backlog that turns the MVP phases into small, ordered, testable work items.
+
+## Open Questions
+
+- Which runtime and UI technology stack will be used for the first implementation?
+- What is the exact simulation tick duration and game-time scale?
+- Which data format will store content definitions?
+- Which persistence format best supports readable development saves and future migrations?
+- Which read models are required for the first vertical slice?
+- How much AI state must be persisted versus recomputed after load?
+
+## Future Extensions
+
+- OpenStreetMap import adapters producing neutral city definitions.
+- Multi-city campaign coordination.
+- Full succession and dynasty support.
+- More advanced institutional and political simulation.
+- Modding and user-authored content pipelines.
+- Background simulation quality levels for large worlds.
 
 ## Final principle
 
-The project should be designed like a living simulation first and a game interface second.
+CrimeWorld should be built as a deterministic, readable living simulation first and as a game interface second.
 
-The interface exists to let the player read the simulation, influence it, and create stories inside it.
+The interface exists to let the player understand the world, make plans, accept risk, and create a history through the consequences of those decisions.
