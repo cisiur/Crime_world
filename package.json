@@ -1,0 +1,36 @@
+{
+  "name": "crimeworld",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @crimeworld/desktop",
+    "desktop:dev": "npm run tauri:dev --workspace @crimeworld/desktop",
+    "desktop:build": "npm run tauri:build --workspace @crimeworld/desktop",
+    "build": "npm run build:packages && npm run build --workspace @crimeworld/desktop",
+    "build:packages": "tsc -b packages/domain packages/application packages/content packages/infrastructure packages/presentation",
+    "test": "vitest run",
+    "test:domain": "vitest run packages/domain",
+    "lint": "eslint .",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "check": "npm run format:check && npm run lint && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.31.0",
+    "@tauri-apps/cli": "2.7.1",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "@vitejs/plugin-react": "4.6.0",
+    "eslint": "9.31.0",
+    "prettier": "3.6.2",
+    "typescript": "5.8.3",
+    "typescript-eslint": "8.37.0",
+    "vite": "^7.3.6",
+    "vitest": "^3.2.7"
+  }
+}

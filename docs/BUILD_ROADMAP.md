@@ -99,8 +99,8 @@ After EPIC 0, `CONTEXT.md` and this roadmap must record the exact commands.
 ```text
 Design Bible                 ██████████ 100%
 MVP Definition               ██████████ 100%
-Technical Stack Decision     ░░░░░░░░░░   0%
-Repository Foundation        ░░░░░░░░░░   0%
+Technical Stack Decision     ██████████ 100%
+Repository Foundation        ██████████ 100%
 Headless Simulation          ░░░░░░░░░░   0%
 First Operation Slice        ░░░░░░░░░░   0%
 Economy & Recruitment        ░░░░░░░░░░   0%
@@ -123,15 +123,15 @@ This epic is a hard gate. No gameplay implementation should begin before it is c
 
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E0-01 | Compare suitable stacks against CrimeWorld requirements | `[PM]` | Pending |
-| E0-02 | Owner selects the implementation stack | `[OWNER]` | Pending |
-| E0-03 | Record the decision in `docs/TECH_STACK.md` | `[PM]` | Pending |
-| E0-04 | Scaffold the project and package structure | `[CODEX]` | Pending |
-| E0-05 | Configure formatter, linter, tests, and production build | `[CODEX]` | Pending |
+| E0-01 | Compare suitable stacks against CrimeWorld requirements | `[PM]` | Done |
+| E0-02 | Owner selects the implementation stack | `[OWNER]` | Done |
+| E0-03 | Record the decision in `docs/TECH_STACK.md` | `[PM]` | Done |
+| E0-04 | Scaffold the project and package structure | `[CODEX]` | Done |
+| E0-05 | Configure formatter, linter, tests, and production build | `[CODEX]` | Done |
 | E0-06 | Add CI for tests and build on pushes / pull requests if desired | `[CODEX]` | Pending |
 | E0-07 | Add deterministic test seed support | `[CODEX]` | Pending |
 | E0-08 | Add repository-level developer instructions if required by the selected tooling | `[BOTH]` | Pending |
-| E0-09 | Update `CONTEXT.md` with exact commands and source structure | `[PM]` | Pending |
+| E0-09 | Update `CONTEXT.md` with exact commands and source structure | `[PM]` | Done |
 
 ### Stack evaluation criteria
 
@@ -559,17 +559,12 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E0-01 — compare and select the implementation stack**.
+The next task is **E1-01 — define branded IDs / stable entity identifiers**.
 
-ChatGPT should prepare a decision document comparing the strongest realistic options for CrimeWorld, including:
+ChatGPT should prepare a bounded EPIC 1 task before Codex implementation, including:
 
-- architecture fit,
-- strategic-map UI capability,
-- simulation testability,
-- desktop packaging,
-- OSM / map integration path,
-- Codex effectiveness,
-- solo-development cost,
-- long-term risks.
-
-No scaffold should be created until the project owner accepts the stack decision.
+- ID types and naming conventions,
+- package ownership,
+- domain-only test expectations,
+- dependency-boundary checks,
+- and explicit exclusions to avoid starting gameplay systems early.

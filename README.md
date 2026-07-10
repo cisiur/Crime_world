@@ -2,7 +2,7 @@
 
 CrimeWorld is a desktop-first grand-strategy crime sandbox about building and maintaining a criminal organization inside a living city simulation.
 
-The repository currently contains the complete design foundation and the AI-assisted implementation workflow. Application code has not been scaffolded yet.
+The repository contains the complete design foundation, the AI-assisted implementation workflow, and the initial TypeScript / React / Vite / Tauri workspace scaffold.
 
 ## Start here
 
@@ -28,11 +28,12 @@ For a new ChatGPT / PM session, read:
 - Design bible: complete enough for implementation.
 - MVP definition and architecture: validated.
 - AI-assisted build roadmap: created.
-- Technology stack: not selected yet.
-- Application scaffold: not created yet.
+- Technology stack: selected and recorded in [`docs/TECH_STACK.md`](docs/TECH_STACK.md).
+- Repository scaffold: created.
+- Gameplay logic: not implemented yet.
 
 Current next task:
 
-> **E0-01 — compare and select the implementation stack.**
+> **E1-01 — define branded IDs / stable entity identifiers.**
 
 See [`docs/BUILD_ROADMAP.md`](docs/BUILD_ROADMAP.md) for the complete implementation sequence.

@@ -1,0 +1,11 @@
+node_modules/
+dist/
+dist-types/
+target/
+**/dist/
+**/dist-types/
+**/target/
+**/src-tauri/gen/
+*.tsbuildinfo
+package-lock.json
+*.md

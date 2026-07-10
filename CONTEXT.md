@@ -193,10 +193,11 @@ Completed document groups:
 
 ### Implementation status
 
-- No application scaffold has been accepted yet.
-- No production source structure exists yet.
-- No technology stack has been selected and recorded.
-- No automated test or build commands exist yet.
+- Technology stack has been selected and recorded in `docs/TECH_STACK.md`.
+- Repository scaffold exists as a TypeScript workspace / modular monolith.
+- Minimal React + Vite + Tauri desktop shell exists in `apps/desktop`.
+- Package boundaries exist for domain, application, content, infrastructure, and presentation.
+- Formatter, linter, unit test framework, production web build, and Tauri executable build are configured.
 - No gameplay code has been implemented.
 
 Current roadmap phase:
@@ -205,9 +206,9 @@ Current roadmap phase:
 
 Current next task:
 
-> **E0-01 — Compare suitable implementation stacks for CrimeWorld.**
+> **E1-01 — Define branded IDs / stable entity identifiers.**
 
-No scaffold should be created until the owner accepts the stack decision.
+No gameplay systems should be implemented before the relevant EPIC 1 scope is accepted.
 
 ---
 
@@ -565,35 +566,42 @@ Do not let documentation claim that a feature exists before implementation revie
 
 ## 16. Current commands
 
-No implementation stack has been selected yet.
+Use `npm.cmd` from Windows PowerShell if script execution policy blocks `npm`.
 
 ```text
-Install:  TBD in EPIC 0
-Test:     TBD in EPIC 0
-Build:    TBD in EPIC 0
-Run:      TBD in EPIC 0
+Install:            npm.cmd install
+Run web shell:      npm.cmd run dev
+Run Tauri shell:    npm.cmd run desktop:dev
+Format check:       npm.cmd run format:check
+Lint:               npm.cmd run lint
+All tests:          npm.cmd run test
+Domain tests:       npm.cmd run test:domain
+Production build:   npm.cmd run build
+Desktop executable: npm.cmd run desktop:build
+Full check:         npm.cmd run check
 ```
 
-These placeholders must be replaced immediately after project scaffolding.
+The desktop executable command compiles the Tauri app with `tauri build --no-bundle`; installer packaging is not part of the current scaffold.
 
 ---
 
 ## 17. Current source structure
 
-No implementation source structure exists yet.
-
-The expected conceptual ownership is:
+Current workspace structure:
 
 ```text
-content/         static game definitions
-src/domain/      pure simulation state and rules
-src/application/ commands, queries, tick orchestration
-src/presentation/ UI and read-model adapters
-src/infrastructure/ persistence and platform adapters
-tests/           unit, integration, deterministic simulation, save/load
+apps/
+  desktop/          React + Vite + Tauri desktop shell
+
+packages/
+  domain/           pure headless domain package
+  application/      commands, queries, use cases, read models
+  content/          immutable content definitions
+  infrastructure/   platform adapters and persistence boundary
+  presentation/     React presentation components and map placeholder
 ```
 
-The final directory names depend on the selected stack and must be recorded after EPIC 0.
+The current scaffold contains only placeholder behavior and boundary descriptors. It contains no gameplay logic.
 
 ---
 
@@ -605,20 +613,20 @@ Completed:
 - MVP validation pass,
 - implementation architecture planning,
 - AI-assisted development roadmap,
-- reusable project context.
+- reusable project context,
+- accepted technology stack decision,
+- repository foundation scaffold.
 
 Next:
 
-> **E0-01 — Technology stack comparison and recommendation.**
+> **E1-01 — Define branded IDs / stable entity identifiers.**
 
 Required PM output before implementation:
 
-- compare realistic stack options,
-- recommend one option,
-- explain tradeoffs,
-- define exact test, build, desktop, map, and persistence path,
-- obtain project-owner acceptance,
-- only then create `docs/TECH_STACK.md` and a Codex scaffold prompt.
+- define the exact stable ID scope and naming,
+- confirm package ownership,
+- define tests and acceptance criteria,
+- keep gameplay systems out of scope until explicitly accepted.
 
 ---
 
