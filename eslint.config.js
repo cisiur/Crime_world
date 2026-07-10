@@ -2,6 +2,16 @@ import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
 const domainForbiddenImports = [
+  "@crimeworld/application",
+  "@crimeworld/application/*",
+  "@crimeworld/content",
+  "@crimeworld/content/*",
+  "@crimeworld/infrastructure",
+  "@crimeworld/infrastructure/*",
+  "@crimeworld/presentation",
+  "@crimeworld/presentation/*",
+  "@crimeworld/desktop",
+  "@crimeworld/desktop/*",
   "react",
   "react-dom",
   "konva",
@@ -12,6 +22,60 @@ const domainForbiddenImports = [
   "os",
   "process",
   "node:*",
+  "**/packages/application/**",
+  "**/packages/content/**",
+  "**/packages/infrastructure/**",
+  "**/packages/presentation/**",
+  "**/apps/desktop/**",
+];
+
+const desktopForbiddenImports = [
+  "@crimeworld/desktop",
+  "@crimeworld/desktop/*",
+  "**/apps/desktop/**",
+];
+
+const applicationForbiddenImports = [
+  "react",
+  "react-dom",
+  "konva",
+  "react-konva",
+  "@tauri-apps/*",
+  "@crimeworld/infrastructure",
+  "@crimeworld/infrastructure/*",
+  "@crimeworld/presentation",
+  "@crimeworld/presentation/*",
+  ...desktopForbiddenImports,
+];
+
+const contentForbiddenImports = [
+  "react",
+  "react-dom",
+  "konva",
+  "react-konva",
+  "@tauri-apps/*",
+  "@crimeworld/infrastructure",
+  "@crimeworld/infrastructure/*",
+  "@crimeworld/presentation",
+  "@crimeworld/presentation/*",
+  ...desktopForbiddenImports,
+];
+
+const presentationForbiddenImports = [
+  "@crimeworld/infrastructure",
+  "@crimeworld/infrastructure/*",
+  "@tauri-apps/*",
+  ...desktopForbiddenImports,
+];
+
+const infrastructureForbiddenImports = [
+  "@crimeworld/presentation",
+  "@crimeworld/presentation/*",
+  "react",
+  "react-dom",
+  "konva",
+  "react-konva",
+  ...desktopForbiddenImports,
 ];
 
 export default tseslint.config(
@@ -55,7 +119,18 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
-          patterns: ["react", "react-dom", "konva", "react-konva", "@tauri-apps/*"],
+          patterns: applicationForbiddenImports,
+        },
+      ],
+    },
+  },
+  {
+    files: ["packages/content/src/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: contentForbiddenImports,
         },
       ],
     },
@@ -66,7 +141,18 @@ export default tseslint.config(
       "no-restricted-imports": [
         "error",
         {
-          patterns: ["@tauri-apps/*"],
+          patterns: presentationForbiddenImports,
+        },
+      ],
+    },
+  },
+  {
+    files: ["packages/infrastructure/src/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: infrastructureForbiddenImports,
         },
       ],
     },

@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** implementation planning baseline  
+> **Status:** EPIC 0 complete; EPIC 1 ready for accepted task scoping
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** design documentation complete; implementation has not started.
+> **Current phase:** repository foundation complete; next accepted scope starts EPIC 1.
 
 ---
 
@@ -128,9 +128,9 @@ This epic is a hard gate. No gameplay implementation should begin before it is c
 | E0-03 | Record the decision in `docs/TECH_STACK.md` | `[PM]` | Done |
 | E0-04 | Scaffold the project and package structure | `[CODEX]` | Done |
 | E0-05 | Configure formatter, linter, tests, and production build | `[CODEX]` | Done |
-| E0-06 | Add CI for tests and build on pushes / pull requests if desired | `[CODEX]` | Pending |
-| E0-07 | Add deterministic test seed support | `[CODEX]` | Pending |
-| E0-08 | Add repository-level developer instructions if required by the selected tooling | `[BOTH]` | Pending |
+| E0-06 | Add CI for tests and build on pushes / pull requests if desired | `[CODEX]` | Done |
+| E0-07 | Add deterministic test seed support | `[CODEX]` | Done |
+| E0-08 | Add repository-level developer instructions if required by the selected tooling | `[BOTH]` | Done |
 | E0-09 | Update `CONTEXT.md` with exact commands and source structure | `[PM]` | Done |
 
 ### Stack evaluation criteria
@@ -154,6 +154,8 @@ The selected stack must support:
 - A minimal application launches locally.
 - Domain tests run without launching the UI.
 - `CONTEXT.md` contains exact commands and directories.
+
+EPIC 0 is complete. The repository uses Node.js `24.15.0`, GitHub Actions CI runs on pushes and pull requests targeting `main`, and deterministic test seed infrastructure is available through `CRIMEWORLD_TEST_SEED`.
 
 ---
 

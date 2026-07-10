@@ -7,6 +7,9 @@
     "apps/*",
     "packages/*"
   ],
+  "engines": {
+    "node": "24.15.0"
+  },
   "scripts": {
     "dev": "npm run dev --workspace @crimeworld/desktop",
     "desktop:dev": "npm run tauri:dev --workspace @crimeworld/desktop",
@@ -18,7 +21,7 @@
     "lint": "eslint .",
     "format": "prettier . --write",
     "format:check": "prettier . --check",
-    "check": "npm run format:check && npm run lint && npm run test && npm run build"
+    "check": "npm run format:check && npm run lint && npm run test && npm run build && npm run desktop:build"
   },
   "devDependencies": {
     "@eslint/js": "9.31.0",

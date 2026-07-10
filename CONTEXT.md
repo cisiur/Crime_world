@@ -198,11 +198,14 @@ Completed document groups:
 - Minimal React + Vite + Tauri desktop shell exists in `apps/desktop`.
 - Package boundaries exist for domain, application, content, infrastructure, and presentation.
 - Formatter, linter, unit test framework, production web build, and Tauri executable build are configured.
+- GitHub Actions CI verifies pushes and pull requests targeting `main`.
+- Deterministic test seed infrastructure exists for tests only.
+- Root-level `AGENTS.md` records repository workflow and package-boundary rules for coding agents.
 - No gameplay code has been implemented.
 
 Current roadmap phase:
 
-> **EPIC 0 — Technology Decision and Repository Foundation**
+> **EPIC 1 - Domain Kernel and Deterministic Simulation Clock**
 
 Current next task:
 
@@ -568,8 +571,15 @@ Do not let documentation claim that a feature exists before implementation revie
 
 Use `npm.cmd` from Windows PowerShell if script execution policy blocks `npm`.
 
+Supported Node.js version:
+
+```text
+Node.js: 24.15.0
+```
+
 ```text
 Install:            npm.cmd install
+Clean install:      npm.cmd ci
 Run web shell:      npm.cmd run dev
 Run Tauri shell:    npm.cmd run desktop:dev
 Format check:       npm.cmd run format:check
@@ -582,6 +592,20 @@ Full check:         npm.cmd run check
 ```
 
 The desktop executable command compiles the Tauri app with `tauri build --no-bundle`; installer packaging is not part of the current scaffold.
+
+Test seed infrastructure:
+
+```text
+Environment variable: CRIMEWORLD_TEST_SEED
+Default seed:         12648430
+Accepted range:       1 to 4294967295
+Definition:           packages/domain/test-support/testSeed.ts
+Environment reader:   test-support/testSeed.ts
+```
+
+Invalid seed values fail with an explicit error during test seed resolution.
+
+GitHub Actions CI runs on pushes to `main` and pull requests targeting `main` on `windows-latest`. It runs `npm ci`, formatting, linting, tests, production build, and the Tauri desktop executable build.
 
 ---
 
@@ -615,7 +639,10 @@ Completed:
 - AI-assisted development roadmap,
 - reusable project context,
 - accepted technology stack decision,
-- repository foundation scaffold.
+- repository foundation scaffold,
+- GitHub Actions CI,
+- deterministic test seed support,
+- repository-level developer instructions.
 
 Next:
 

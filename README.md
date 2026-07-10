@@ -29,7 +29,9 @@ For a new ChatGPT / PM session, read:
 - MVP definition and architecture: validated.
 - AI-assisted build roadmap: created.
 - Technology stack: selected and recorded in [`docs/TECH_STACK.md`](docs/TECH_STACK.md).
-- Repository scaffold: created.
+- Repository scaffold: created and covered by GitHub Actions CI.
+- Node.js: `24.15.0`.
+- Test seed override: `CRIMEWORLD_TEST_SEED` with default `12648430`.
 - Gameplay logic: not implemented yet.
 
 Current next task:
