@@ -4,156 +4,225 @@
 
 This document defines the player character as a concrete entity within the simulation.
 
-The player is not just a cursor that issues commands.
-The player is a character with properties, risks, growth, and a specific relationship to their organization.
+The player is not just a cursor issuing commands.
+The player begins as a specific character with personal risks, relationships, reputation, and a place inside the organization they build.
 
 ## Core idea
 
-The player character is the most important NPC in the game.
+The current player character is the most important NPC in the campaign, but the campaign represents the continuity of the organization and its leadership line.
 
-They have a unique position: they are inside the simulation, exposed to its consequences,
-but they are also the only entity the human controls.
+The player character is:
+- inside the simulation,
+- exposed to personal consequences,
+- able to shape the organization,
+- replaceable through succession if the organization survives.
 
-The player character should feel personal, vulnerable, and meaningful.
-If the player character dies or goes to prison, it should matter.
+The player should care about the current character's survival, while also preparing the organization for life after them.
 
 ## Player character properties
 
-The player character should have:
-- name
-- age
-- reputation (street, criminal, political, legal)
-- personal heat (separate from organization heat)
-- personal wealth
-- personal network (contacts, loyalties, debts)
-- physical condition (health, injury, stress)
-- psychological state (confidence, paranoia, ambition)
-- known associates (visible to law enforcement)
-- criminal record
-- legal cover (businesses, identities, lawyers)
+The current player character should have:
+- name,
+- age,
+- health,
+- stress,
+- personal wealth,
+- street reputation,
+- criminal reputation,
+- political reputation,
+- legal reputation,
+- personal exposure,
+- criminal record,
+- personal contacts,
+- debts and obligations,
+- known associates,
+- legal cover,
+- family and succession ties,
+- personality traits,
+- ambitions and fears.
 
-## Player vs organization
+## Player character vs organization
 
-The player character and the organization they lead are related but not identical.
+The character and organization are connected but not identical.
 
 | Dimension | Player character | Organization |
 |---|---|---|
-| Scale | One person | Many people and assets |
-| Heat | Personal exposure | Institutional exposure |
-| Risk | Arrest, death, injury | Raids, seizures, collapse |
-| Reputation | Personal standing | Collective standing |
-| Growth | Skills, contacts, influence | Territory, income, capacity |
-| Vulnerability | Personal mistakes | Structural weaknesses |
+| Scale | One person | People, assets, territory, systems |
+| Exposure | Personal criminal connection | Structural and institutional exposure |
+| Risk | Arrest, death, injury, betrayal | Raids, seizures, collapse, fragmentation |
+| Reputation | Personal identity | Collective identity |
+| Growth | Contacts, influence, knowledge | Capacity, territory, income, reach |
+| Continuity | Finite life | May continue through succession |
 
-An organization can survive the player's temporary absence (arrest, hospitalization).
-A strong enough organization may even survive the player's death — but the game ends there.
+The organization can continue while the player is arrested, incapacitated, or dead if it has sufficient structure and a viable successor.
 
-## Player growth
+## Campaign identity
 
-The player character should grow through experience, not through abstract skill trees.
+The campaign is not tied permanently to one individual.
+It follows the criminal organization and the sequence of leaders who control it.
 
-Growth dimensions:
-- reputation — how the criminal world perceives them
-- network — who owes them, who trusts them, who fears them
-- knowledge — understanding of districts, organizations, and weaknesses
-- legal exposure — how much law enforcement knows about them
-- personal wealth — assets held separately from the organization
-- influence — the ability to make things happen through personal authority
+The founding character matters because they establish:
+- culture,
+- relationships,
+- enemies,
+- reputation,
+- succession expectations,
+- and structural strengths or weaknesses.
 
-Growth should happen organically through decisions and outcomes,
-not through XP bars or arbitrary stat purchases.
+Later leaders inherit that history but do not become copies of the founder.
 
-## Player risks
+## Character growth
 
-The player character faces personal risks that the organization cannot fully absorb.
+Growth should happen organically through decisions and outcomes rather than through a conventional XP skill tree.
+
+Growth dimensions include:
+- reputation,
+- personal network,
+- knowledge of districts and actors,
+- political and legal access,
+- personal wealth,
+- influence,
+- leadership credibility,
+- succession legitimacy.
+
+## Personal risks
 
 ### Arrest
-- The player can be arrested if personal heat reaches a critical threshold.
-- Arrest does not end the game immediately.
-- While arrested, the organization continues to run under a trusted lieutenant.
-- The player must manage legal exposure, find legal cover, or be released through influence.
-- A long arrest weakens organizational loyalty and creates succession pressure.
+
+Arrest does not automatically end the campaign.
+
+When the leader is arrested:
+- a designated deputy or successor can run daily operations,
+- the imprisoned leader may retain limited influence,
+- communication depends on corruption, contacts, and security,
+- loyalty may decline,
+- the acting leader may attempt to keep power permanently,
+- an extended absence may trigger a succession crisis.
 
 ### Death
-- The player can be killed by rival organizations, police, or betrayal.
-- Death ends the current campaign.
-- The game should make death feel meaningful and avoidable through smart play.
-- Death should never feel random — it should be a consequence of identifiable decisions.
+
+Death ends the current character's rule, not necessarily the campaign.
+
+Possible outcomes:
+- orderly succession,
+- disputed succession,
+- temporary regency,
+- civil war,
+- organizational split,
+- hostile takeover,
+- campaign end if no viable successor or organization remains.
+
+Death should be understandable and connected to prior decisions.
+It should not feel like an arbitrary random event.
 
 ### Injury and stress
-- Physical injury reduces the player's ability to take direct actions.
-- Stress and paranoia affect decision quality (reflected in available choices and probabilities).
-- Both recover over time with the right conditions (safe houses, downtime, trusted allies).
+
+Injury and stress affect:
+- available direct actions,
+- negotiation quality,
+- risk tolerance,
+- leadership presence,
+- health outcomes,
+- reliance on deputies.
 
 ### Betrayal
-- Key lieutenants may turn against the player if loyalty collapses.
-- Betrayal may take the form of a coup, an informant deal with police, or defection to a rival.
-- The player can detect betrayal risk through intelligence operations.
 
-## Player visibility
+Important members may:
+- defect,
+- become informants,
+- attempt a coup,
+- support another claimant,
+- steal assets,
+- sabotage succession.
 
-The player character exists on a spectrum from unknown to notorious.
+Betrayal should arise from relationships, ambition, fear, dependency, and opportunity.
 
-| Visibility level | State | Effect |
+## Personal visibility
+
+The player character exists on a spectrum of personal exposure.
+
+| State | Meaning | Typical effects |
 |---|---|---|
-| Unknown | Ghost | Full freedom of movement, no police interest |
-| Suspected | On radar | Occasional surveillance, soft restrictions |
-| Known | Named | Monitored contacts, harder legal cover |
-| Wanted | Hunted | Active investigation, travel restricted |
-| Notorious | Legend | Massive heat, but fear-based influence |
+| Unknown | No meaningful institutional awareness | Broad freedom of movement |
+| Suspected | Weak criminal connection | Occasional surveillance |
+| Identified | Known association with crime | Monitored contacts and legal difficulty |
+| Wanted | Active pursuit | Arrest risk and restricted movement |
+| Notorious | Public criminal identity | Strong fear and influence, extreme exposure |
 
-The player should be able to manage their visibility deliberately.
-Low profile is a strategic choice, not a default.
+Notoriety can create power, but it should never be a free upgrade.
 
-## Player as a diplomatic actor
+## Player as diplomatic actor
 
-The player character's personal reputation affects diplomatic outcomes.
+Personal conduct affects diplomacy.
 
-- a player known for keeping deals has better negotiation outcomes
-- a player known for violence gets faster submission but more coalition pressure
-- a player with wide personal networks has more options in crisis
-- a player who has betrayed allies faces narrower diplomatic options later
+Examples:
+- keeping agreements builds trust,
+- repeated violence builds fear and hostility,
+- betrayal damages future options,
+- personal relationships can preserve deals even when organizations conflict,
+- a respected successor may inherit more stable relations.
 
-## Player and the organization's identity
+## Organization identity
 
-The organization reflects the player's choices over time.
+The organization becomes a record of how successive leaders have ruled it.
 
-An aggressive player builds a feared but watched organization.
-A subtle player builds a quiet but deeply networked one.
-A diplomatic player builds alliances but depends on relationships that can break.
+Examples:
+- aggressive leadership creates fear and opposition,
+- subtle leadership creates hidden influence,
+- diplomatic leadership creates dependency on relationships,
+- unstable succession creates factions and long-term mistrust.
 
-The organization is not a neutral tool.
-It is the accumulated consequence of how the player has played.
+## Direct player actions
 
-## What the player can do directly
+The player primarily plans and delegates operations.
 
-The player character can take some actions personally, outside the organization.
+Direct actions should be limited to moments where personal presence creates a meaningful strategic tradeoff.
 
-Direct player actions may include:
-- meeting a contact face to face
-- negotiating with a rival boss directly
-- visiting a front business to manage its cover
-- personally extracting a compromised crew member
-- going into hiding to let heat decay faster
-- making a personal bribe that does not trace back to the organization
+Appropriate direct actions include:
+- high-level negotiations,
+- meetings with critical contacts,
+- loyalty interventions,
+- succession declarations,
+- crisis decisions,
+- ceremonial or symbolic appearances,
+- going into hiding,
+- personally managing a highly sensitive relationship.
 
-Direct actions are higher risk and higher reward than delegated operations.
-They also carry personal exposure that affects the player character's heat directly.
+Direct field actions should be rare, dangerous, and never make the leader behave like a super-agent.
 
-## Player character at campaign start
+## Campaign start
 
-At the beginning of a campaign, the player character should:
-- be unknown to law enforcement
-- have minimal personal wealth
-- have one or two reliable personal contacts
-- have no criminal record (or a minor one)
-- have no territory or organizational assets
-- have ambition and a starting reason to enter the criminal world
+At the start of a campaign, the founding character should:
+- be unknown or only locally known,
+- have minimal personal wealth,
+- have one or two contacts,
+- have no meaningful territory,
+- have no established organization,
+- have a personal motive or ambition,
+- have no guaranteed heir or successor.
 
-The starting state should feel like a real beginning, not a tutorial wrapper.
+The early game should feel like the beginning of both a personal career and a possible dynasty.
 
 ## Design principle
 
-The player character is well designed if losing them feels like losing something real.
-If the player is just a login screen for the organization, the character is too shallow.
-The player should be able to care about their character's survival independently of the organization's fate.
+The current leader must feel personal and vulnerable.
+The organization must feel capable of outliving them.
+
+A good player model creates tension between personal survival, organizational growth, and preparation for succession.
+
+## Open Questions
+
+- At what point should succession become available?
+- How much control should an imprisoned leader retain?
+- Can a player voluntarily retire or transfer power?
+- How are multiple claimants compared after a leadership vacancy?
+
+## Future Extensions
+
+- family and dynasty systems,
+- prison gameplay,
+- regencies,
+- voluntary retirement,
+- hidden heirs,
+- disputed legitimacy,
+- multi-generational personal histories.
