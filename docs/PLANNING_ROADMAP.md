@@ -2,27 +2,35 @@
 
 ## Purpose
 
-This document is the project's working memory.
+This document is CrimeWorld's planning memory.
 
 It records:
-- what CrimeWorld is,
-- what has already been decided,
-- which design layers are complete,
-- what is currently in scope,
-- what should be planned or implemented next,
-- and what should not be expanded yet.
 
-This is not the final design bible. It is the planning guide that keeps future work aligned with the current project state.
+- the decisions that led to the current MVP,
+- the boundary between long-term design and accepted MVP scope,
+- the implementation principles that must survive future sessions,
+- known decisions that still need to be made,
+- and the current implementation priority.
+
+This document is not the authoritative implementation backlog.
+
+For current build order and task status, use:
+
+1. `../CONTEXT.md`,
+2. `BUILD_ROADMAP.md`,
+3. `PROJECT_ARCHITECTURE.md`.
+
+Earlier revisions of this file described an MVP validation pass. That pass has been completed. Documents `14_MVP_SCOPE.md` through `18_MVP_BALANCING.md` were revised and aligned with the later component models before the implementation roadmap was created.
 
 ---
 
 # 1. Project summary
 
-CrimeWorld is an open-ended grand-strategy crime sandbox set in real-world-inspired cities.
+CrimeWorld is an open-ended grand-strategy crime sandbox set in living cities.
 
-The player begins as a single unknown character and builds a criminal organization through planning, recruitment, legal and illegal businesses, pressure management, diplomacy, territorial influence, succession, and long-term organizational survival.
+The player begins as a single unknown character and builds a criminal organization through planning, delegation, recruitment, operations, business control, pressure management, diplomacy, influence, and long-term organizational survival.
 
-The long-term fantasy is not merely committing crimes. It is building and maintaining an organization that can survive leadership changes, collapse, betrayal, institutional pressure, and decades of history.
+The player is a vulnerable actor inside the simulation rather than an omnipotent map cursor.
 
 The game is entertainment-focused and must not become a realistic criminal training simulator.
 
@@ -32,401 +40,304 @@ The game is entertainment-focused and must not become a realistic criminal train
 
 ## Core fantasy
 
-- The player starts as one character with no meaningful power.
-- The player plans actions while NPCs and crews execute most operations.
-- The player is a vulnerable character inside the simulation, not a detached cursor.
+- The player starts as one character with almost no power.
+- The player plans and delegates most operations to NPCs and crews.
 - The game is about building an organization, not completing a linear mission campaign.
-- The world continues to act and react without waiting for the player.
-- The organization can outlive individual bosses through succession.
+- The world acts and reacts without waiting for the player.
+- Growth changes the player's problems rather than removing risk permanently.
+- Long-term organization continuity and succession belong to the full game, but full succession is outside the MVP.
 
 ## World structure
 
 - Cities are the strategic board.
-- OpenStreetMap is the long-term map source, but it is not a prerequisite for the first playable version.
-- The world is abstracted at strategy level rather than simulated as detailed interiors.
-- Buildings, roads, districts, businesses, routes, and institutions are strategic objects.
-- Districts are local simulation nodes with distinct economic, political, social, and criminal identities.
+- Buildings, routes, districts, businesses, institutions, and important actors are strategic objects.
+- OpenStreetMap is a long-term source for city definitions, not a dependency of the first playable version.
+- The MVP uses one controlled, handcrafted city definition.
+- Background population remains aggregated unless an individual creates meaningful decisions.
 
 ## Gameplay structure
 
-- Time passes continuously and can be paused or accelerated.
+- Time passes continuously from the player's perspective and can be paused or accelerated.
 - Operations are the atomic intentional actions of organizations.
-- Economy, crime, legal business, diplomacy, pressure, and territorial influence are interconnected.
-- Pressure is broader than a single police heat meter.
-- Outcomes are not purely binary and should create world-state consequences.
-- Growth increases capability while also creating exposure, complexity, and new threats.
+- Outcomes are not purely binary and must create persistent consequences.
+- Economy, people, assets, exposure, district tension, investigations, and rival reactions are connected.
+- Pressure must not be collapsed into one generic `heat` value.
+- The UI explains and projects simulation state; it does not own authoritative gameplay rules.
 
 ## Campaign structure
 
 - CrimeWorld is an endless sandbox without a mandatory victory condition.
-- Optional milestones recognize achievements but do not end or fundamentally alter the campaign.
-- Bankruptcy, imprisonment, loss of territory, and organizational collapse are recoverable setbacks.
-- The only true game-over condition is the death of the current boss when no valid successor or transfer mechanism exists.
-- Organization history, leadership reigns, wars, betrayals, collapse, and recovery should persist as campaign memory.
-
-## MVP decisions
-
-- MVP uses one controlled city or city shell.
-- MVP must prove the loop of planning, operations, growth, pressure, reaction, and survival.
-- MVP does not need full OpenStreetMap generation.
-- MVP does not need full dynasty, family, global politics, or multi-city systems.
-- MVP should contain only enough content to validate repeated strategic decisions.
-- The start should be difficult and vulnerable without becoming arbitrary or frustrating.
+- Optional milestones recognize achievements but do not end the campaign.
+- Most setbacks should change the player's strategic position rather than immediately end the run.
+- The full game ends only when the current boss dies without a valid continuation mechanism.
+- The MVP may treat boss death as a run-ending state because full succession is excluded.
 
 ---
 
 # 3. Documentation status
 
-## Vision and foundations
+## Validated implementation baseline
 
-Completed:
-- `00_VISION.md`
-- `01_CORE_PILLARS.md`
+The following MVP documents have completed their validation pass and are the accepted design baseline for implementation:
 
-## Core simulation systems
+- `14_MVP_SCOPE.md`,
+- `15_MVP_GAME_LOOP.md`,
+- `16_MVP_CONTENT_LIST.md`,
+- `17_MVP_TECH_PLAN.md`,
+- `18_MVP_BALANCING.md`.
 
-Completed:
-- `02_WORLD_SIMULATION.md`
-- `03_ECONOMY.md`
-- `04_ORGANIZATIONS.md`
-- `05_NPCS.md`
-- `06_SUCCESSION.md`
-- `07_GAMEPLAY_LOOP.md`
-- `08_INFLUENCE_AND_EXPANSION.md`
-- `09_OPERATIONS.md`
-- `10_POLICE_AND_PRESSURE.md`
-- `11_CITY_GENERATION.md`
-- `12_UI_AND_CONTROLS.md`
-- `13_SAVE_AND_SIMULATION_TICKS.md`
+The following documents define the current implementation process and architecture:
 
-## Existing MVP planning
+- `../CONTEXT.md`,
+- `BUILD_ROADMAP.md`,
+- `PROJECT_ARCHITECTURE.md`,
+- `GDD_INDEX.md`.
 
-Present but requiring validation and revision:
-- `14_MVP_SCOPE.md`
-- `15_MVP_GAME_LOOP.md`
-- `16_MVP_CONTENT_LIST.md`
-- `17_MVP_TECH_PLAN.md`
-- `18_MVP_BALANCING.md`
+The high-level and long-term documents `00`–`13` and `19`–`33` remain useful design references. They are not automatic MVP commitments.
 
-## Deep simulation models
+## Status hierarchy
 
-Completed:
-- `19_WORLD_DEPENDENCY_GRAPH.md`
-- `20_LIVING_WORLD_BEHAVIOR.md`
-- `21_AI_PRIORITY_MODEL.md`
-- `22_CRIME_ECOSYSTEM.md`
-- `23_EMERGENT_STORY_SYSTEM.md`
+When documents appear to disagree, use this priority:
 
-## Component and campaign models
+1. an explicit decision accepted by the project owner in the current task,
+2. `BUILD_ROADMAP.md` for build order and task status,
+3. `PROJECT_ARCHITECTURE.md` for technical boundaries,
+4. `14_MVP_SCOPE.md` through `18_MVP_BALANCING.md` for accepted MVP behavior and content,
+5. long-term GDD documents for future direction.
 
-Completed:
-- `24_CITY_ECONOMY_MODEL.md`
-- `25_DISTRICT_MODEL.md`
-- `26_ORGANIZATION_MODEL.md`
-- `27_OPERATION_MODEL.md`
-- `28_PRESSURE_REACTION_MODEL.md`
-- `29_PLAYER_MODEL.md`
-- `30_DIPLOMACY_MODEL.md`
-- `31_PROGRESSION_MODEL.md`
-- `32_ENDGAME_MODEL.md`
-- `33_ORGANIZATION_HISTORY_AND_LEGACY.md`
+`PLANNING_ROADMAP.md` preserves intent and constraints but must not override newer accepted implementation decisions.
 
 ---
 
-# 4. Design layer summary
+# 4. Current phase
 
-| Layer | Documents | Status | Purpose |
-|---|---|---|---|
-| Vision | 00–01 | Complete | Defines the fantasy and non-negotiable principles |
-| Core systems | 02–13 | Complete at high level | Defines the original simulation and player-facing systems |
-| MVP planning | 14–18 | Needs validation | Defines the first playable version, but predates later models |
-| Deep models | 19–23 | Complete at design level | Connects the world, AI, criminal economy, and emergent stories |
-| Component models | 24–30 | Complete at design level | Defines city, district, organization, operations, pressure, player, and diplomacy |
-| Campaign models | 31–33 | Complete at design level | Defines progression, endless play, succession continuity, and historical memory |
+The broad design phase is closed.
 
-The high-level design phase is sufficiently complete to stop adding broad systems.
+The project is now in:
 
-The project should now move from design expansion toward scope validation, technical alignment, and implementation planning.
+> **EPIC 0 — Technology Decision and Repository Foundation**
+
+The current task is:
+
+> **E0-01 — Compare suitable implementation stacks for CrimeWorld.**
+
+No gameplay scaffold should be accepted before the project owner selects the stack.
+
+The immediate sequence is:
+
+1. compare viable stacks against CrimeWorld's actual requirements,
+2. obtain the project owner's decision,
+3. record the accepted decision in `TECH_STACK.md`,
+4. scaffold the repository,
+5. establish exact test and production-build commands,
+6. begin the smallest deterministic domain kernel required by the first operation slice.
 
 ---
 
-# 5. Current priority: MVP validation pass
-
-The next task is to revise documents `14`–`18` against the completed models `24`–`33`.
+# 5. MVP purpose
 
 The MVP must answer one central question:
 
-> Is the repeated loop of identifying an opportunity, planning and assigning an operation, receiving an outcome, managing pressure, reacting to rivals, and expanding capability compelling enough to support repeated play?
+> Is the repeated loop of reading the city, identifying an opportunity, planning and assigning an operation, receiving a systemic outcome, managing pressure, reacting to rivals, and expanding capability compelling enough to support repeated play?
 
-## MVP validation goals
+The MVP is not intended to prove every long-term CrimeWorld system.
 
-The revised MVP documents must define:
-- the exact starting state,
-- the minimum map and district structure,
-- the minimum player and organization data,
-- the first available operations,
-- operation planning and assignment,
-- basic economic flows,
-- the minimum rival AI loop,
-- the minimum pressure and reaction loop,
-- the first meaningful expansion decision,
-- collapse and recovery boundaries,
-- the first-session success criteria,
-- and explicit exclusions.
+A system belongs in the MVP only when it is required to prove the repeated strategic loop or to prevent that loop from producing misleading results.
 
-## MVP inclusion principle
-
-A system belongs in MVP only if it is required to prove the core strategic loop.
-
-A system should be excluded or simplified if it mainly supports:
-- long campaigns,
-- multi-generation continuity,
-- regional or global scale,
-- advanced politics,
-- large content variety,
-- or simulation depth that does not change the first repeated decisions.
-
-## Likely MVP simplifications
-
-The validation pass should assume:
-- one player character,
-- one small player organization,
-- a small number of districts,
-- a limited set of buildings and businesses,
-- one or two meaningful rivals,
-- a small operation catalogue,
-- simplified diplomacy,
-- simplified personal exposure,
-- simplified pressure reactions,
-- no full succession gameplay,
-- no multi-city expansion,
-- no full organization history UI,
-- and a controlled map rather than full OSM generation.
+Systems that mainly support multi-generation play, global scale, large content variety, advanced politics, or speculative future extensibility must be excluded, simplified, or deferred.
 
 ---
 
-# 6. Required planning sequence
+# 6. First playable versus MVP feature-complete
 
-## Step 1: Revise MVP scope
+The project must distinguish two milestones.
 
-Update `14_MVP_SCOPE.md`.
+## First playable vertical slice
 
-It must clearly define:
-- the exact systems included,
-- the systems represented only in simplified form,
-- the systems excluded,
-- and the measurable questions the MVP is meant to answer.
+The first playable slice proves one complete operation cycle:
 
-## Step 2: Revise MVP game loop
+1. inspect a controlled city state,
+2. identify one opportunity,
+3. configure one operation,
+4. assign an available character,
+5. advance simulation time,
+6. resolve a deterministic seeded outcome,
+7. apply persistent money, availability, and exposure consequences,
+8. display a readable result and changed state.
 
-Update `15_MVP_GAME_LOOP.md`.
+This slice may use:
 
-It must define:
-- the starting situation,
-- the first opportunities,
-- the operation planning flow,
-- world reaction timing,
-- the first expansion choice,
-- and a complete first-session arc.
+- one minimal city dataset,
+- one district or only the subset of districts needed by the operation,
+- one player boss,
+- one assignable helper if required by the accepted operation design,
+- one operation template,
+- one minimal reaction path,
+- a developer UI or narrow playable interface.
 
-## Step 3: Revise MVP content list
+It does not need the full MVP content budget.
 
-Update `16_MVP_CONTENT_LIST.md`.
+## MVP feature-complete
 
-It must specify a finite initial content budget, including:
-- districts,
-- organizations,
-- NPC roles,
-- businesses,
-- operations,
-- events,
-- pressure reactions,
-- and UI screens.
+The feature-complete MVP expands the validated slice to the accepted scope in documents `14`–`18`, including the controlled city, rivals, economy, recruitment, businesses, pressure, investigation lifecycle, save/load, and readable strategic UI.
 
-## Step 4: Revise MVP balancing
-
-Update `18_MVP_BALANCING.md`.
-
-It must define:
-- operation durations,
-- income and cost scales,
-- pressure accumulation and decay,
-- recruitment pacing,
-- failure recovery,
-- and expected session progression.
-
-Numbers may remain provisional, but all important tuning relationships must be explicit.
-
-## Step 5: Update technical architecture
-
-Review and update:
-- `17_MVP_TECH_PLAN.md`
-- `PROJECT_ARCHITECTURE.md`
-
-The architecture must map the validated MVP into concrete modules, data structures, simulation order, save state, and implementation boundaries.
-
-## Step 6: Create implementation backlog
-
-After the documents above are aligned, create a concrete development backlog organized into small testable vertical slices.
-
-The first implementation slice should prove one complete operation cycle rather than build disconnected foundations.
+The project must not use “MVP” as an excuse to postpone all playability until every documented MVP subsystem exists.
 
 ---
 
-# 7. MVP validation questions
+# 7. Vertical-slice implementation guardrail
 
-The next documentation pass must resolve these questions.
+`BUILD_ROADMAP.md` remains the authoritative epic order, but Epics 0–3 must implement only the minimum reusable foundation required to reach the first end-to-end operation slice in Epic 4.
 
-## Starting state
+Before the first operation slice works, do not build:
 
-- Does the player begin alone or with one helper?
-- What assets and money exist at campaign start?
-- What creates the first opportunity?
-- Which risks are already active?
+- a generic framework for systems not exercised by that slice,
+- complete city simulation when a smaller city shell is sufficient,
+- complete organization, diplomacy, history, succession, or progression models,
+- abstractions created only for hypothetical OSM import,
+- large content catalogues,
+- speculative plugin systems,
+- generalized event scripting beyond the needs of the tested flow.
 
-## First operations
+A foundation task is justified only when at least one of these is true:
 
-- Which operation types best demonstrate planning, assignment, reward, and pressure?
-- How much information is known before committing?
-- Which resources and crew properties matter in the first version?
-- How are partial success and failure represented?
+1. the first operation slice directly requires it,
+2. deterministic testing requires it,
+3. save-compatible stable state requires it from the beginning,
+4. postponing it would create a known destructive migration before the slice.
 
-## Rival behavior
-
-- What is the smallest AI model that creates readable competition?
-- Can rivals recruit, earn, operate, expand, and react using the same core rules?
-- Which rival actions must be visible to the player?
-
-## Pressure and recovery
-
-- Which pressure layers are necessary in MVP?
-- How quickly should consequences appear?
-- What tools allow the player to stabilize after mistakes?
-- How much failure is recoverable before the run becomes strategically lost?
-
-## Expansion
-
-- What is the first meaningful growth decision?
-- Does the player recruit, acquire a business, claim influence, or establish a second operating location first?
-- How does expansion increase both capability and risk?
-
-## Session outcome
-
-- What state represents a successful stabilized first run?
-- What conditions create a soft failure without immediate game over?
-- What should motivate the player to start another run?
+“Useful later” is not sufficient justification.
 
 ---
 
-# 8. Technical alignment requirements
+# 8. Simulation order decision boundary
 
-The technical plan must eventually define at least these MVP entities:
-- World
-- City
-- District
-- Building or strategic location
-- Character
-- Organization
-- Membership or role
-- Business or income source
-- Operation
-- Opportunity
-- Relationship
-- Pressure state
-- Investigation or reaction event
-- Historical event record
+The simulation must use one explicit, deterministic tick pipeline.
 
-It must also define:
-- simulation tick order,
-- operation lifecycle,
-- AI decision cadence,
-- event generation,
-- save determinism,
-- random seed handling,
-- and which data is configuration-driven.
+`PROJECT_ARCHITECTURE.md` is the current source of truth for the recommended phase order. Other documents may summarize the phases at a higher level but must not define a competing order.
 
-The architecture should preserve future extensibility without implementing non-MVP systems prematurely.
+The exact executable phase names and boundaries are intentionally unresolved until **E1-02 — Define simulation time, tick, pause, and speed model**.
+
+Before E1-06 implements the ordered tick pipeline, the project owner and PM must accept a single specification covering at minimum:
+
+- when queued commands are validated and applied,
+- when the simulation clock advances,
+- when planned operations start,
+- when active operations advance,
+- when completed operations resolve,
+- when immediate outcome effects apply,
+- when recurring economy updates run,
+- when exposure, tension, and investigations update,
+- when rival AI evaluates and submits actions,
+- when opportunities, events, history, notifications, and read models update.
+
+The accepted order must then be:
+
+- recorded in `PROJECT_ARCHITECTURE.md`,
+- reflected in `CONTEXT.md`,
+- implemented once in the domain/application orchestration,
+- protected by deterministic ordering tests.
+
+Until that task is accepted, summaries in documentation are architectural guidance rather than a finalized executable contract.
 
 ---
 
-# 9. What should not happen yet
+# 9. Technical alignment requirements
 
-Do not add more broad design documents unless the MVP validation uncovers a specific missing dependency.
+The implementation must preserve:
+
+- a modular monolith,
+- a headless deterministic domain simulation,
+- stable serializable IDs,
+- versioned authoritative game state,
+- injected seeded randomness,
+- explicit commands, results, and domain events,
+- data-driven content where practical,
+- UI read models rather than UI-owned rules,
+- replaceable infrastructure for save/load and future map import.
+
+The technology stack must support:
+
+- desktop-first delivery,
+- a UI-heavy strategic map and management interface,
+- fast headless domain tests,
+- local save files,
+- a future neutral city-definition import path,
+- practical solo-development iteration,
+- strong Codex ergonomics.
+
+The stack decision must be based on CrimeWorld's constraints rather than framework popularity.
+
+---
+
+# 10. What should not happen yet
+
+Do not restart broad game design.
+
+Do not add another large design document unless implementation reveals a concrete missing dependency that cannot be resolved in an existing file.
 
 Do not expand into:
-- multi-country politics,
-- global warfare,
+
+- full OpenStreetMap ingestion,
+- multiple cities,
+- regional or global simulation,
+- advanced family trees or full dynasty simulation,
 - detailed international law enforcement,
-- advanced family trees,
-- full dynasty simulation,
-- large-scale historical-era simulation,
-- full OSM generation before the controlled-map loop works,
-- dozens of business categories,
-- dozens of organization archetypes,
-- advanced banking or financial-market simulation,
+- advanced institutional politics,
 - detailed tactical combat,
-- or systems that do not change the MVP's core decisions.
+- dozens of business or organization archetypes,
+- advanced banking or financial-market simulation,
+- full organization history UI,
+- systems that do not change the MVP's repeated decisions.
 
-Do not implement every concept from documents `24`–`33` in the MVP.
-Those documents define the long-term architecture, not the initial content commitment.
-
----
-
-# 10. Current design philosophy
-
-## Prefer a complete vertical loop over disconnected systems
-
-The first playable build should let the player make one meaningful plan, execute it, receive consequences, and respond.
-
-## Prefer dependencies over isolated bonuses
-
-A mechanic should be both a cause and a consequence inside the simulation.
-
-## Prefer abstraction over unbounded simulation
-
-Simulate only enough detail to produce readable, interesting decisions and emergent outcomes.
-
-## Preserve player agency under failure
-
-Most setbacks should change the player's strategic position rather than immediately terminate the campaign.
-
-## Make growth transform problems
-
-Progression should replace early survival problems with coordination, exposure, dependency, and stability problems.
-
-## Keep the interface explainable
-
-The player should understand why an option is available, why an operation is risky, and why the world reacted.
+Do not implement every concept from documents `19`–`33`. Those documents preserve long-term direction, not the initial content commitment.
 
 ---
 
-# 11. Instructions for future sessions
+# 11. Decision standard for new work
 
-When continuing this project, begin by reading:
+Every proposed task or feature should answer:
 
-1. `docs/PLANNING_ROADMAP.md`
-2. `docs/GDD_INDEX.md`
-3. `docs/14_MVP_SCOPE.md`
-4. `docs/15_MVP_GAME_LOOP.md`
-5. `docs/27_OPERATION_MODEL.md`
-6. `docs/28_PRESSURE_REACTION_MODEL.md`
-7. `docs/31_PROGRESSION_MODEL.md`
+1. What player decision does it create or support?
+2. Which current MVP system requires it?
+3. What persistent state transition does it introduce?
+4. How will it be tested deterministically?
+5. Is it required before the first operation slice or only before MVP feature completion?
+6. What simpler version would prove the same assumption?
 
-Then continue with the next unfinished step from section 6.
-
-Do not restart the design from scratch.
-Do not add random systems.
-Do not treat every long-term design document as MVP scope.
-Always build on the established model and move toward a testable playable loop.
+Work that cannot answer these questions should be rejected, reduced, or postponed.
 
 ---
 
-# 12. Immediate next task
+# 12. Instructions for future sessions
+
+Begin implementation-oriented sessions by reading:
+
+1. `../CONTEXT.md`,
+2. `BUILD_ROADMAP.md`,
+3. `PROJECT_ARCHITECTURE.md`,
+4. the directly relevant MVP or domain documents.
+
+Use `GDD_INDEX.md` to locate supporting design material.
+
+Do not rely on old conversation context when the repository can be checked.
+Do not treat long-term design as accepted MVP scope.
+Do not create a Codex prompt before the project owner accepts the task scope.
+Do not begin the next roadmap task before blocking review findings are resolved.
+
+---
+
+# 13. Immediate next task
 
 The next task is:
 
-> Perform the MVP validation pass beginning with `14_MVP_SCOPE.md`.
+> **E0-01 — Compare suitable implementation stacks for CrimeWorld.**
 
-Before rewriting the file, compare the existing MVP assumptions against the completed operation, pressure, player, diplomacy, progression, endgame, and legacy models.
+The task should compare a small number of realistic stacks against weighted project requirements and produce:
 
-The output should be a narrow, measurable MVP scope that can be translated into technical architecture and an implementation backlog.
+- a recommended stack,
+- a credible fallback,
+- explicit trade-offs and risks,
+- the decisions required from the project owner.
+
+E0-01 is analysis only. It must not create the application scaffold, implementation code, or `TECH_STACK.md` before the owner selects a stack.
