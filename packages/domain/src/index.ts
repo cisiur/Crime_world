@@ -11,3 +11,32 @@ export function describeDomainRuntime(): DomainRuntimeDescriptor {
     ownsGameplayRules: true,
   };
 }
+
+export {
+  InvalidEntityIdError,
+  parseBusinessId,
+  parseCharacterId,
+  parseCityId,
+  parseDistrictId,
+  parseInvestigationId,
+  parseLocationId,
+  parseOperationId,
+  parseOperationTemplateId,
+  parseOpportunityId,
+  parseOrganizationId,
+  parseWorldEventId,
+} from "./entityIds";
+
+export type {
+  BusinessId,
+  CharacterId,
+  CityId,
+  DistrictId,
+  InvestigationId,
+  LocationId,
+  OperationId,
+  OperationTemplateId,
+  OpportunityId,
+  OrganizationId,
+  WorldEventId,
+} from "./entityIds";
