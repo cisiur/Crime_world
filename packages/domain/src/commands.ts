@@ -1,5 +1,6 @@
 import { parseGameState, type GameState } from "./gameState";
-import { resumeSimulationClock } from "./simulationClock";
+import { advanceSimulationClockOneTick, resumeSimulationClock } from "./simulationClock";
+import { createSimulationTickContext, runSimulationTickPipeline } from "./simulationTickPipeline";
 import {
   DomainErrorCode,
   failure,
@@ -11,6 +12,7 @@ import {
 declare const commandBrand: unique symbol;
 
 export const DomainCommandType = {
+  AdvanceSimulationTick: "AdvanceSimulationTick",
   ResumeSimulation: "ResumeSimulation",
 } as const;
 
@@ -21,7 +23,18 @@ export interface ResumeSimulationCommand {
   readonly [commandBrand]: "ResumeSimulationCommand";
 }
 
-export type DomainCommand = ResumeSimulationCommand;
+export interface AdvanceSimulationTickCommand {
+  readonly type: typeof DomainCommandType.AdvanceSimulationTick;
+  readonly [commandBrand]: "AdvanceSimulationTickCommand";
+}
+
+export type DomainCommand = AdvanceSimulationTickCommand | ResumeSimulationCommand;
+
+export function createAdvanceSimulationTickCommand(): AdvanceSimulationTickCommand {
+  return Object.freeze({
+    type: DomainCommandType.AdvanceSimulationTick,
+  }) as AdvanceSimulationTickCommand;
+}
 
 export function createResumeSimulationCommand(): ResumeSimulationCommand {
   return Object.freeze({
@@ -33,6 +46,8 @@ export function dispatchCommand(state: GameState, command: DomainCommand): Domai
   const commandType = command.type;
 
   switch (commandType) {
+    case DomainCommandType.AdvanceSimulationTick:
+      return handleAdvanceSimulationTickCommand(state, command);
     case DomainCommandType.ResumeSimulation:
       return handleResumeSimulationCommand(state, command);
     default: {
@@ -42,6 +57,30 @@ export function dispatchCommand(state: GameState, command: DomainCommand): Domai
       return failure(createUnsupportedCommandError(getCommandType(command)));
     }
   }
+}
+
+function handleAdvanceSimulationTickCommand(
+  state: GameState,
+  command: AdvanceSimulationTickCommand,
+): DomainResult<GameState> {
+  if (state.clock.paused) {
+    return failure({
+      code: DomainErrorCode.SimulationPaused,
+      message: "Cannot advance simulation while the clock is paused.",
+    });
+  }
+
+  const gameStateAfterClockAdvance = parseGameState({
+    ...state,
+    clock: advanceSimulationClockOneTick(state.clock),
+  });
+  const context = createSimulationTickContext({
+    gameState: gameStateAfterClockAdvance,
+    command,
+    tickNumber: gameStateAfterClockAdvance.clock.currentTick,
+  });
+
+  return success(runSimulationTickPipeline(context));
 }
 
 function handleResumeSimulationCommand(

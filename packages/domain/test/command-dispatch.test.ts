@@ -111,17 +111,23 @@ describe("command dispatch", () => {
   });
 
   it("keeps the dispatcher switch exhaustive for the current command union", () => {
-    const command: DomainCommand = createResumeSimulationCommand();
-    const commandType = command.type;
+    function expectKnownCommand(command: DomainCommand) {
+      const commandType = command.type;
 
-    switch (commandType) {
-      case DomainCommandType.ResumeSimulation:
-        expect(command).toEqual(createResumeSimulationCommand());
-        break;
-      default: {
-        const exhaustiveCommandType: never = commandType;
-        void exhaustiveCommandType;
+      switch (commandType) {
+        case DomainCommandType.AdvanceSimulationTick:
+          expect(command.type).toBe(DomainCommandType.AdvanceSimulationTick);
+          break;
+        case DomainCommandType.ResumeSimulation:
+          expect(command).toEqual(createResumeSimulationCommand());
+          break;
+        default: {
+          const exhaustiveCommandType: never = commandType;
+          void exhaustiveCommandType;
+        }
       }
     }
+
+    expectKnownCommand(createResumeSimulationCommand());
   });
 });

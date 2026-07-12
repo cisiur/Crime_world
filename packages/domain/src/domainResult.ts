@@ -1,4 +1,5 @@
 export const DomainErrorCode = {
+  SimulationPaused: "SIMULATION_PAUSED",
   UnsupportedCommand: "UNSUPPORTED_COMMAND",
 } as const;
 
