@@ -486,22 +486,23 @@ The exact real-time-to-game-time ratio remains a balancing value.
 
 Each simulation tick should run in a stable order.
 
-Recommended order:
+Accepted E1-06 conceptual order:
 
-1. Advance simulation time.
-2. Process queued player and AI commands.
-3. Advance active operations.
-4. Resolve completed operations.
-5. Apply direct outcome effects.
-6. Update exposure and district tension.
-7. Advance investigations and institutional reactions.
-8. Process economic schedules when due.
-9. Process rival AI schedules when due.
-10. Generate or expire opportunities.
-11. Emit and record world events.
-12. Recalculate derived summaries used by UI.
+1. Validate and apply queued commands against the current pre-tick state.
+2. Advance simulation time by one fixed tick.
+3. Execute ordered domain systems for the new simulation time.
+4. Collect resulting domain events and publish the resulting state.
 
-Systems should not depend on accidental iteration order.
+A command issued at 08:00 starts at 08:00, not at 08:10.
+
+Every requested tick must be executed individually. Simulation speed changes only how many one-tick executions the application requests:
+
+```text
+repeat getTicksPerUpdate(speed) times:
+    execute one complete deterministic tick
+```
+
+Do not shortcut accelerated time into one larger domain tick. Systems should not depend on accidental iteration order.
 
 ## Update frequencies
 

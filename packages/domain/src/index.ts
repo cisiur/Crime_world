@@ -40,3 +40,5 @@ export type {
   OrganizationId,
   WorldEventId,
 } from "./entityIds";
+
+export * from "./simulationClock";
