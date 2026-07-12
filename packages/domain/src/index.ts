@@ -42,3 +42,4 @@ export type {
 } from "./entityIds";
 
 export * from "./simulationClock";
+export * from "./randomService";
