@@ -1,0 +1,38 @@
+export const DomainErrorCode = {
+  UnsupportedCommand: "UNSUPPORTED_COMMAND",
+} as const;
+
+export type DomainErrorCode = (typeof DomainErrorCode)[keyof typeof DomainErrorCode];
+
+export interface DomainError {
+  readonly code: DomainErrorCode;
+  readonly message: string;
+}
+
+export interface Success<TValue> {
+  readonly ok: true;
+  readonly value: TValue;
+}
+
+export interface Failure<TError extends DomainError = DomainError> {
+  readonly ok: false;
+  readonly error: TError;
+}
+
+export type DomainResult<TValue, TError extends DomainError = DomainError> =
+  | Success<TValue>
+  | Failure<TError>;
+
+export function success<TValue>(value: TValue): Success<TValue> {
+  return Object.freeze({
+    ok: true,
+    value,
+  });
+}
+
+export function failure<TError extends DomainError>(error: TError): Failure<TError> {
+  return Object.freeze({
+    ok: false,
+    error: Object.freeze({ ...error }),
+  });
+}
