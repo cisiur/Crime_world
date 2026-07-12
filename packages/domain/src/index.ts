@@ -14,6 +14,7 @@ export function describeDomainRuntime(): DomainRuntimeDescriptor {
 
 export {
   InvalidEntityIdError,
+  parseCampaignId,
   parseBusinessId,
   parseCharacterId,
   parseCityId,
@@ -39,7 +40,9 @@ export type {
   OpportunityId,
   OrganizationId,
   WorldEventId,
+  CampaignId,
 } from "./entityIds";
 
 export * from "./simulationClock";
 export * from "./randomService";
+export * from "./gameState";

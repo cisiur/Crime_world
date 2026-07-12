@@ -60,6 +60,42 @@ export function parseSimulationTick(value: unknown): SimulationTick {
   return value as SimulationTick;
 }
 
+export function parseSimulationClockState(value: unknown): SimulationClockState {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new InvalidSimulationTimeError(
+      "SimulationClockState",
+      `received ${describeValueType(value)}`,
+      value,
+    );
+  }
+
+  const candidate = value as Partial<SimulationClockState>;
+
+  if (typeof candidate.paused !== "boolean") {
+    throw new InvalidSimulationTimeError("SimulationClockState", "paused must be a boolean", value);
+  }
+
+  if (
+    candidate.speed !== SimulationSpeed.Normal &&
+    candidate.speed !== SimulationSpeed.Fast &&
+    candidate.speed !== SimulationSpeed.VeryFast &&
+    candidate.speed !== SimulationSpeed.Maximum
+  ) {
+    throw new InvalidSimulationTimeError(
+      "SimulationClockState",
+      "speed must be a valid SimulationSpeed",
+      value,
+    );
+  }
+
+  return createSimulationClockState({
+    currentMinute: parseSimulationMinute(candidate.currentMinute),
+    currentTick: parseSimulationTick(candidate.currentTick),
+    paused: candidate.paused,
+    speed: candidate.speed,
+  });
+}
+
 export function getTicksPerUpdate(speed: SimulationSpeed): number {
   switch (speed) {
     case SimulationSpeed.Normal:
@@ -177,6 +213,7 @@ function assertValidSimulationClockState(clock: SimulationClockState): void {
 }
 
 function createSimulationClockState(clock: SimulationClockState): SimulationClockState {
+  assertValidSimulationClockState(clock);
   return Object.freeze({ ...clock });
 }
 

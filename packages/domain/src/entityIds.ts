@@ -15,7 +15,8 @@ type EntityIdTypeName =
   | "OperationTemplateId"
   | "InvestigationId"
   | "OpportunityId"
-  | "WorldEventId";
+  | "WorldEventId"
+  | "CampaignId";
 
 export type CityId = EntityId<"CityId">;
 export type DistrictId = EntityId<"DistrictId">;
@@ -28,6 +29,7 @@ export type OperationTemplateId = EntityId<"OperationTemplateId">;
 export type InvestigationId = EntityId<"InvestigationId">;
 export type OpportunityId = EntityId<"OpportunityId">;
 export type WorldEventId = EntityId<"WorldEventId">;
+export type CampaignId = EntityId<"CampaignId">;
 
 const MAX_ENTITY_ID_LENGTH = 128;
 const ENTITY_ID_PATTERN = /^[A-Za-z0-9_.:-]+$/;
@@ -87,6 +89,10 @@ export function parseOpportunityId(value: unknown): OpportunityId {
 
 export function parseWorldEventId(value: unknown): WorldEventId {
   return parseEntityId("WorldEventId", value);
+}
+
+export function parseCampaignId(value: unknown): CampaignId {
+  return parseEntityId("CampaignId", value);
 }
 
 function parseEntityId<TIdType extends EntityIdTypeName>(
