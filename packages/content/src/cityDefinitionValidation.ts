@@ -95,6 +95,10 @@ export function deriveDistrictAdjacency(
   }
 
   for (const route of routes) {
+    if (!adjacency.has(route.fromDistrictId) || !adjacency.has(route.toDistrictId)) {
+      continue;
+    }
+
     addAdjacentDistrict(adjacency, route.fromDistrictId, route.toDistrictId);
 
     if (route.direction === "bidirectional") {
@@ -184,7 +188,7 @@ function validateRoutes(
   districtIds: ReadonlySet<DistrictId>,
   errors: CityDefinitionValidationError[],
 ): void {
-  const connectionKeys = new Map<string, RouteId>();
+  const coveredConnections = new Map<string, RouteId>();
 
   for (const route of routes) {
     const fromExists = districtIds.has(route.fromDistrictId);
@@ -218,19 +222,20 @@ function validateRoutes(
       continue;
     }
 
-    const connectionKey = getConnectionKey(route.fromDistrictId, route.toDistrictId);
-    const existingRouteId = connectionKeys.get(connectionKey);
+    const overlappingRouteId = getOverlappingRouteId(route, coveredConnections);
 
-    if (existingRouteId !== undefined) {
+    if (overlappingRouteId !== undefined) {
       errors.push({
         code: "DUPLICATE_ROUTE_CONNECTION",
         entity: { kind: "route", id: route.id },
-        message: `Route "${route.id}" duplicates the connection already defined by "${existingRouteId}".`,
+        message: `Route "${route.id}" duplicates the connection already defined by "${overlappingRouteId}".`,
       });
       continue;
     }
 
-    connectionKeys.set(connectionKey, route.id);
+    for (const connectionKey of getCoveredConnectionKeys(route)) {
+      coveredConnections.set(connectionKey, route.id);
+    }
   }
 }
 
@@ -315,6 +320,31 @@ function addAdjacentDistrict(
   adjacentDistrictIds.push(adjacentDistrictId);
 }
 
-function getConnectionKey(firstDistrictId: DistrictId, secondDistrictId: DistrictId): string {
-  return [firstDistrictId, secondDistrictId].sort().join("|");
+function getOverlappingRouteId(
+  route: RouteDefinition,
+  coveredConnections: ReadonlyMap<string, RouteId>,
+): RouteId | undefined {
+  for (const connectionKey of getCoveredConnectionKeys(route)) {
+    const overlappingRouteId = coveredConnections.get(connectionKey);
+
+    if (overlappingRouteId !== undefined) {
+      return overlappingRouteId;
+    }
+  }
+
+  return undefined;
+}
+
+function getCoveredConnectionKeys(route: RouteDefinition): readonly string[] {
+  const forwardConnectionKey = getDirectedConnectionKey(route.fromDistrictId, route.toDistrictId);
+
+  if (route.direction === "from-to") {
+    return [forwardConnectionKey];
+  }
+
+  return [forwardConnectionKey, getDirectedConnectionKey(route.toDistrictId, route.fromDistrictId)];
+}
+
+function getDirectedConnectionKey(fromDistrictId: DistrictId, toDistrictId: DistrictId): string {
+  return `${fromDistrictId}->${toDistrictId}`;
 }

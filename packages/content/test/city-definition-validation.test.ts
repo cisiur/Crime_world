@@ -143,6 +143,131 @@ describe("city definition validation", () => {
     expectValidationCodes(cityDefinition, ["DUPLICATE_ROUTE_CONNECTION"]);
   });
 
+  it("allows opposite directed routes between the same districts", () => {
+    const cityDefinition = withDirectedRouteFixture([
+      createRouteDefinition(
+        "route:directed_residential_to_commercial_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "from-to",
+      ),
+      createRouteDefinition(
+        "route:directed_commercial_to_residential_fixture",
+        commercialDistrictDefinition.id,
+        startingResidentialDistrictDefinition.id,
+        "from-to",
+      ),
+    ]);
+
+    const result = validateCityDefinition(cityDefinition);
+
+    expect(result).toEqual({
+      valid: true,
+      errors: [],
+    });
+  });
+
+  it("reports duplicate identical directed route connections", () => {
+    const cityDefinition = withDirectedRouteFixture([
+      createRouteDefinition(
+        "route:first_directed_duplicate_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "from-to",
+      ),
+      createRouteDefinition(
+        "route:second_directed_duplicate_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "from-to",
+      ),
+    ]);
+
+    expectValidationCodes(cityDefinition, ["DUPLICATE_ROUTE_CONNECTION"]);
+  });
+
+  it("reports duplicate identical bidirectional route connections", () => {
+    const cityDefinition = withDirectedRouteFixture([
+      createRouteDefinition(
+        "route:first_bidirectional_duplicate_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "bidirectional",
+      ),
+      createRouteDefinition(
+        "route:second_bidirectional_duplicate_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "bidirectional",
+      ),
+    ]);
+
+    expectValidationCodes(cityDefinition, ["DUPLICATE_ROUTE_CONNECTION"]);
+  });
+
+  it("reports a bidirectional route overlapping a matching directed route", () => {
+    const cityDefinition = withDirectedRouteFixture([
+      createRouteDefinition(
+        "route:bidirectional_overlapping_forward_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "bidirectional",
+      ),
+      createRouteDefinition(
+        "route:directed_overlapping_forward_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "from-to",
+      ),
+    ]);
+
+    expectValidationCodes(cityDefinition, ["DUPLICATE_ROUTE_CONNECTION"]);
+  });
+
+  it("reports a bidirectional route overlapping a reverse directed route", () => {
+    const cityDefinition = withDirectedRouteFixture([
+      createRouteDefinition(
+        "route:bidirectional_overlapping_reverse_fixture",
+        startingResidentialDistrictDefinition.id,
+        commercialDistrictDefinition.id,
+        "bidirectional",
+      ),
+      createRouteDefinition(
+        "route:directed_overlapping_reverse_fixture",
+        commercialDistrictDefinition.id,
+        startingResidentialDistrictDefinition.id,
+        "from-to",
+      ),
+    ]);
+
+    expectValidationCodes(cityDefinition, ["DUPLICATE_ROUTE_CONNECTION"]);
+  });
+
+  it("derives directed adjacency without reverse adjacency", () => {
+    const adjacency = deriveDistrictAdjacency(
+      [startingResidentialDistrictDefinition, commercialDistrictDefinition],
+      [
+        createRouteDefinition(
+          "route:directed_adjacency_fixture",
+          startingResidentialDistrictDefinition.id,
+          commercialDistrictDefinition.id,
+          "from-to",
+        ),
+      ],
+    );
+
+    expect(adjacency).toEqual([
+      {
+        districtId: startingResidentialDistrictDefinition.id,
+        adjacentDistrictIds: [commercialDistrictDefinition.id],
+      },
+      {
+        districtId: commercialDistrictDefinition.id,
+        adjacentDistrictIds: [],
+      },
+    ]);
+  });
+
   it("reports disconnected district graphs", () => {
     const cityDefinition = withCityOverrides({
       routes: [canonicalMvpCityDefinition.routes[0]],
@@ -205,6 +330,35 @@ function withCityOverrides(overrides: Partial<CityDefinition>): CityDefinition {
     ...canonicalMvpCityDefinition,
     schemaVersion: SUPPORTED_CITY_DEFINITION_SCHEMA_VERSION,
     ...overrides,
+  };
+}
+
+function withDirectedRouteFixture(routes: readonly RouteDefinition[]): CityDefinition {
+  return withCityOverrides({
+    districts: [startingResidentialDistrictDefinition, commercialDistrictDefinition],
+    routes,
+    locations: [
+      {
+        ...canonicalMvpCityDefinition.locations[0],
+        districtId: startingResidentialDistrictDefinition.id,
+      },
+    ],
+  });
+}
+
+function createRouteDefinition(
+  id: `route:${string}`,
+  fromDistrictId: RouteDefinition["fromDistrictId"],
+  toDistrictId: RouteDefinition["toDistrictId"],
+  direction: RouteDefinition["direction"],
+): RouteDefinition {
+  return {
+    id: parseRouteId(id),
+    fromDistrictId,
+    toDistrictId,
+    kind: "road",
+    direction,
+    tags: [],
   };
 }
 
