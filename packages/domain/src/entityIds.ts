@@ -7,6 +7,7 @@ type EntityId<TIdType extends string> = string & {
 type EntityIdTypeName =
   | "CityId"
   | "DistrictId"
+  | "RouteId"
   | "LocationId"
   | "CharacterId"
   | "OrganizationId"
@@ -20,6 +21,7 @@ type EntityIdTypeName =
 
 export type CityId = EntityId<"CityId">;
 export type DistrictId = EntityId<"DistrictId">;
+export type RouteId = EntityId<"RouteId">;
 export type LocationId = EntityId<"LocationId">;
 export type CharacterId = EntityId<"CharacterId">;
 export type OrganizationId = EntityId<"OrganizationId">;
@@ -53,6 +55,10 @@ export function parseCityId(value: unknown): CityId {
 
 export function parseDistrictId(value: unknown): DistrictId {
   return parseEntityId("DistrictId", value);
+}
+
+export function parseRouteId(value: unknown): RouteId {
+  return parseEntityId("RouteId", value);
 }
 
 export function parseLocationId(value: unknown): LocationId {

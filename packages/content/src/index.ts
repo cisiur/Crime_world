@@ -7,3 +7,5 @@ export const contentPackageDescriptor: ContentPackageDescriptor = {
   packageName: "@crimeworld/content",
   mutableCampaignState: false,
 };
+
+export * from "./cityDefinition";

@@ -12,12 +12,14 @@ import {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRouteId,
   parseWorldEventId,
 } from "../src/index";
 
 const parserCases = [
   ["CityId", parseCityId, "city:harbor"],
   ["DistrictId", parseDistrictId, "district:old_docks"],
+  ["RouteId", parseRouteId, "route:old_docks-industrial"],
   ["LocationId", parseLocationId, "location:warehouse.01"],
   ["CharacterId", parseCharacterId, "character:boss_001"],
   ["OrganizationId", parseOrganizationId, "organization:crew-alpha"],
@@ -52,6 +54,11 @@ describe("entity IDs", () => {
 
   it("rejects unsupported characters", () => {
     expect(() => parseCharacterId("character/boss")).toThrow("unsupported characters");
+  });
+
+  it("rejects invalid route IDs consistently with other branded IDs", () => {
+    expect(() => parseRouteId("route main")).toThrow(InvalidEntityIdError);
+    expect(() => parseRouteId("route/main")).toThrow("unsupported characters");
   });
 
   it("rejects values longer than 128 characters", () => {

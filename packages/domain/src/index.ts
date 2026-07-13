@@ -25,6 +25,7 @@ export {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRouteId,
   parseWorldEventId,
 } from "./entityIds";
 
@@ -39,6 +40,7 @@ export type {
   OperationTemplateId,
   OpportunityId,
   OrganizationId,
+  RouteId,
   WorldEventId,
   CampaignId,
 } from "./entityIds";

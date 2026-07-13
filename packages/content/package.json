@@ -9,6 +9,9 @@
       "import": "./src/index.ts"
     }
   },
+  "dependencies": {
+    "@crimeworld/domain": "0.1.0"
+  },
   "scripts": {
     "build": "tsc -b"
   }
