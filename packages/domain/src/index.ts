@@ -50,3 +50,4 @@ export * from "./domainResult";
 export * from "./domainEvents";
 export * from "./commands";
 export * from "./simulationTickPipeline";
+export * from "./invariants";
