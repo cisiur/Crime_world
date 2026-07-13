@@ -12,6 +12,13 @@ export const contestedNightlifeLocationDefinitions = [
     tags: ["cash-rich", "information-access", "rival-interest", "high-visibility"],
   },
   {
+    id: parseLocationId("location:neon_plaza"),
+    districtId: contestedNightlifeDistrictDefinition.id,
+    name: "Neon Plaza",
+    kind: "landmark",
+    tags: ["public-landmark", "rival-interest", "high-visibility"],
+  },
+  {
     id: parseLocationId("location:casino"),
     districtId: contestedNightlifeDistrictDefinition.id,
     name: "Casino",

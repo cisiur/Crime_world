@@ -18,7 +18,7 @@ describe("canonical MVP location definitions", () => {
   it("exports 20 to 30 canonical strategic locations through the public API", () => {
     expect(canonicalMvpLocationDefinitions.length).toBeGreaterThanOrEqual(20);
     expect(canonicalMvpLocationDefinitions.length).toBeLessThanOrEqual(30);
-    expect(canonicalMvpLocationDefinitions).toHaveLength(24);
+    expect(canonicalMvpLocationDefinitions).toHaveLength(29);
     expect(canonicalMvpLocationDefinitions).toEqual([
       ...startingResidentialLocationDefinitions,
       ...commercialLocationDefinitions,
@@ -28,10 +28,10 @@ describe("canonical MVP location definitions", () => {
   });
 
   it("distributes locations evenly across the four canonical districts", () => {
-    expect(startingResidentialLocationDefinitions).toHaveLength(6);
-    expect(commercialLocationDefinitions).toHaveLength(6);
-    expect(industrialLocationDefinitions).toHaveLength(6);
-    expect(contestedNightlifeLocationDefinitions).toHaveLength(6);
+    expect(startingResidentialLocationDefinitions).toHaveLength(7);
+    expect(commercialLocationDefinitions).toHaveLength(8);
+    expect(industrialLocationDefinitions).toHaveLength(7);
+    expect(contestedNightlifeLocationDefinitions).toHaveLength(7);
   });
 
   it("uses unique stable branded location IDs", () => {
@@ -39,7 +39,9 @@ describe("canonical MVP location definitions", () => {
 
     expect(new Set(locationIds).size).toBe(canonicalMvpLocationDefinitions.length);
     expect(locationIds).toContain("location:cheap_apartments");
+    expect(locationIds).toContain("location:starting_hideout");
     expect(locationIds).toContain("location:bank_branch");
+    expect(locationIds).toContain("location:central_police_station");
     expect(locationIds).toContain("location:freight_terminal");
     expect(locationIds).toContain("location:rival_safehouse");
   });
@@ -79,7 +81,11 @@ describe("canonical MVP location definitions", () => {
   it("conforms to accepted location kinds and bounded tags", () => {
     const locationDefinitions: readonly LocationDefinition[] = canonicalMvpLocationDefinitions;
 
+    expect(locationDefinitions.some((location) => location.kind === "hideout")).toBe(true);
     expect(locationDefinitions.some((location) => location.kind === "safehouse")).toBe(true);
+    expect(locationDefinitions.some((location) => location.kind === "police-institution")).toBe(
+      true,
+    );
     expect(locationDefinitions.some((location) => location.kind === "shop-or-service")).toBe(true);
     expect(locationDefinitions.some((location) => location.kind === "nightlife-venue")).toBe(true);
     expect(locationDefinitions.some((location) => location.kind === "warehouse-or-storage")).toBe(
@@ -91,11 +97,28 @@ describe("canonical MVP location definitions", () => {
     expect(locationDefinitions.some((location) => location.kind === "medical-or-recovery")).toBe(
       true,
     );
+    expect(locationDefinitions.some((location) => location.kind === "municipal-or-legal")).toBe(
+      true,
+    );
     expect(locationDefinitions.some((location) => location.tags.includes("rival-interest"))).toBe(
       true,
     );
     expect(
       locationDefinitions.some((location) => location.tags.includes("smuggling-support")),
+    ).toBe(true);
+  });
+
+  it("gives every canonical district at least one landmark", () => {
+    const districtIdsWithLandmarks = new Set(
+      canonicalMvpLocationDefinitions
+        .filter((location) => location.kind === "landmark")
+        .map((location) => location.districtId),
+    );
+
+    expect(
+      canonicalMvpDistrictDefinitions.every((district) =>
+        districtIdsWithLandmarks.has(district.id),
+      ),
     ).toBe(true);
   });
 

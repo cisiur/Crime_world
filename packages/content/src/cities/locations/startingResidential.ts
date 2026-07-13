@@ -5,6 +5,13 @@ import type { LocationDefinition } from "../../cityDefinition";
 
 export const startingResidentialLocationDefinitions = [
   {
+    id: parseLocationId("location:starting_hideout"),
+    districtId: startingResidentialDistrictDefinition.id,
+    name: "Starting Hideout",
+    kind: "hideout",
+    tags: ["starter-base", "low-profile"],
+  },
+  {
     id: parseLocationId("location:cheap_apartments"),
     districtId: startingResidentialDistrictDefinition.id,
     name: "Cheap Apartments",

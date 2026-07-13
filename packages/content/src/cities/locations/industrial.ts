@@ -12,6 +12,13 @@ export const industrialLocationDefinitions = [
     tags: ["transport-access", "smuggling-support", "high-visibility"],
   },
   {
+    id: parseLocationId("location:cargo_crane"),
+    districtId: industrialDistrictDefinition.id,
+    name: "Cargo Crane",
+    kind: "landmark",
+    tags: ["public-landmark", "transport-access", "high-visibility"],
+  },
+  {
     id: parseLocationId("location:warehouse"),
     districtId: industrialDistrictDefinition.id,
     name: "Warehouse",

@@ -12,6 +12,20 @@ export const commercialLocationDefinitions = [
     tags: ["cash-rich", "high-visibility", "front-business"],
   },
   {
+    id: parseLocationId("location:business_plaza"),
+    districtId: commercialDistrictDefinition.id,
+    name: "Business Plaza",
+    kind: "landmark",
+    tags: ["public-landmark", "high-visibility", "civic-pressure"],
+  },
+  {
+    id: parseLocationId("location:central_police_station"),
+    districtId: commercialDistrictDefinition.id,
+    name: "Central Police Station",
+    kind: "police-institution",
+    tags: ["law-enforcement", "civic-pressure", "high-visibility"],
+  },
+  {
     id: parseLocationId("location:jewelry_store"),
     districtId: commercialDistrictDefinition.id,
     name: "Jewelry Store",
