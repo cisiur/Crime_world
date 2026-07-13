@@ -4,6 +4,7 @@ import {
   DomainErrorCode,
   DomainCommandType,
   createInitialGameState,
+  createDomainExecution,
   createResumeSimulationCommand,
   dispatchCommand,
   failure,
@@ -70,13 +71,13 @@ describe("command dispatch", () => {
     }
 
     expect(state.clock.paused).toBe(true);
-    expect(result.value.clock.paused).toBe(false);
-    expect(result.value.clock).toEqual(resumeSimulationClock(state.clock));
-    expect(result.value.randomState).toEqual(state.randomState);
-    expect(result.value).not.toBe(state);
-    expect(Object.isFrozen(result.value)).toBe(true);
-    expect(Object.isFrozen(result.value.clock)).toBe(true);
-    expect(Object.isFrozen(result.value.randomState)).toBe(true);
+    expect(result.value.gameState.clock.paused).toBe(false);
+    expect(result.value.gameState.clock).toEqual(resumeSimulationClock(state.clock));
+    expect(result.value.gameState.randomState).toEqual(state.randomState);
+    expect(result.value.gameState).not.toBe(state);
+    expect(Object.isFrozen(result.value.gameState)).toBe(true);
+    expect(Object.isFrozen(result.value.gameState.clock)).toBe(true);
+    expect(Object.isFrozen(result.value.gameState.randomState)).toBe(true);
   });
 
   it("returns unchanged GameState when already running", () => {
@@ -87,11 +88,12 @@ describe("command dispatch", () => {
     });
     const result = dispatchCommand(runningState, createResumeSimulationCommand());
 
-    expect(result).toEqual(success(runningState));
+    expect(result).toEqual(success(createDomainExecution(runningState, [])));
     if (!result.ok) {
       throw new Error("expected success");
     }
-    expect(result.value).toBe(runningState);
+    expect(result.value.gameState).toBe(runningState);
+    expect(result.value.events).toEqual([]);
   });
 
   it("returns failure for unsupported runtime command objects", () => {

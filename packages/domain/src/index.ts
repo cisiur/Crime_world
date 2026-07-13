@@ -47,5 +47,6 @@ export * from "./simulationClock";
 export * from "./randomService";
 export * from "./gameState";
 export * from "./domainResult";
+export * from "./domainEvents";
 export * from "./commands";
 export * from "./simulationTickPipeline";

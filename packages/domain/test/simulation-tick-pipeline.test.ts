@@ -36,7 +36,7 @@ function createRunningGameState() {
     throw new Error("expected resume command to succeed");
   }
 
-  return resumeResult.value;
+  return resumeResult.value.gameState;
 }
 
 describe("simulation tick pipeline", () => {
@@ -76,15 +76,17 @@ describe("simulation tick pipeline", () => {
       throw new Error("expected success");
     }
 
-    expect(result.value.clock.currentTick).toBe(state.clock.currentTick + 1);
-    expect(result.value.clock.currentMinute).toBe(state.clock.currentMinute + MINUTES_PER_TICK);
-    expect(result.value.clock.paused).toBe(false);
-    expect(result.value.clock.speed).toBe(state.clock.speed);
-    expect(result.value.randomState).toEqual(state.randomState);
-    expect(result.value).not.toBe(state);
-    expect(Object.isFrozen(result.value)).toBe(true);
-    expect(Object.isFrozen(result.value.clock)).toBe(true);
-    expect(Object.isFrozen(result.value.randomState)).toBe(true);
+    expect(result.value.gameState.clock.currentTick).toBe(state.clock.currentTick + 1);
+    expect(result.value.gameState.clock.currentMinute).toBe(
+      state.clock.currentMinute + MINUTES_PER_TICK,
+    );
+    expect(result.value.gameState.clock.paused).toBe(false);
+    expect(result.value.gameState.clock.speed).toBe(state.clock.speed);
+    expect(result.value.gameState.randomState).toEqual(state.randomState);
+    expect(result.value.gameState).not.toBe(state);
+    expect(Object.isFrozen(result.value.gameState)).toBe(true);
+    expect(Object.isFrozen(result.value.gameState.clock)).toBe(true);
+    expect(Object.isFrozen(result.value.gameState.randomState)).toBe(true);
   });
 
   it("executes pipeline stages in the exact accepted order", () => {
@@ -194,6 +196,6 @@ describe("simulation tick pipeline", () => {
     if (!result.ok) {
       throw new Error("expected success");
     }
-    expect(result.value.clock.paused).toBe(false);
+    expect(result.value.gameState.clock.paused).toBe(false);
   });
 });

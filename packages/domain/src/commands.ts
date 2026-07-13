@@ -2,6 +2,12 @@ import { parseGameState, type GameState } from "./gameState";
 import { parseSimulationTick, resumeSimulationClock } from "./simulationClock";
 import { createSimulationTickContext, runSimulationTickPipeline } from "./simulationTickPipeline";
 import {
+  createDomainExecution,
+  createSimulationResumedEvent,
+  createSimulationTickAdvancedEvent,
+  type DomainExecution,
+} from "./domainEvents";
+import {
   DomainErrorCode,
   failure,
   success,
@@ -42,7 +48,10 @@ export function createResumeSimulationCommand(): ResumeSimulationCommand {
   }) as ResumeSimulationCommand;
 }
 
-export function dispatchCommand(state: GameState, command: DomainCommand): DomainResult<GameState> {
+export function dispatchCommand(
+  state: GameState,
+  command: DomainCommand,
+): DomainResult<DomainExecution> {
   const commandType = command.type;
 
   switch (commandType) {
@@ -62,7 +71,7 @@ export function dispatchCommand(state: GameState, command: DomainCommand): Domai
 function handleAdvanceSimulationTickCommand(
   state: GameState,
   command: AdvanceSimulationTickCommand,
-): DomainResult<GameState> {
+): DomainResult<DomainExecution> {
   if (state.clock.paused) {
     return failure({
       code: DomainErrorCode.SimulationPaused,
@@ -75,26 +84,37 @@ function handleAdvanceSimulationTickCommand(
     command,
     tickNumber: parseSimulationTick(state.clock.currentTick + 1),
   });
+  const nextGameState = runSimulationTickPipeline(context);
+  const event = createSimulationTickAdvancedEvent({
+    previousTick: state.clock.currentTick,
+    currentTick: nextGameState.clock.currentTick,
+    previousMinute: state.clock.currentMinute,
+    currentMinute: nextGameState.clock.currentMinute,
+  });
 
-  return success(runSimulationTickPipeline(context));
+  return success(createDomainExecution(nextGameState, [event]));
 }
 
 function handleResumeSimulationCommand(
   state: GameState,
   command: ResumeSimulationCommand,
-): DomainResult<GameState> {
+): DomainResult<DomainExecution> {
   void command;
 
   if (!state.clock.paused) {
-    return success(state);
+    return success(createDomainExecution(state, []));
   }
 
-  return success(
-    parseGameState({
-      ...state,
-      clock: resumeSimulationClock(state.clock),
-    }),
+  const nextGameState = parseGameState({
+    ...state,
+    clock: resumeSimulationClock(state.clock),
+  });
+  const event = createSimulationResumedEvent(
+    nextGameState.clock.currentTick,
+    nextGameState.clock.currentMinute,
   );
+
+  return success(createDomainExecution(nextGameState, [event]));
 }
 
 function createUnsupportedCommandError(commandType: unknown): DomainError {

@@ -1,5 +1,6 @@
 import {
   createAdvanceSimulationTickCommand,
+  createDomainExecution,
   createInitialGameState,
   createResumeSimulationCommand,
   dispatchCommand,
@@ -8,6 +9,7 @@ import {
 import type {
   AdvanceSimulationTickCommand,
   DomainCommand,
+  DomainExecution,
   DomainResult,
   GameState,
   ResumeSimulationCommand,
@@ -22,10 +24,11 @@ const advanceCommand = createAdvanceSimulationTickCommand();
 
 const domainCommand: DomainCommand = resumeCommand;
 const advanceDomainCommand: DomainCommand = advanceCommand;
-const result: DomainResult<GameState> = success(gameState);
+const execution = createDomainExecution(gameState, []);
+const result: DomainResult<DomainExecution> = success(execution);
 
-dispatchCommand(gameState, resumeCommand);
-dispatchCommand(gameState, advanceCommand);
+const resumeResult: DomainResult<DomainExecution> = dispatchCommand(gameState, resumeCommand);
+const advanceResult: DomainResult<DomainExecution> = dispatchCommand(gameState, advanceCommand);
 
 // @ts-expect-error ResumeSimulationCommand cannot be assigned from arbitrary objects.
 const invalidResumeCommand: ResumeSimulationCommand = {
@@ -43,11 +46,13 @@ dispatchCommand(gameState, "ResumeSimulation");
 // @ts-expect-error Dispatcher cannot receive arbitrary objects.
 dispatchCommand(gameState, { type: "AdvanceSimulationTick" });
 
-// @ts-expect-error DomainResult<GameState> cannot be confused with GameState.
+// @ts-expect-error DomainResult<DomainExecution> cannot be confused with GameState.
 const invalidGameState: GameState = result;
 
 void domainCommand;
 void advanceDomainCommand;
+void resumeResult;
+void advanceResult;
 void invalidResumeCommand;
 void invalidAdvanceCommand;
 void invalidGameState;
