@@ -197,21 +197,50 @@ Completed document groups:
 - Repository scaffold exists as a TypeScript workspace / modular monolith.
 - Minimal React + Vite + Tauri desktop shell exists in `apps/desktop`.
 - Package boundaries exist for domain, application, content, infrastructure, and presentation.
-- Formatter, linter, unit test framework, production web build, and Tauri executable build are configured.
+- Formatter, linter, unit test framework, production web build, Tauri executable build, and GitHub Actions CI are configured.
 - GitHub Actions CI verifies pushes and pull requests targeting `main`.
-- Deterministic test seed infrastructure exists for tests only.
+- Deterministic test seed infrastructure exists for tests through `CRIMEWORLD_TEST_SEED`.
 - Root-level `AGENTS.md` records repository workflow and package-boundary rules for coding agents.
-- No gameplay code has been implemented.
+- Stable branded IDs exist in the domain package.
+- Deterministic simulation clock, pause/resume, speed, and fixed tick duration exist.
+- Deterministic PCG32 seeded random service and immutable serializable `RandomState` exist.
+- Versioned immutable root `GameState` exists.
+- Command dispatcher and explicit `DomainResult` success/failure pattern exist.
+- Ordered single-tick pipeline exists.
+- Domain events are collected into `DomainExecution`; they are not published or persisted.
+- Deterministic replay scenarios exist as tests only.
+- Invariant validation helpers exist and are manually callable; they are not automatically run after commands.
+- No gameplay systems have been implemented yet.
+- No city model has been implemented yet.
+- No event bus, scheduler, save/load, AI, economy, operation, pressure, character, organization, district, location, or route systems exist yet.
+
+Accepted implementation baseline:
+
+```text
+0decc3e94ff80565894175456491ad6dad3c7b60
+```
+
+Final accepted EPIC 1 commit:
+
+```text
+feat(domain): add invariant validation helpers
+```
+
+Final verification:
+
+```text
+GitHub Actions run 29232731045 — success
+```
 
 Current roadmap phase:
 
-> **EPIC 1 - Domain Kernel and Deterministic Simulation Clock**
+> **EPIC 2 — Controlled City Shell**
 
 Current next task:
 
-> **E1-01 — Define branded IDs / stable entity identifiers.**
+> **E2-01 — Define `CityDefinition`, district, route, and location content schemas.**
 
-No gameplay systems should be implemented before the relevant EPIC 1 scope is accepted.
+No EPIC 2 implementation should begin before the E2-01 schema scope is analyzed and accepted through the normal PM workflow.
 
 ---
 
@@ -625,7 +654,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current scaffold contains only placeholder behavior and boundary descriptors. It contains no gameplay logic.
+The current domain package contains the accepted EPIC 1 foundation. It does not contain city data, gameplay systems, or playable gameplay.
 
 ---
 
@@ -642,18 +671,19 @@ Completed:
 - repository foundation scaffold,
 - GitHub Actions CI,
 - deterministic test seed support,
-- repository-level developer instructions.
+- repository-level developer instructions,
+- EPIC 1 domain kernel and deterministic simulation clock foundation.
 
 Next:
 
-> **E1-01 — Define branded IDs / stable entity identifiers.**
+> **E2-01 — Define `CityDefinition`, district, route, and location content schemas.**
 
 Required PM output before implementation:
 
-- define the exact stable ID scope and naming,
-- confirm package ownership,
+- define the exact schema ownership and package boundaries,
+- define the accepted content schema shape and validation expectations,
 - define tests and acceptance criteria,
-- keep gameplay systems out of scope until explicitly accepted.
+- keep city runtime state and gameplay systems out of scope until explicitly accepted.
 
 ---
 

@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0 complete; EPIC 1 ready for accepted task scoping
+> **Status:** EPIC 0 and EPIC 1 complete; EPIC 2 ready for accepted task scoping
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** repository foundation complete; next accepted scope starts EPIC 1.
+> **Current phase:** Domain kernel complete; next accepted scope starts EPIC 2.
 
 ---
 
@@ -101,7 +101,7 @@ Design Bible                 ██████████ 100%
 MVP Definition               ██████████ 100%
 Technical Stack Decision     ██████████ 100%
 Repository Foundation        ██████████ 100%
-Headless Simulation          ░░░░░░░░░░   0%
+Headless Simulation          ██████████ 100%
 First Operation Slice        ░░░░░░░░░░   0%
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
@@ -167,15 +167,15 @@ Create the headless foundation that all later systems use.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E1-01 | Define branded IDs / stable entity identifiers | `[CODEX]` | Pending |
-| E1-02 | Define simulation time, tick, pause, and speed model | `[BOTH]` | Pending |
-| E1-03 | Implement seeded random service behind an interface | `[CODEX]` | Pending |
-| E1-04 | Define root `GameState` and version metadata | `[BOTH]` | Pending |
-| E1-05 | Implement command dispatch and domain result pattern | `[CODEX]` | Pending |
-| E1-06 | Implement ordered tick pipeline skeleton | `[CODEX]` | Pending |
-| E1-07 | Implement domain event collection | `[CODEX]` | Pending |
-| E1-08 | Add deterministic replay tests for identical seed and commands | `[CODEX]` | Pending |
-| E1-09 | Add invariant validation helpers for tests and debug builds | `[CODEX]` | Pending |
+| E1-01 | Define branded IDs / stable entity identifiers | `[CODEX]` | Done |
+| E1-02 | Define simulation time, tick, pause, and speed model | `[BOTH]` | Done |
+| E1-03 | Implement seeded random service behind an interface | `[CODEX]` | Done |
+| E1-04 | Define root `GameState` and version metadata | `[BOTH]` | Done |
+| E1-05 | Implement command dispatch and domain result pattern | `[CODEX]` | Done |
+| E1-06 | Implement ordered tick pipeline skeleton | `[CODEX]` | Done |
+| E1-07 | Implement domain event collection | `[CODEX]` | Done |
+| E1-08 | Add deterministic replay tests for identical seed and commands | `[CODEX]` | Done |
+| E1-09 | Add invariant validation helpers for tests and debug builds | `[CODEX]` | Done |
 
 ### Acceptance criteria
 
@@ -183,6 +183,25 @@ Create the headless foundation that all later systems use.
 - Tick phases execute in an explicit documented order.
 - Domain code does not import UI, filesystem, network, or platform APIs.
 - Invalid commands return explicit failures rather than corrupting state.
+
+EPIC 1 is complete. The domain kernel now includes branded stable entity identifiers, deterministic simulation minute and tick state, pause/resume and speed state, a seeded PCG32 random service with immutable serializable `RandomState`, root versioned `GameState`, command dispatch with explicit `DomainResult` success/failure, an ordered single-tick pipeline, deterministic domain event collection, deterministic replay tests, and invariant validation helpers.
+
+Accepted single-tick order:
+
+1. `BeforeTick`
+2. advance the clock exactly once
+3. `AfterClockAdvance`
+4. systems placeholder
+5. `AfterSystems`
+
+Current command behavior:
+
+- `ResumeSimulationCommand` resumes a paused simulation.
+- Resuming an already running simulation is a successful no-op.
+- `AdvanceSimulationTickCommand` advances exactly one tick when running.
+- Advancing while paused returns `SIMULATION_PAUSED`.
+
+Command dispatch returns `DomainResult<DomainExecution>`, where `DomainExecution` contains the resulting `gameState` and ordered domain events.
 
 ---
 
@@ -561,12 +580,11 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E1-01 — define branded IDs / stable entity identifiers**.
+The next task is **E2-01 — define `CityDefinition`, district, route, and location content schemas**.
 
-ChatGPT should prepare a bounded EPIC 1 task before Codex implementation, including:
+ChatGPT should prepare a bounded EPIC 2 task before Codex implementation, including:
 
-- ID types and naming conventions,
-- package ownership,
-- domain-only test expectations,
-- dependency-boundary checks,
-- and explicit exclusions to avoid starting gameplay systems early.
+- schema ownership and package boundaries,
+- exact MVP city-content scope,
+- validation and test expectations,
+- and explicit exclusions to avoid implementing city runtime state or gameplay systems early.
