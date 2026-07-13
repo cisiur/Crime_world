@@ -1,6 +1,6 @@
 import type { AdvanceSimulationTickCommand } from "./commands";
-import type { GameState } from "./gameState";
-import type { SimulationTick } from "./simulationClock";
+import { parseGameState, type GameState } from "./gameState";
+import { advanceSimulationClockOneTick, type SimulationTick } from "./simulationClock";
 
 declare const simulationTickContextBrand: unique symbol;
 
@@ -29,20 +29,45 @@ export type SimulationTickContext = SimulationTickContextData & {
   readonly [simulationTickContextBrand]: "SimulationTickContext";
 };
 
+export interface SimulationTickPipelineOptions {
+  readonly observeStage?: (
+    stage: SimulationTickPipelineStage,
+    gameState: GameState,
+    context: SimulationTickContext,
+  ) => void;
+}
+
 export function createSimulationTickContext(
   context: SimulationTickContextData,
 ): SimulationTickContext {
   return Object.freeze({ ...context }) as SimulationTickContext;
 }
 
-export function runSimulationTickPipeline(context: SimulationTickContext): GameState {
-  let gameState = context.gameState;
+export function runSimulationTickPipeline(
+  context: SimulationTickContext,
+  options: SimulationTickPipelineOptions = {},
+): GameState {
+  const beforeTickState = executeSimulationTickPipelineStage(
+    SimulationTickPipelineStage.BeforeTick,
+    context.gameState,
+    context,
+    options,
+  );
+  const afterClockAdvanceState = advanceGameStateClockOneTick(beforeTickState);
+  const afterClockAdvanceStageState = executeSimulationTickPipelineStage(
+    SimulationTickPipelineStage.AfterClockAdvance,
+    afterClockAdvanceState,
+    context,
+    options,
+  );
+  const afterSystemsPlaceholderState = runSystemsPlaceholder(afterClockAdvanceStageState, context);
 
-  for (const stage of SIMULATION_TICK_PIPELINE_STAGES) {
-    gameState = executeSimulationTickPipelineStage(stage, gameState, context);
-  }
-
-  return gameState;
+  return executeSimulationTickPipelineStage(
+    SimulationTickPipelineStage.AfterSystems,
+    afterSystemsPlaceholderState,
+    context,
+    options,
+  );
 }
 
 export function runBeforeTickStage(
@@ -73,7 +98,10 @@ function executeSimulationTickPipelineStage(
   stage: SimulationTickPipelineStage,
   gameState: GameState,
   context: SimulationTickContext,
+  options: SimulationTickPipelineOptions,
 ): GameState {
+  options.observeStage?.(stage, gameState, context);
+
   switch (stage) {
     case SimulationTickPipelineStage.BeforeTick:
       return runBeforeTickStage(gameState, context);
@@ -82,4 +110,16 @@ function executeSimulationTickPipelineStage(
     case SimulationTickPipelineStage.AfterSystems:
       return runAfterSystemsStage(gameState, context);
   }
+}
+
+function advanceGameStateClockOneTick(gameState: GameState): GameState {
+  return parseGameState({
+    ...gameState,
+    clock: advanceSimulationClockOneTick(gameState.clock),
+  });
+}
+
+function runSystemsPlaceholder(gameState: GameState, context: SimulationTickContext): GameState {
+  void context;
+  return gameState;
 }

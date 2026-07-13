@@ -11,10 +11,15 @@ import {
   createResumeSimulationCommand,
   createSimulationTickContext,
   dispatchCommand,
+  parseSimulationTick,
   runAfterClockAdvanceStage,
   runAfterSystemsStage,
   runBeforeTickStage,
   runSimulationTickPipeline,
+} from "../src/index";
+import type {
+  GameState,
+  SimulationTickPipelineStage as SimulationTickPipelineStageName,
 } from "../src/index";
 
 function createTestGameState() {
@@ -96,13 +101,72 @@ describe("simulation tick pipeline", () => {
     const context = createSimulationTickContext({
       gameState: state,
       command,
-      tickNumber: state.clock.currentTick,
+      tickNumber: parseSimulationTick(state.clock.currentTick + 1),
     });
 
     expect(runBeforeTickStage(state, context)).toBe(state);
     expect(runAfterClockAdvanceStage(state, context)).toBe(state);
     expect(runAfterSystemsStage(state, context)).toBe(state);
-    expect(runSimulationTickPipeline(context)).toBe(state);
+  });
+
+  it("runs stages around exactly one clock advance using the real pipeline behavior", () => {
+    const state = createRunningGameState();
+    const command = createAdvanceSimulationTickCommand();
+    const context = createSimulationTickContext({
+      gameState: state,
+      command,
+      tickNumber: parseSimulationTick(state.clock.currentTick + 1),
+    });
+    const observations: Array<{
+      readonly stage: SimulationTickPipelineStageName;
+      readonly gameState: GameState;
+    }> = [];
+
+    const result = runSimulationTickPipeline(context, {
+      observeStage: (stage, observedState) => {
+        observations.push({
+          stage,
+          gameState: observedState,
+        });
+      },
+    });
+
+    expect(observations.map((observation) => observation.stage)).toEqual([
+      SimulationTickPipelineStage.BeforeTick,
+      SimulationTickPipelineStage.AfterClockAdvance,
+      SimulationTickPipelineStage.AfterSystems,
+    ]);
+
+    const beforeTickObservation = observations[0];
+    const afterClockAdvanceObservation = observations[1];
+    const afterSystemsObservation = observations[2];
+
+    expect(beforeTickObservation?.gameState).toBe(state);
+    expect(beforeTickObservation?.gameState.clock.currentTick).toBe(state.clock.currentTick);
+    expect(beforeTickObservation?.gameState.clock.currentMinute).toBe(state.clock.currentMinute);
+
+    expect(afterClockAdvanceObservation?.gameState).not.toBe(state);
+    expect(afterClockAdvanceObservation?.gameState.clock.currentTick).toBe(
+      state.clock.currentTick + 1,
+    );
+    expect(afterClockAdvanceObservation?.gameState.clock.currentMinute).toBe(
+      state.clock.currentMinute + MINUTES_PER_TICK,
+    );
+
+    expect(afterSystemsObservation?.gameState).toBe(afterClockAdvanceObservation?.gameState);
+    expect(result).toBe(afterSystemsObservation?.gameState);
+    expect(result.clock.currentTick).toBe(state.clock.currentTick + 1);
+    expect(result.clock.currentMinute).toBe(state.clock.currentMinute + MINUTES_PER_TICK);
+    expect(result.clock.paused).toBe(false);
+    expect(result.clock.speed).toBe(state.clock.speed);
+    expect(result.randomState).toEqual(state.randomState);
+
+    expect(state.clock.currentTick).toBe(0);
+    expect(state.clock.currentMinute).toBe(0);
+    expect(state.clock.paused).toBe(false);
+    expect(Object.isFrozen(result)).toBe(true);
+    expect(Object.isFrozen(result.clock)).toBe(true);
+    expect(Object.isFrozen(result.randomState)).toBe(true);
   });
 
   it("creates immutable SimulationTickContext values", () => {
@@ -111,13 +175,13 @@ describe("simulation tick pipeline", () => {
     const context = createSimulationTickContext({
       gameState: state,
       command,
-      tickNumber: state.clock.currentTick,
+      tickNumber: parseSimulationTick(state.clock.currentTick + 1),
     });
 
     expect(context).toEqual({
       gameState: state,
       command,
-      tickNumber: state.clock.currentTick,
+      tickNumber: parseSimulationTick(state.clock.currentTick + 1),
     });
     expect(Object.isFrozen(context)).toBe(true);
   });

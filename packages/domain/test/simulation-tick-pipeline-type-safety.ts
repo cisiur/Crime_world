@@ -3,6 +3,7 @@ import {
   createInitialGameState,
   createSimulationTickContext,
   dispatchCommand,
+  parseSimulationTick,
 } from "../src/index";
 import type {
   AdvanceSimulationTickCommand,
@@ -18,7 +19,7 @@ const advanceCommand = createAdvanceSimulationTickCommand();
 const context = createSimulationTickContext({
   gameState,
   command: advanceCommand,
-  tickNumber: gameState.clock.currentTick,
+  tickNumber: parseSimulationTick(gameState.clock.currentTick + 1),
 });
 
 const domainCommand: DomainCommand = advanceCommand;
@@ -41,6 +42,13 @@ const invalidContext: SimulationTickContext = {
   command: advanceCommand,
   tickNumber: gameState.clock.currentTick,
 };
+
+createSimulationTickContext({
+  gameState,
+  command: advanceCommand,
+  // @ts-expect-error tickNumber must remain a branded SimulationTick.
+  tickNumber: gameState.clock.currentTick + 1,
+});
 
 void domainCommand;
 void typedAdvanceCommand;

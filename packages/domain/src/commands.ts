@@ -1,5 +1,5 @@
 import { parseGameState, type GameState } from "./gameState";
-import { advanceSimulationClockOneTick, resumeSimulationClock } from "./simulationClock";
+import { parseSimulationTick, resumeSimulationClock } from "./simulationClock";
 import { createSimulationTickContext, runSimulationTickPipeline } from "./simulationTickPipeline";
 import {
   DomainErrorCode,
@@ -70,14 +70,10 @@ function handleAdvanceSimulationTickCommand(
     });
   }
 
-  const gameStateAfterClockAdvance = parseGameState({
-    ...state,
-    clock: advanceSimulationClockOneTick(state.clock),
-  });
   const context = createSimulationTickContext({
-    gameState: gameStateAfterClockAdvance,
+    gameState: state,
     command,
-    tickNumber: gameStateAfterClockAdvance.clock.currentTick,
+    tickNumber: parseSimulationTick(state.clock.currentTick + 1),
   });
 
   return success(runSimulationTickPipeline(context));
