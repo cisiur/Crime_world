@@ -9,3 +9,4 @@ export const contentPackageDescriptor: ContentPackageDescriptor = {
 };
 
 export * from "./cityDefinition";
+export * from "./cities/districts";
