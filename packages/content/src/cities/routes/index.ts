@@ -1,0 +1,1 @@
+export { canonicalMvpRouteDefinitions } from "./canonicalMvpRoutes";

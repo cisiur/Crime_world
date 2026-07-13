@@ -9,5 +9,7 @@ export const contentPackageDescriptor: ContentPackageDescriptor = {
 };
 
 export * from "./cityDefinition";
+export * from "./cities/canonicalMvpCity";
 export * from "./cities/districts";
 export * from "./cities/locations";
+export * from "./cities/routes";
