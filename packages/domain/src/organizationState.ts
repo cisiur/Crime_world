@@ -18,6 +18,14 @@ export interface CreateOrganizationStateInput {
   readonly operationalCapacity: number;
 }
 
+export interface CreatePlayerOrganizationInput {
+  readonly organizationId: OrganizationId;
+  readonly displayName: string;
+  readonly leaderCharacterId: CharacterId;
+  readonly money: number;
+  readonly operationalCapacity: number;
+}
+
 export type InvalidOrganizationStateField =
   | "displayName"
   | "leaderCharacterId"
@@ -51,6 +59,17 @@ export function createOrganizationState(input: CreateOrganizationStateInput): Or
     money: input.money,
     operationalCapacity: input.operationalCapacity,
   };
+}
+
+export function createPlayerOrganization(input: CreatePlayerOrganizationInput): OrganizationState {
+  return createOrganizationState({
+    organizationId: input.organizationId,
+    displayName: input.displayName,
+    leaderCharacterId: input.leaderCharacterId,
+    memberCharacterIds: [input.leaderCharacterId],
+    money: input.money,
+    operationalCapacity: input.operationalCapacity,
+  });
 }
 
 function validateDisplayName(displayName: unknown): asserts displayName is string {

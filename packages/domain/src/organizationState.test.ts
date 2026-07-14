@@ -3,10 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   InvalidOrganizationStateError,
   createOrganizationState,
+  createPlayerOrganization,
   parseCharacterId,
   parseOrganizationId,
   type CharacterId,
   type CreateOrganizationStateInput,
+  type CreatePlayerOrganizationInput,
   type InvalidOrganizationStateField,
   type OrganizationState,
 } from "./index";
@@ -181,6 +183,64 @@ describe("organization state", () => {
       "leaderCharacterId",
     );
   });
+
+  it("creates a player organization with the leader as the only initial member", () => {
+    const organizationState = createPlayerOrganization(createValidPlayerOrganizationInput());
+
+    expect(organizationState).toEqual({
+      organizationId: parseOrganizationId("organization:player_crew"),
+      displayName: "Player Crew",
+      leaderCharacterId: parseCharacterId("character:player_boss"),
+      memberCharacterIds: [parseCharacterId("character:player_boss")],
+      money: 100,
+      operationalCapacity: 1,
+    });
+  });
+
+  it("returns a valid OrganizationState from player organization creation", () => {
+    const organizationState: OrganizationState = createPlayerOrganization(
+      createValidPlayerOrganizationInput(),
+    );
+
+    expect(organizationState.organizationId).toBe(parseOrganizationId("organization:player_crew"));
+    expect(organizationState.memberCharacterIds).toHaveLength(1);
+  });
+
+  it("delegates display name validation to organization state creation", () => {
+    expectInvalidOrganizationStateError(
+      () =>
+        createPlayerOrganization(
+          createValidPlayerOrganizationInput({
+            displayName: " Player Crew",
+          }),
+        ),
+      "displayName",
+    );
+  });
+
+  it("delegates money validation to organization state creation", () => {
+    expectInvalidOrganizationStateError(
+      () =>
+        createPlayerOrganization(
+          createValidPlayerOrganizationInput({
+            money: -1,
+          }),
+        ),
+      "money",
+    );
+  });
+
+  it("returns a fresh immutable-compatible member array for player organization creation", () => {
+    const firstOrganizationState = createPlayerOrganization(createValidPlayerOrganizationInput());
+    const secondOrganizationState = createPlayerOrganization(createValidPlayerOrganizationInput());
+
+    expect(firstOrganizationState.memberCharacterIds).toEqual([
+      parseCharacterId("character:player_boss"),
+    ]);
+    expect(firstOrganizationState.memberCharacterIds).not.toBe(
+      secondOrganizationState.memberCharacterIds,
+    );
+  });
 });
 
 function createValidOrganizationInput(
@@ -196,6 +256,19 @@ function createValidOrganizationInput(
     ],
     money: 250,
     operationalCapacity: 2,
+    ...overrides,
+  };
+}
+
+function createValidPlayerOrganizationInput(
+  overrides: Partial<CreatePlayerOrganizationInput> = {},
+): CreatePlayerOrganizationInput {
+  return {
+    organizationId: parseOrganizationId("organization:player_crew"),
+    displayName: "Player Crew",
+    leaderCharacterId: parseCharacterId("character:player_boss"),
+    money: 100,
+    operationalCapacity: 1,
     ...overrides,
   };
 }
