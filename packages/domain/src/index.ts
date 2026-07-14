@@ -54,3 +54,4 @@ export * from "./commands";
 export * from "./simulationTickPipeline";
 export * from "./invariants";
 export * from "./cityState";
+export * from "./districtProperties";
