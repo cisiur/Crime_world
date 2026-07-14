@@ -25,7 +25,15 @@ describe("district properties compatibility", () => {
 
       expect(districtState).toBeDefined();
 
-      return deriveDistrictProperties(districtDefinition, districtState!);
+      const result = deriveDistrictProperties(districtDefinition, districtState!);
+
+      expect(result.ok).toBe(true);
+
+      if (!result.ok) {
+        throw new Error(result.error.message);
+      }
+
+      return result.value;
     });
 
     expect(districtProperties).toHaveLength(canonicalMvpDistrictDefinitions.length);

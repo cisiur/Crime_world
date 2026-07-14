@@ -1,4 +1,11 @@
 import type { DistrictId } from "./entityIds";
+import {
+  DomainErrorCode,
+  failure,
+  success,
+  type DomainError,
+  type DomainResult,
+} from "./domainResult";
 
 export const MIN_DISTRICT_TENSION = 0;
 export const MAX_DISTRICT_TENSION = 100;
@@ -47,10 +54,30 @@ export interface DistrictProperties {
   readonly effectivePolicePresence: number;
 }
 
+export interface DistrictPropertiesInputMismatchError extends DomainError {
+  readonly code: typeof DomainErrorCode.DistrictPropertyInputMismatch;
+  readonly authoredDistrictId: DistrictId;
+  readonly runtimeDistrictId: DistrictId;
+}
+
+export type DeriveDistrictPropertiesResult = DomainResult<
+  DistrictProperties,
+  DistrictPropertiesInputMismatchError
+>;
+
 export function deriveDistrictProperties(
   districtDefinition: DistrictPropertiesDefinitionInput,
   districtState: DistrictPropertiesStateInput,
-): DistrictProperties {
+): DeriveDistrictPropertiesResult {
+  if (districtDefinition.id !== districtState.districtId) {
+    return failure({
+      code: DomainErrorCode.DistrictPropertyInputMismatch,
+      authoredDistrictId: districtDefinition.id,
+      runtimeDistrictId: districtState.districtId,
+      message: `Cannot derive district properties for authored district "${districtDefinition.id}" with runtime state "${districtState.districtId}".`,
+    });
+  }
+
   const currentPolicePresenceModifier = clampNumber(
     districtState.currentPolicePresenceModifier,
     MIN_DISTRICT_POLICE_PRESENCE_MODIFIER,
@@ -58,7 +85,7 @@ export function deriveDistrictProperties(
   );
   const baselinePolicePresence = districtDefinition.baselineProfile.lawEnforcementPresence;
 
-  return {
+  return success({
     districtId: districtState.districtId,
     baselineProfile: copyBaselineProfile(districtDefinition.baselineProfile),
     currentTension: clampNumber(
@@ -78,7 +105,7 @@ export function deriveDistrictProperties(
       MIN_EFFECTIVE_DISTRICT_POLICE_PRESENCE,
       MAX_EFFECTIVE_DISTRICT_POLICE_PRESENCE,
     ),
-  };
+  });
 }
 
 function copyBaselineProfile(

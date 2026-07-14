@@ -9,9 +9,12 @@ import {
   MIN_DISTRICT_POLICE_PRESENCE_MODIFIER,
   MIN_DISTRICT_TENSION,
   MIN_EFFECTIVE_DISTRICT_POLICE_PRESENCE,
+  DomainErrorCode,
   deriveDistrictProperties,
   parseDistrictId,
+  type DeriveDistrictPropertiesResult,
   type DistrictBaselineProfileInput,
+  type DistrictProperties,
   type DistrictPropertiesDefinitionInput,
   type DistrictPropertiesStateInput,
 } from "../src/index";
@@ -27,7 +30,9 @@ describe("district properties", () => {
       currentPolicePresenceModifier: 1,
     });
 
-    const districtProperties = deriveDistrictProperties(districtDefinition, districtState);
+    const districtProperties = expectDistrictPropertiesSuccess(
+      deriveDistrictProperties(districtDefinition, districtState),
+    );
 
     expect(districtProperties).toEqual({
       districtId: districtState.districtId,
@@ -52,7 +57,9 @@ describe("district properties", () => {
       rivalPresence: 2,
     });
 
-    const districtProperties = deriveDistrictProperties(districtDefinition, createDistrictState());
+    const districtProperties = expectDistrictPropertiesSuccess(
+      deriveDistrictProperties(districtDefinition, createDistrictState()),
+    );
 
     expect(districtProperties.baselineProfile).toEqual(districtDefinition.baselineProfile);
     expect(districtProperties.baselineProfile).not.toBe(districtDefinition.baselineProfile);
@@ -81,42 +88,52 @@ describe("district properties", () => {
 
   it("clamps tension to the supported runtime range", () => {
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition(),
-        createDistrictState({ currentTension: MIN_DISTRICT_TENSION - 1 }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition(),
+          createDistrictState({ currentTension: MIN_DISTRICT_TENSION - 1 }),
+        ),
       ).currentTension,
     ).toBe(MIN_DISTRICT_TENSION);
 
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition(),
-        createDistrictState({ currentTension: MAX_DISTRICT_TENSION + 1 }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition(),
+          createDistrictState({ currentTension: MAX_DISTRICT_TENSION + 1 }),
+        ),
       ).currentTension,
     ).toBe(MAX_DISTRICT_TENSION);
   });
 
   it("clamps exposure to the supported runtime range", () => {
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition(),
-        createDistrictState({ currentExposure: MIN_DISTRICT_EXPOSURE - 1 }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition(),
+          createDistrictState({ currentExposure: MIN_DISTRICT_EXPOSURE - 1 }),
+        ),
       ).currentExposure,
     ).toBe(MIN_DISTRICT_EXPOSURE);
 
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition(),
-        createDistrictState({ currentExposure: MAX_DISTRICT_EXPOSURE + 1 }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition(),
+          createDistrictState({ currentExposure: MAX_DISTRICT_EXPOSURE + 1 }),
+        ),
       ).currentExposure,
     ).toBe(MAX_DISTRICT_EXPOSURE);
   });
 
   it("clamps police modifier below the supported range", () => {
-    const districtProperties = deriveDistrictProperties(
-      createDistrictDefinition({ lawEnforcementPresence: 2 }),
-      createDistrictState({
-        currentPolicePresenceModifier: MIN_DISTRICT_POLICE_PRESENCE_MODIFIER - 1,
-      }),
+    const districtProperties = expectDistrictPropertiesSuccess(
+      deriveDistrictProperties(
+        createDistrictDefinition({ lawEnforcementPresence: 2 }),
+        createDistrictState({
+          currentPolicePresenceModifier: MIN_DISTRICT_POLICE_PRESENCE_MODIFIER - 1,
+        }),
+      ),
     );
 
     expect(districtProperties.currentPolicePresenceModifier).toBe(
@@ -126,11 +143,13 @@ describe("district properties", () => {
   });
 
   it("clamps police modifier above the supported range", () => {
-    const districtProperties = deriveDistrictProperties(
-      createDistrictDefinition({ lawEnforcementPresence: 2 }),
-      createDistrictState({
-        currentPolicePresenceModifier: MAX_DISTRICT_POLICE_PRESENCE_MODIFIER + 1,
-      }),
+    const districtProperties = expectDistrictPropertiesSuccess(
+      deriveDistrictProperties(
+        createDistrictDefinition({ lawEnforcementPresence: 2 }),
+        createDistrictState({
+          currentPolicePresenceModifier: MAX_DISTRICT_POLICE_PRESENCE_MODIFIER + 1,
+        }),
+      ),
     );
 
     expect(districtProperties.currentPolicePresenceModifier).toBe(
@@ -141,20 +160,24 @@ describe("district properties", () => {
 
   it("clamps effective police presence to minimum and maximum bounds", () => {
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition({ lawEnforcementPresence: 0 }),
-        createDistrictState({
-          currentPolicePresenceModifier: MIN_DISTRICT_POLICE_PRESENCE_MODIFIER,
-        }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition({ lawEnforcementPresence: 0 }),
+          createDistrictState({
+            currentPolicePresenceModifier: MIN_DISTRICT_POLICE_PRESENCE_MODIFIER,
+          }),
+        ),
       ).effectivePolicePresence,
     ).toBe(MIN_EFFECTIVE_DISTRICT_POLICE_PRESENCE);
 
     expect(
-      deriveDistrictProperties(
-        createDistrictDefinition({ lawEnforcementPresence: 4 }),
-        createDistrictState({
-          currentPolicePresenceModifier: MAX_DISTRICT_POLICE_PRESENCE_MODIFIER,
-        }),
+      expectDistrictPropertiesSuccess(
+        deriveDistrictProperties(
+          createDistrictDefinition({ lawEnforcementPresence: 4 }),
+          createDistrictState({
+            currentPolicePresenceModifier: MAX_DISTRICT_POLICE_PRESENCE_MODIFIER,
+          }),
+        ),
       ).effectivePolicePresence,
     ).toBe(MAX_EFFECTIVE_DISTRICT_POLICE_PRESENCE);
   });
@@ -174,13 +197,41 @@ describe("district properties", () => {
       deriveDistrictProperties(districtDefinition, districtState),
     );
   });
+
+  it("returns success for matching district IDs", () => {
+    const result = deriveDistrictProperties(createDistrictDefinition(), createDistrictState());
+
+    expect(result.ok).toBe(true);
+    expect(result).toHaveProperty("value");
+  });
+
+  it("returns failure for mismatched authored and runtime district IDs", () => {
+    const authoredDistrictId = parseDistrictId("district:authored_properties");
+    const runtimeDistrictId = parseDistrictId("district:runtime_properties");
+    const result = deriveDistrictProperties(
+      createDistrictDefinition({}, authoredDistrictId),
+      createDistrictState({ districtId: runtimeDistrictId }),
+    );
+
+    expect(result).toEqual({
+      ok: false,
+      error: {
+        code: DomainErrorCode.DistrictPropertyInputMismatch,
+        authoredDistrictId,
+        runtimeDistrictId,
+        message: `Cannot derive district properties for authored district "${authoredDistrictId}" with runtime state "${runtimeDistrictId}".`,
+      },
+    });
+    expect(result).not.toHaveProperty("value");
+  });
 });
 
 function createDistrictDefinition(
   baselineOverrides: Partial<DistrictBaselineProfileInput> = {},
+  id = parseDistrictId("district:test_properties"),
 ): DistrictPropertiesDefinitionInput {
   return {
-    id: parseDistrictId("district:test_properties"),
+    id,
     baselineProfile: {
       wealth: 1,
       lawEnforcementPresence: 1,
@@ -205,4 +256,16 @@ function createDistrictState(
     currentPolicePresenceModifier: 0,
     ...overrides,
   };
+}
+
+function expectDistrictPropertiesSuccess(
+  result: DeriveDistrictPropertiesResult,
+): DistrictProperties {
+  expect(result.ok).toBe(true);
+
+  if (!result.ok) {
+    throw new Error(result.error.message);
+  }
+
+  return result.value;
 }

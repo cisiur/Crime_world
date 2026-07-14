@@ -1,4 +1,5 @@
 export const DomainErrorCode = {
+  DistrictPropertyInputMismatch: "DISTRICT_PROPERTY_INPUT_MISMATCH",
   SimulationPaused: "SIMULATION_PAUSED",
   UnsupportedCommand: "UNSUPPORTED_COMMAND",
 } as const;
