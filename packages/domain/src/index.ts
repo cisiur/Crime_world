@@ -56,3 +56,4 @@ export * from "./invariants";
 export * from "./cityState";
 export * from "./districtProperties";
 export * from "./characterState";
+export * from "./organizationState";
