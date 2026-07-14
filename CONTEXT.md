@@ -210,9 +210,15 @@ Completed document groups:
 - Domain events are collected into `DomainExecution`; they are not published or persisted.
 - Deterministic replay scenarios exist as tests only.
 - Invariant validation helpers exist and are manually callable; they are not automatically run after commands.
+- Neutral content-owned `CityDefinition`, district, route, and location schemas exist.
+- The canonical MVP city content exists with four authored districts, 29 strategic locations, and five routes.
+- City definition validation exists for schema version, required collections, duplicate IDs, route endpoints, self-loop routes, duplicate route connections, orphan locations, and disconnected district graphs.
+- Runtime city state exists in the domain package as ID-only city, district, location, and route state.
+- District property derivation exists in the domain package for combining authored baseline profiles with runtime tension, exposure, and police-presence modifiers.
+- A deterministic headless city debug report formatter exists in the content package.
 - No gameplay systems have been implemented yet.
-- No city model has been implemented yet.
-- No event bus, scheduler, save/load, AI, economy, operation, pressure, character, organization, district, location, or route systems exist yet.
+- No campaign creation flow loads the canonical city yet.
+- No event bus, scheduler, save/load, AI, economy, operation, pressure, character, organization, business ownership, or playable UI systems exist yet.
 
 Accepted implementation baseline:
 
@@ -232,15 +238,21 @@ Final verification:
 GitHub Actions run 29232731045 — success
 ```
 
+Latest reviewed EPIC 2 implementation baseline before documentation sync:
+
+```text
+4408ad5 feat(content): add city debug formatter
+```
+
 Current roadmap phase:
 
-> **EPIC 2 — Controlled City Shell**
+> **EPIC 3 — Characters and Organizations planning**
 
 Current next task:
 
-> **E2-01 — Define `CityDefinition`, district, route, and location content schemas.**
+> **E3-01 — Define MVP character state and traits.**
 
-No EPIC 2 implementation should begin before the E2-01 schema scope is analyzed and accepted through the normal PM workflow.
+No EPIC 3 implementation should begin before the E3-01 scope is analyzed and accepted through the normal PM workflow.
 
 ---
 
@@ -647,14 +659,14 @@ apps/
   desktop/          React + Vite + Tauri desktop shell
 
 packages/
-  domain/           pure headless domain package
+  domain/           pure headless domain package, runtime city state, district property derivation
   application/      commands, queries, use cases, read models
-  content/          immutable content definitions
+  content/          immutable content definitions, canonical MVP city, city validation/debug output
   infrastructure/   platform adapters and persistence boundary
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation. It does not contain city data, gameplay systems, or playable gameplay.
+The current domain package contains the accepted EPIC 1 foundation plus the minimal EPIC 2 runtime city shell. Authored city data remains in `packages/content`. The repository still does not contain gameplay systems or playable gameplay.
 
 ---
 
@@ -672,18 +684,19 @@ Completed:
 - GitHub Actions CI,
 - deterministic test seed support,
 - repository-level developer instructions,
-- EPIC 1 domain kernel and deterministic simulation clock foundation.
+- EPIC 1 domain kernel and deterministic simulation clock foundation,
+- EPIC 2 controlled city shell.
 
 Next:
 
-> **E2-01 — Define `CityDefinition`, district, route, and location content schemas.**
+> **E3-01 — Define MVP character state and traits.**
 
 Required PM output before implementation:
 
-- define the exact schema ownership and package boundaries,
-- define the accepted content schema shape and validation expectations,
+- define character state ownership and package boundaries,
+- define the minimal MVP boss/recruit/availability shape and validation expectations,
 - define tests and acceptance criteria,
-- keep city runtime state and gameplay systems out of scope until explicitly accepted.
+- keep organization runtime, operation assignment, recruitment gameplay, and UI out of scope until explicitly accepted.
 
 ---
 

@@ -271,10 +271,12 @@ Any proposed change must include measured evidence, migration cost, affected arc
 
 ---
 
-## 11. Next roadmap task
+## 11. Current roadmap position
 
-With the stack accepted and recorded, the next implementation task is:
+The stack is accepted and implemented in the repository scaffold.
 
-> **E0-04 — Scaffold the project and package structure.**
+EPIC 0, EPIC 1, and EPIC 2 are complete. The next implementation-planning task is:
 
-Before Codex receives an implementation prompt, the PM must define the bounded scaffold scope, expected repository layout, minimum launch behavior, test expectations, build expectations, and explicit exclusions.
+> **E3-01 — Define MVP character state and traits.**
+
+Before Codex receives an implementation prompt, the PM must define the bounded character-state scope, package ownership, validation and test expectations, and explicit exclusions for organization behavior, recruitment gameplay, operation assignment, and UI.

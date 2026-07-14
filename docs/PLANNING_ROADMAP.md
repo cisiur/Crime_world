@@ -115,22 +115,22 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 0 — Technology Decision and Repository Foundation**
+> **EPIC 3 — Characters and Organizations planning**
 
 The current task is:
 
-> **E0-01 — Compare suitable implementation stacks for CrimeWorld.**
+> **E3-01 — Define MVP character state and traits.**
 
-No gameplay scaffold should be accepted before the project owner selects the stack.
+EPIC 0, EPIC 1, and EPIC 2 are complete.
 
 The immediate sequence is:
 
-1. compare viable stacks against CrimeWorld's actual requirements,
-2. obtain the project owner's decision,
-3. record the accepted decision in `TECH_STACK.md`,
-4. scaffold the repository,
-5. establish exact test and production-build commands,
-6. begin the smallest deterministic domain kernel required by the first operation slice.
+1. define the minimal MVP character state and traits,
+2. define organization state, membership, roles, money, and capacity,
+3. implement player organization creation,
+4. implement two rival organization seeds,
+5. add only the ownership and assignment references required by the accepted EPIC 3 scope,
+6. keep operation gameplay, recruitment actions, economy simulation, pressure systems, and UI work out of scope until their epics.
 
 ---
 
@@ -331,13 +331,13 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E0-01 — Compare suitable implementation stacks for CrimeWorld.**
+> **E3-01 — Define MVP character state and traits.**
 
-The task should compare a small number of realistic stacks against weighted project requirements and produce:
+The task should define a small, stable character-state foundation for the first playable path and produce:
 
-- a recommended stack,
-- a credible fallback,
-- explicit trade-offs and risks,
-- the decisions required from the project owner.
+- package ownership and dependency boundaries,
+- the minimum fields required for the player boss and future recruitable characters,
+- deterministic validation and test expectations,
+- explicit exclusions for organization behavior, recruitment gameplay, operation assignment, and UI.
 
-E0-01 is analysis only. It must not create the application scaffold, implementation code, or `TECH_STACK.md` before the owner selects a stack.
+E3-01 must not begin EPIC 4 operation gameplay or expand into full NPC life simulation.

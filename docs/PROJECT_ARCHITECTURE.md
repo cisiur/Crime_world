@@ -177,6 +177,12 @@ Contains authored or generated definitions:
 Content definitions should be data-driven and validated at load time.
 They should not contain mutable campaign state.
 
+Current implementation:
+- `packages/content` owns the neutral `CityDefinition` schema and the canonical MVP city definition.
+- The canonical MVP city contains four districts, 29 strategic locations, and five routes.
+- City validation is structural and headless; it checks schema version, required collections, duplicate IDs, route validity, orphan locations, and district graph connectivity.
+- The content package may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state.
+
 ### 2. Domain layer
 
 Contains authoritative simulation entities and rules.
@@ -196,6 +202,11 @@ Primary domain modules:
 - `Progression`
 
 Domain code should not depend on UI frameworks, storage implementations, or external map formats.
+
+Current implementation:
+- `packages/domain` owns stable entity IDs, deterministic simulation time, seeded randomness, root `GameState`, command/result/event foundations, the ordered tick pipeline, invariant helpers, runtime city state, and district property derivation.
+- Runtime city state stores IDs and mutable shell values only. Authored city names, tags, location kinds, route endpoints, and baseline profiles remain content definitions.
+- Domain currently has no dependency on React, Konva, Tauri, filesystem APIs, browser APIs, application, presentation, infrastructure, or content packages.
 
 ### 3. Application layer
 
@@ -367,6 +378,10 @@ The MVP campaign state should contain at minimum:
 Stable IDs should connect entities.
 Runtime objects should not rely on direct serialized object references.
 
+Current implementation note:
+- The root `GameState` foundation exists, but EPIC 2 city state has not yet been attached to campaign creation or save/load.
+- `CityState`, `DistrictState`, `LocationState`, and `RouteState` exist as standalone domain types for the controlled city shell.
+
 ## Time and tick architecture
 
 Time is continuous from the player's perspective but processed in deterministic simulation steps.
@@ -481,6 +496,12 @@ For MVP, this data is handcrafted.
 Later, an OSM adapter may generate the same format.
 
 This prevents map ingestion technology from controlling domain architecture.
+
+Current implementation:
+- The neutral city format is implemented as `CityDefinition` in `packages/content`.
+- District definitions include strategic baseline profiles and tags, not UI geometry.
+- Location and route definitions use stable IDs and district references without renderer-specific coordinates or Konva/Leaflet objects.
+- Future OSM work should target this neutral schema or an explicitly versioned successor.
 
 ## Read models
 
@@ -683,16 +704,29 @@ The MVP should not use:
 
 ## Current architecture status
 
-The high-level design phase is complete enough to begin implementation planning.
+EPIC 0, EPIC 1, and EPIC 2 are complete.
 
-The next architecture task should not be another broad system document.
-It should be a concrete implementation backlog that turns the MVP phases into small, ordered, testable work items.
+The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, and the controlled city shell.
+
+The architecture review after EPIC 2 found the package boundaries intact:
+- domain remains pure and renderer/platform independent,
+- content owns immutable authored city data and structural validation,
+- application, infrastructure, and presentation remain thin scaffolds,
+- Konva remains confined to presentation dependencies,
+- and no gameplay systems were added during the city-shell work.
+
+The next architecture-sensitive task is EPIC 3 character-state planning. It should define only the smallest character model needed before the first operation slice.
+
+## Technical debt and postponed work
+
+- Campaign creation does not yet validate the canonical city and attach runtime `CityState` to root `GameState`.
+- City-state invariants are not yet integrated with root invariant validation because city state is not part of campaign state.
+- The city debug report is a developer inspection formatter, not a stable application read model.
+- Save/load, content compatibility checks, and migration policy still need concrete implementation when campaign state becomes persistent.
 
 ## Open Questions
 
-- Which runtime and UI technology stack will be used for the first implementation?
-- What is the exact simulation tick duration and game-time scale?
-- Which data format will store content definitions?
+- What is the final player-facing game-time scale for normal and accelerated play?
 - Which persistence format best supports readable development saves and future migrations?
 - Which read models are required for the first vertical slice?
 - How much AI state must be persisted versus recomputed after load?

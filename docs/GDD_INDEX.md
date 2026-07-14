@@ -70,18 +70,17 @@ For active implementation work, begin with:
 
 ## Current project status
 
-The high-level game design, MVP definition, and implementation architecture are complete enough to begin development.
+The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, and controlled city shell are complete.
 
-The project has moved from design expansion into implementation preparation.
+The project has moved from city-shell implementation into EPIC 3 planning.
 
 Current priority:
 
-1. compare viable technology stacks,
-2. obtain the project owner's stack decision,
-3. record the decision in `TECH_STACK.md`,
-4. scaffold the repository,
-5. establish tests and build commands,
-6. begin the deterministic domain kernel from `BUILD_ROADMAP.md`.
+1. define MVP character state and traits,
+2. define organization state and membership boundaries,
+3. seed the player organization and two rivals when accepted,
+4. preserve the existing package boundaries,
+5. avoid operation gameplay until EPIC 4.
 
 Do not add another large design system unless implementation reveals a real design gap.
 

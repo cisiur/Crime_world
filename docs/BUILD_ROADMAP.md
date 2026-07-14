@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0 and EPIC 1 complete; EPIC 2 ready for accepted task scoping
+> **Status:** EPIC 0, EPIC 1, and EPIC 2 complete; EPIC 3 ready for accepted task scoping
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** Domain kernel complete; next accepted scope starts EPIC 2.
+> **Current phase:** Controlled city shell complete; next accepted scope starts EPIC 3.
 
 ---
 
@@ -102,6 +102,7 @@ MVP Definition               ██████████ 100%
 Technical Stack Decision     ██████████ 100%
 Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
+Controlled City Shell        ██████████ 100%
 First Operation Slice        ░░░░░░░░░░   0%
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
@@ -213,21 +214,31 @@ Represent one handcrafted MVP city with four strategically distinct districts an
 
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E2-01 | Define `CityDefinition`, district, route, and location content schemas | `[BOTH]` | Pending |
-| E2-02 | Define runtime city and district state | `[CODEX]` | Pending |
-| E2-03 | Create the four MVP district definitions | `[BOTH]` | Pending |
-| E2-04 | Create 20–30 strategic MVP locations | `[BOTH]` | Pending |
-| E2-05 | Implement district adjacency and route validation | `[CODEX]` | Pending |
-| E2-06 | Implement district properties used by operations and pressure | `[CODEX]` | Pending |
-| E2-07 | Add city-definition validation tests | `[CODEX]` | Pending |
-| E2-08 | Add a headless city-state inspection / debug output | `[CODEX]` | Pending |
+| E2-01 | Define `CityDefinition`, district, route, and location content schemas | `[BOTH]` | Done |
+| E2-02 | Define runtime city and district state | `[CODEX]` | Done |
+| E2-03 | Create the four MVP district definitions | `[BOTH]` | Done |
+| E2-04 | Create 20–30 strategic MVP locations | `[BOTH]` | Done |
+| E2-05A | Implement district adjacency derivation | `[CODEX]` | Done |
+| E2-05B | Implement route and city-definition validation | `[CODEX]` | Done |
+| E2-06 | Implement district properties used by operations and pressure | `[CODEX]` | Done |
+| E2-07 | Add city-definition validation tests | `[CODEX]` | Done |
+| E2-08 | Add a headless city-state inspection / debug output | `[CODEX]` | Done |
 
-### Acceptance criteria
+### Completion criteria
 
-- A new campaign loads one valid controlled city from data.
+- The canonical controlled city is represented as data and can be validated headlessly.
+- Runtime city state can be created from the authored city definition shape.
 - Districts differ in opportunity, risk, economy, and rival presence.
 - No UI-specific coordinates are required by domain rules.
 - Future OSM import can produce the same neutral `CityDefinition` format.
+
+EPIC 2 is complete as a controlled city shell. The content package owns immutable authored city definitions and the canonical MVP city. The domain package owns ID-only runtime city state and derived district properties. Validation and debug reporting are headless and deterministic. Campaign creation from the canonical city remains future work.
+
+### EPIC 2 follow-up notes
+
+- Campaign creation still needs an application-level use case that validates `canonicalMvpCityDefinition` and creates runtime city state when EPIC 3 or save/load work requires it.
+- City validation currently reports structural content errors; runtime invariants that compare `CityState` against an authored definition should be added when city state becomes part of root `GameState`.
+- The debug report is a developer formatter, not a UI read model. Do not treat it as the future map or district overview API.
 
 ---
 
@@ -580,11 +591,11 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E2-01 — define `CityDefinition`, district, route, and location content schemas**.
+The next task is **E3-01 — define MVP character state and traits**.
 
-ChatGPT should prepare a bounded EPIC 2 task before Codex implementation, including:
+ChatGPT should prepare a bounded EPIC 3 task before Codex implementation, including:
 
-- schema ownership and package boundaries,
-- exact MVP city-content scope,
+- character state ownership and package boundaries,
+- the minimal MVP boss/recruit/availability shape,
 - validation and test expectations,
-- and explicit exclusions to avoid implementing city runtime state or gameplay systems early.
+- and explicit exclusions to avoid implementing organizations, recruitment gameplay, operation assignment, or UI early.

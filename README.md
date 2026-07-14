@@ -2,7 +2,7 @@
 
 CrimeWorld is a desktop-first grand-strategy crime sandbox about building and maintaining a criminal organization inside a living city simulation.
 
-The repository contains the complete design foundation, the AI-assisted implementation workflow, and the initial TypeScript / React / Vite / Tauri workspace scaffold.
+The repository contains the complete design foundation, the AI-assisted implementation workflow, the TypeScript / React / Vite / Tauri workspace scaffold, the deterministic domain kernel, and the controlled MVP city shell.
 
 ## Start here
 
@@ -30,12 +30,14 @@ For a new ChatGPT / PM session, read:
 - AI-assisted build roadmap: created.
 - Technology stack: selected and recorded in [`docs/TECH_STACK.md`](docs/TECH_STACK.md).
 - Repository scaffold: created and covered by GitHub Actions CI.
+- EPIC 1 domain kernel: complete.
+- EPIC 2 controlled city shell: complete.
 - Node.js: `24.15.0`.
 - Test seed override: `CRIMEWORLD_TEST_SEED` with default `12648430`.
 - Gameplay logic: not implemented yet.
 
 Current next task:
 
-> **E1-01 — define branded IDs / stable entity identifiers.**
+> **E3-01 — define MVP character state and traits.**
 
 See [`docs/BUILD_ROADMAP.md`](docs/BUILD_ROADMAP.md) for the complete implementation sequence.
