@@ -15,6 +15,8 @@ export interface CharacterState {
   readonly healthState: CharacterHealthState;
   readonly legalState: CharacterLegalState;
   readonly assignmentState: AssignmentState;
+  readonly competence: number;
+  readonly loyalty: number;
   readonly personalExposure: number;
 }
 
@@ -25,6 +27,8 @@ export interface CreateCharacterStateInput {
   readonly healthState: CharacterHealthState;
   readonly legalState: CharacterLegalState;
   readonly assignmentState: AssignmentState;
+  readonly competence: number;
+  readonly loyalty: number;
   readonly personalExposure: number;
 }
 
@@ -34,6 +38,8 @@ export type InvalidCharacterStateField =
   | "healthState"
   | "legalState"
   | "assignmentState"
+  | "competence"
+  | "loyalty"
   | "personalExposure";
 
 export class InvalidCharacterStateError extends Error {
@@ -79,6 +85,8 @@ export function createCharacterState(input: CreateCharacterStateInput): Characte
   validateHealthState(input.healthState);
   validateLegalState(input.legalState);
   validateAssignmentState(input.assignmentState);
+  validateCompetence(input.competence);
+  validateLoyalty(input.loyalty);
   validatePersonalExposure(input.personalExposure);
 
   return {
@@ -88,6 +96,8 @@ export function createCharacterState(input: CreateCharacterStateInput): Characte
     healthState: input.healthState,
     legalState: input.legalState,
     assignmentState: input.assignmentState,
+    competence: input.competence,
+    loyalty: input.loyalty,
     personalExposure: input.personalExposure,
   };
 }
@@ -200,6 +210,58 @@ function validateAssignmentState(
       "assignmentState",
       `unsupported assignment state "${String(assignmentState)}"`,
       assignmentState,
+    );
+  }
+}
+
+function validateCompetence(competence: unknown): asserts competence is number {
+  if (typeof competence !== "number") {
+    throw new InvalidCharacterStateError(
+      "competence",
+      `expected a number, received ${describeValueType(competence)}`,
+      competence,
+    );
+  }
+
+  if (!Number.isFinite(competence)) {
+    throw new InvalidCharacterStateError("competence", "expected a finite number", competence);
+  }
+
+  if (!Number.isInteger(competence)) {
+    throw new InvalidCharacterStateError("competence", "expected an integer", competence);
+  }
+
+  if (competence < MIN_PERSONAL_EXPOSURE || competence > MAX_PERSONAL_EXPOSURE) {
+    throw new InvalidCharacterStateError(
+      "competence",
+      `expected a value between ${MIN_PERSONAL_EXPOSURE} and ${MAX_PERSONAL_EXPOSURE}`,
+      competence,
+    );
+  }
+}
+
+function validateLoyalty(loyalty: unknown): asserts loyalty is number {
+  if (typeof loyalty !== "number") {
+    throw new InvalidCharacterStateError(
+      "loyalty",
+      `expected a number, received ${describeValueType(loyalty)}`,
+      loyalty,
+    );
+  }
+
+  if (!Number.isFinite(loyalty)) {
+    throw new InvalidCharacterStateError("loyalty", "expected a finite number", loyalty);
+  }
+
+  if (!Number.isInteger(loyalty)) {
+    throw new InvalidCharacterStateError("loyalty", "expected an integer", loyalty);
+  }
+
+  if (loyalty < MIN_PERSONAL_EXPOSURE || loyalty > MAX_PERSONAL_EXPOSURE) {
+    throw new InvalidCharacterStateError(
+      "loyalty",
+      `expected a value between ${MIN_PERSONAL_EXPOSURE} and ${MAX_PERSONAL_EXPOSURE}`,
+      loyalty,
     );
   }
 }

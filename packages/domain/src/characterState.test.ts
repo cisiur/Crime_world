@@ -24,6 +24,8 @@ describe("character state", () => {
       healthState: "healthy",
       legalState: "free",
       assignmentState: "idle",
+      competence: 50,
+      loyalty: 50,
       personalExposure: 10,
     });
   });
@@ -46,6 +48,20 @@ describe("character state", () => {
     expect(
       createCharacterState(createValidCharacterInput({ personalExposure: 100 })),
     ).toHaveProperty("personalExposure", 100);
+  });
+
+  it.each([0, 50, 100])("accepts valid competence values: %s", (competence) => {
+    expect(createCharacterState(createValidCharacterInput({ competence }))).toHaveProperty(
+      "competence",
+      competence,
+    );
+  });
+
+  it.each([0, 50, 100])("accepts valid loyalty values: %s", (loyalty) => {
+    expect(createCharacterState(createValidCharacterInput({ loyalty }))).toHaveProperty(
+      "loyalty",
+      loyalty,
+    );
   });
 
   it("returns a new state object", () => {
@@ -144,6 +160,26 @@ describe("character state", () => {
   });
 
   it.each([-1, 101, 1.5, Number.NaN, Infinity, -Infinity])(
+    "rejects invalid competence: %s",
+    (competence) => {
+      expectInvalidCharacterStateError(
+        () => createCharacterState(createValidCharacterInput({ competence })),
+        "competence",
+      );
+    },
+  );
+
+  it.each([-1, 101, 1.5, Number.NaN, Infinity, -Infinity])(
+    "rejects invalid loyalty: %s",
+    (loyalty) => {
+      expectInvalidCharacterStateError(
+        () => createCharacterState(createValidCharacterInput({ loyalty })),
+        "loyalty",
+      );
+    },
+  );
+
+  it.each([-1, 101, 1.5, Number.NaN, Infinity, -Infinity])(
     "rejects invalid personal exposure: %s",
     (personalExposure) => {
       expectInvalidCharacterStateError(
@@ -206,6 +242,8 @@ function createValidCharacterInput(
     healthState: "healthy",
     legalState: "free",
     assignmentState: "idle",
+    competence: 50,
+    loyalty: 50,
     personalExposure: 10,
     ...overrides,
   };
