@@ -11,6 +11,7 @@ export const contentPackageDescriptor: ContentPackageDescriptor = {
 export * from "./cityDefinition";
 export * from "./cityDebugReport";
 export * from "./cityDefinitionValidation";
+export * from "./organizationSeeds";
 export * from "./cities/canonicalMvpCity";
 export * from "./cities/districts";
 export * from "./cities/locations";
