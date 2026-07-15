@@ -3,7 +3,7 @@
 > **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 ready for accepted task scoping
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** Characters and organizations foundation complete; next accepted scope starts EPIC 4.
+> **Current phase:** Characters & Organizations Foundation complete; next accepted scope starts EPIC 4.
 
 ---
 
@@ -243,16 +243,16 @@ EPIC 2 is complete as a controlled city shell. The content package owns immutabl
 
 ---
 
-# EPIC 3 — Characters and Organizations
+# EPIC 3 — Characters & Organizations Foundation
 
 ## Goal
 
-Create the player boss, recruits, crews, rival organizations, ownership, and basic capacity constraints.
+Create the minimal runtime foundation for characters, organizations, rival organization seeds, ownership references, and basic capacity values.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
 | E3-01 | Define MVP character state and traits | `[BOTH]` | Done |
-| E3-02 | Define organization state, membership, roles, money, and capacity | `[BOTH]` | Done |
+| E3-02 | Define organization state, leader, members, money, and capacity | `[BOTH]` | Done |
 | E3-03 | Implement player organization creation | `[CODEX]` | Done |
 | E3-04 | Implement two rival organization seeds | `[CODEX]` | Done |
 | E3-05 | Implement location and business ownership references | `[CODEX]` | Done |
@@ -262,12 +262,14 @@ Create the player boss, recruits, crews, rival organizations, ownership, and bas
 
 ### Acceptance criteria
 
-- The player starts as one boss with a minimal base and no territory.
-- Organizations have stable members, money, capacity, and owned assets.
-- One character cannot be assigned to incompatible simultaneous work.
-- Removing a character cannot leave invalid references.
+- `CharacterState` represents the minimal MVP character runtime fields, including capability tags, health, legal state, assignment state, competence, loyalty, and personal exposure.
+- `OrganizationState` represents one leader, ordered members, money, and operational capacity; player organization creation starts with the leader as the only member.
+- `BusinessState` and `LocationState` expose explicit nullable ownership references without derived organization asset collections.
+- Character availability is derived from health, legal state, and assignment state rather than stored.
+- The content package provides two immutable rival organization seeds.
+- Cross-model tests verify current references without implementing campaign creation, recruitment, ownership transfer, character removal, operation lifecycle behavior, or a global invariant engine.
 
-EPIC 3 is complete as a minimal characters-and-organizations foundation. The domain package owns runtime `CharacterState`, `OrganizationState`, `BusinessState`, city ownership references, player organization creation, and derived character availability. The content package owns immutable rival organization seeds. Lifecycle tests verify the current cross-model relationships without introducing campaign creation, operation gameplay, recruitment, economy simulation, ownership transfer, or a global invariant engine.
+EPIC 3 is complete as the Characters & Organizations Foundation. The domain package owns runtime `CharacterState`, `OrganizationState`, `BusinessState`, city ownership references, player organization creation, and derived character availability. The content package owns immutable rival organization seeds. Lifecycle tests verify the current cross-model relationships without introducing campaign creation, operation gameplay, recruitment, economy simulation, ownership transfer, character removal, or a global invariant engine.
 
 ---
 
