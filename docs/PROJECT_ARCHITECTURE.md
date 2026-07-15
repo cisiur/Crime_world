@@ -463,6 +463,13 @@ All operation instances should follow a common lifecycle:
 Operation templates should provide configurable rules.
 They should not each implement a completely separate execution engine.
 
+Current EPIC 4 specification status:
+- E4-01 accepts **Local Collection** as the first operation and records the authoritative detailed specification in `BUILD_ROADMAP.md`.
+- No operation template schema, runtime operation state, command, lifecycle, resolver, forecast, UI, or production test implementation exists yet.
+- The first operation implementation depends on attaching the current standalone EPIC 2 city state and EPIC 3 character, organization, and business state foundations to a minimal root campaign state. Do not decide a broad final campaign aggregate before the first operation slice requires it.
+- For the first EPIC 4 money consequence only, domain operation resolution may update `OrganizationState.money` directly with an explicit event or traceable result; the EPIC 5 transaction ledger remains pending and must not be preempted by a competing economy system.
+- EPIC 4 may update `CharacterState.personalExposure`, but organization-wide exposure, district tension changes, police pressure, investigations, evidence, decay, and law-enforcement reactions remain EPIC 6 scope unless later accepted scope changes the roadmap.
+
 ## Save architecture
 
 The MVP should use versioned snapshot saves.
@@ -708,7 +715,7 @@ The MVP should not use:
 
 ## Current architecture status
 
-EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
+EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task only.
 
 The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, and the minimal characters-and-organizations foundation.
 
@@ -719,7 +726,7 @@ The architecture review after EPIC 3 found the package boundaries intact:
 - Konva remains confined to presentation dependencies,
 - and no operation gameplay, recruitment gameplay, economy simulation, ownership transfer, AI, or playable UI was added during the character-and-organization foundation work.
 
-The next architecture-sensitive phase is EPIC 4, the first operation vertical slice. It should define only the smallest operation template/runtime model needed to prove one complete operation loop.
+The next architecture-sensitive task is E4-02, defining the smallest operation template and runtime instance schemas needed for the accepted Local Collection slice. The First Operation Slice is not implemented yet.
 
 ## Technical debt and postponed work
 

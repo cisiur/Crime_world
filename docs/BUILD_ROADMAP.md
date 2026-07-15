@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 ready for accepted task scoping
+> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 specification work has started, but no EPIC 4 gameplay implementation exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** Characters & Organizations Foundation complete; next accepted scope starts EPIC 4.
+> **Current phase:** First Operation Slice specification complete; next accepted scope defines operation template and runtime instance schemas.
 
 ---
 
@@ -104,7 +104,7 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        ░░░░░░░░░░   0%
+First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification complete
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
@@ -283,7 +283,7 @@ Recommended first slice: a small income operation against a local target, select
 
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E4-01 | Finalize the first operation specification and outcome table | `[PM]` | Pending |
+| E4-01 | Finalize the first operation specification and outcome table | `[PM]` | Done |
 | E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Pending |
 | E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Pending |
 | E4-04 | Implement planning and crew assignment command | `[CODEX]` | Pending |
@@ -301,6 +301,222 @@ Recommended first slice: a small income operation against a local target, select
 - Partial success is materially different from both success and failure.
 - Consequences persist in `GameState`.
 - The entire loop is covered by deterministic tests.
+
+### E4-01 accepted first operation specification
+
+This subsection is the authoritative detailed specification for the first EPIC 4 operation. It records accepted design scope only. E4-01 does not implement operation schemas, runtime state, commands, lifecycle code, resolver code, campaign creation, UI, or production tests.
+
+The accepted first operation is **Local Collection**: a small one-off income operation against a neutral local service location. It exists to prove the first operation vertical slice without introducing recurring income, business control, recruitment, investigations, rival AI, or the complete economy system.
+
+#### Operation identity
+
+| Field | Accepted value |
+|---|---|
+| Name | `Local Collection` |
+| Category | one-off income operation |
+| Canonical first target | `location:corner_store` |
+| Target reference type | `LocationId` |
+| Target district | Starting Residential District |
+| Required assigned characters | exactly 1 |
+| Start cost | 20 organization money |
+| Duration | 60 simulation minutes |
+| Operational capacity cost | 1 |
+| Main reward | one-time organization money change |
+| Main risks | personal exposure and injury |
+| Outcomes | `success`, `partial-success`, `failure`, `critical-failure` |
+
+This operation must not create recurring income, business ownership, location ownership, territory control, rival relationship changes, investigations, arrests, imprisonment, death, or new recruits.
+
+#### Target requirements
+
+Future implementation must validate that the target:
+
+- exists in the active authored `CityDefinition`,
+- has corresponding runtime location state,
+- has authored kind `shop-or-service`,
+- is not owned by any organization,
+- is not connected to a business owned by the acting organization,
+- is currently eligible for this operation.
+
+For the first vertical slice, the authored template may explicitly allow only `location:corner_store`. Runtime operation state must still reference the target through `LocationId`, not through a special hardcoded target enum.
+
+#### Character requirements
+
+The assigned character must:
+
+- belong to the acting organization,
+- be available according to the existing derived availability rule,
+- have `healthState: "healthy"`,
+- have `legalState: "free"`,
+- have `assignmentState: "idle"`.
+
+Capability tags are modifiers, not hard prerequisites. Accepted positive capability modifiers are `streetwise` and `social`. Other existing capability tags are neutral for this first operation. The first starting operation must not become impossible merely because the starting character lacks one specific capability tag.
+
+#### Organization requirements
+
+The acting organization must:
+
+- exist,
+- contain the assigned character as a member,
+- have at least 20 money,
+- have at least one free operational capacity slot,
+- not already use the same character in another incompatible assignment.
+
+#### Outcome baseline
+
+For a character with competence 50, no positive capability modifier, neutral district conditions, and neutral exposure conditions, the initial vertical-slice outcome distribution is:
+
+| Outcome | Baseline probability |
+|---|---:|
+| Success | 45% |
+| Partial success | 30% |
+| Failure | 20% |
+| Critical failure | 5% |
+
+These are initial vertical-slice tuning values, not final game-wide balance values.
+
+The future centralized resolver should conceptually evaluate:
+
+- base outcome distribution or base score,
+- competence modifier,
+- capability modifier,
+- district modifier,
+- personal exposure modifier,
+- seeded deterministic random roll.
+
+E4-01 does not finalize a generic mathematical framework. Later E4 implementation should specify only what is required to make the first resolver deterministic, testable, explainable, and extensible without destructive migration.
+
+#### Outcome table
+
+| Outcome | Gross reward | Net money result after start cost | Personal exposure | Health consequence |
+|---|---:|---:|---:|---|
+| Success | +80 | +60 | +4 | none |
+| Partial success | +40 | +20 | +10 | none |
+| Failure | 0 | -20 | +14 | none |
+| Critical failure | 0 | -20 | +25 | `healthy -> injured` |
+
+Additional rules:
+
+- Start cost is paid exactly once.
+- Gross reward is applied only during resolution.
+- Personal exposure remains clamped to the existing valid `0-100` range.
+- This operation cannot kill a character.
+- This operation cannot move a character to `critical`.
+- This operation cannot detain or imprison a character.
+- Partial success must remain materially different from both success and failure.
+- Critical failure must be serious but recoverable.
+
+#### Forecast and explainability requirements
+
+The future forecast or read model must be able to present:
+
+- operation name,
+- target,
+- assigned character,
+- cost,
+- duration,
+- operational capacity requirement,
+- expected gross reward range: `0-80`,
+- estimated risk category,
+- known positive and negative modifiers,
+- visible possible consequences: loss of the start cost, personal exposure increase, possible injury.
+
+Exact hidden random rolls do not need to be shown. The player or developer must be able to understand which known factors influenced the estimate.
+
+The future resolution result should retain enough diagnostic information to explain:
+
+- base contribution,
+- competence contribution,
+- capability contribution,
+- district contribution,
+- exposure contribution,
+- random roll,
+- final outcome band.
+
+Debug-only presentation text does not need to be persisted in authoritative state.
+
+#### Package ownership
+
+`packages/content` owns authored immutable operation template data, eventually including template ID, display metadata, allowed target criteria or explicit target IDs, cost, duration, operational capacity requirement, base outcome table, and authored modifier configuration.
+
+It must not own mutable operation instances, assigned characters, runtime target state, current lifecycle state, random state, actual outcome, or applied rewards.
+
+`packages/domain` owns authoritative operation rules and runtime state, eventually including stable operation IDs, operation instances, lifecycle state, actor and target references, reservations and assignments, timing, prerequisite rules that are independent from application orchestration, centralized outcome resolution, immediate consequences, and operation domain events.
+
+The resolver must ultimately be reusable by both player and rival AI operations. The domain package must not depend on `packages/content`, UI frameworks, filesystem APIs, browser APIs, Tauri, or infrastructure implementations.
+
+`packages/application` owns orchestration, eventually including locating the authored template, combining authored definition data with runtime state, locating the organization, target, and assigned character, invoking domain validation and commands, preparing forecasts/read models, and coordinating campaign creation when introduced.
+
+The application layer must not independently calculate operation outcomes or directly own authoritative money, exposure, health, or assignment rules.
+
+`packages/presentation` has no implementation in E4-01. Future presentation or developer harness work may display forecasts, submit commands, display operation status, display result explanations, and display changed state. It must not own operation rules or directly mutate authoritative state.
+
+#### Root `GameState` dependency
+
+The current EPIC 2 and EPIC 3 standalone runtime models are not yet attached to one complete campaign state. E4-01 must not implement that integration.
+
+The following EPIC 4 implementation tasks depend on a minimal root campaign state that can hold the active city state, runtime locations, characters, organizations, businesses when needed, operation instances, and deterministic random state. Do not prematurely decide a broad final campaign aggregate beyond what the first operation slice needs.
+
+#### Temporary EPIC 4 money rule
+
+EPIC 5 will introduce the explicit transaction ledger. For the first operation slice, it is acceptable for the domain operation consequence to update `OrganizationState.money` directly, provided that:
+
+- the change is deterministic,
+- the reason and delta are represented by an explicit domain event or equivalent traceable result,
+- the implementation does not create a competing generic economy system,
+- the future ledger migration remains straightforward.
+
+This is an intentional temporary vertical-slice boundary.
+
+#### Exposure boundary
+
+EPIC 4 may update existing `CharacterState.personalExposure`.
+
+EPIC 4 must not introduce organization-wide exposure, district tension updates, police pressure, investigation state, evidence state, exposure decay, or law-enforcement reactions. Those belong to EPIC 6 unless a later accepted scope explicitly changes the roadmap.
+
+#### Expected future domain events
+
+Future implementation should document or emit semantic events for:
+
+- operation planned or started,
+- operation resolved,
+- organization money changed because of the operation,
+- character personal exposure changed,
+- character injured when applicable,
+- character assignment released after resolution.
+
+Events must describe facts that occurred, not commands or player intent.
+
+#### Deterministic test expectations for later E4 tasks
+
+Future implementation must cover at minimum:
+
+- identical initial state, seed, commands, and content produce identical outcomes,
+- all four outcome bands can be reached through controlled deterministic tests,
+- start cost is paid exactly once,
+- reward is applied exactly once,
+- exposure is applied exactly once and clamped,
+- critical failure changes healthy to injured,
+- non-critical outcomes do not change health,
+- the operation cannot cause death, critical health, detention, or imprisonment,
+- unavailable characters are rejected,
+- non-member characters are rejected,
+- insufficient money is rejected,
+- insufficient capacity is rejected,
+- invalid or ineligible targets are rejected,
+- already assigned characters are rejected,
+- valid planning reserves the character and capacity,
+- resolved operations release the assignment and capacity,
+- consequences persist in authoritative game state,
+- result diagnostics explain the final outcome,
+- authored content and runtime state remain separate,
+- domain code does not import the content package.
+
+Do not add production tests during E4-01 because no production behavior is being implemented.
+
+#### Explicit exclusions
+
+E4-01 must not specify or implement the full operation catalogue, generic operation scripting, critical success, multiple assigned characters, equipment selection, approach selection, operation cancellation or aborting, recurring income, transaction ledger implementation, business control, ownership transfer, recruitment, recovery mechanics, district tension, investigations, police reactions, rival reactions, rival AI, save/load, full playable UI, or long-term balancing.
 
 ---
 
@@ -596,11 +812,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-01 — finalize the first operation specification and outcome table**.
+The next task is **E4-02 — Define operation template and runtime instance schemas**.
 
-ChatGPT should prepare a bounded EPIC 4 task before Codex implementation, including:
-
-- the first operation's target, cost, duration, requirements, and outcome table,
-- operation template and runtime ownership boundaries,
-- deterministic validation and test expectations,
-- and explicit exclusions to avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, or full UI early.
+E4-02 should use the accepted **Local Collection** specification in the EPIC 4 section as its authoritative input, while keeping E4-03 and later runtime behavior pending. It should define only the minimal authored template shape and runtime operation instance shape needed for the first operation slice, preserve package ownership boundaries, and avoid implementing availability, commands, lifecycle resolution, economy systems, pressure systems, rival AI, save/load, or full UI early.

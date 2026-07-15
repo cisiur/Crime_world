@@ -115,22 +115,22 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 4 — First End-to-End Operation Vertical Slice planning**
+> **EPIC 4 — First End-to-End Operation Vertical Slice specification and schema planning**
 
-The current task is:
+The current next task is:
 
-> **E4-01 — Finalize the first operation specification and outcome table.**
+> **E4-02 — Define operation template and runtime instance schemas.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
+E4-01 is complete as a documentation/specification task. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay implementation exists yet.
 
 The immediate sequence is:
 
-1. finalize the first operation specification and outcome table,
-2. define the minimal operation template and runtime state required for that slice,
-3. implement operation availability and prerequisite checks,
-4. implement planning and crew assignment through the accepted command boundary,
-5. implement the smallest operation lifecycle and resolver needed for one complete flow,
-6. keep the full operation catalogue, economy simulation, recruitment actions, pressure systems, rival AI, save/load, and full UI work out of scope until their epics.
+1. define the minimal operation template and runtime instance schemas required for Local Collection,
+2. implement operation availability and prerequisite checks,
+3. implement planning and crew assignment through the accepted command boundary,
+4. implement the smallest operation lifecycle and resolver needed for one complete flow,
+5. keep the full operation catalogue, economy simulation, recruitment actions, pressure systems, rival AI, save/load, and full UI work out of scope until their epics.
 
 ---
 
@@ -331,13 +331,13 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E4-01 — Finalize the first operation specification and outcome table.**
+> **E4-02 — Define operation template and runtime instance schemas.**
 
-The task should define a small, stable first operation specification for the first playable path and produce:
+The task should use the accepted Local Collection specification in `BUILD_ROADMAP.md` and produce:
 
+- a minimal authored operation template schema,
+- a minimal runtime operation instance schema,
 - package ownership and dependency boundaries,
-- the operation target, cost, duration, requirements, and outcome table,
-- deterministic validation and test expectations,
-- explicit exclusions for the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, and full UI.
+- explicit exclusions for availability logic, commands, lifecycle resolution, resolver behavior, production tests, campaign creation, full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, and full UI.
 
-E4-01 must not implement operation gameplay. It should prepare the accepted specification for the first vertical-slice implementation tasks.
+E4-02 must not implement operation gameplay beyond defining schema boundaries accepted for the first vertical-slice implementation tasks.
