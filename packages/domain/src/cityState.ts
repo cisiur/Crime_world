@@ -1,4 +1,11 @@
-import type { CityId, DistrictId, LocationId, RouteId } from "./entityIds";
+import type {
+  BusinessId,
+  CityId,
+  DistrictId,
+  LocationId,
+  OrganizationId,
+  RouteId,
+} from "./entityIds";
 
 export interface CityStateDefinitionInput {
   readonly id: CityId;
@@ -36,6 +43,8 @@ export interface DistrictState {
 export interface LocationState {
   readonly locationId: LocationId;
   readonly enabled: boolean;
+  readonly ownerOrganizationId: OrganizationId | null;
+  readonly businessId: BusinessId | null;
 }
 
 export interface RouteState {
@@ -65,6 +74,8 @@ function createLocationState(locationDefinition: CityStateLocationDefinitionInpu
   return {
     locationId: locationDefinition.id,
     enabled: true,
+    ownerOrganizationId: null,
+    businessId: null,
   };
 }
 

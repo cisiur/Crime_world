@@ -91,6 +91,8 @@ describe("city state", () => {
     expect(cityState.locationStates[0]).toEqual({
       locationId: cityDefinition.locations[0]?.id,
       enabled: true,
+      ownerOrganizationId: null,
+      businessId: null,
     });
     expect(cityState.routeStates[0]).toEqual({
       routeId: cityDefinition.routes[0]?.id,
@@ -136,6 +138,15 @@ describe("city state", () => {
     const cityDefinition = createMinimalCityDefinition();
 
     expect(createCityState(cityDefinition)).toEqual(createCityState(cityDefinition));
+  });
+
+  it("initializes location ownership references as unowned and without a business", () => {
+    const cityState = createCityState(createMinimalCityDefinition());
+
+    expect(
+      cityState.locationStates.every((location) => location.ownerOrganizationId === null),
+    ).toBe(true);
+    expect(cityState.locationStates.every((location) => location.businessId === null)).toBe(true);
   });
 });
 
