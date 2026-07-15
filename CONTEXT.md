@@ -214,11 +214,18 @@ Completed document groups:
 - The canonical MVP city content exists with four authored districts, 29 strategic locations, and five routes.
 - City definition validation exists for schema version, required collections, duplicate IDs, route endpoints, self-loop routes, duplicate route connections, orphan locations, and disconnected district graphs.
 - Runtime city state exists in the domain package as ID-only city, district, location, and route state.
+- Location runtime state includes nullable organization and business ownership references; new locations default to unowned and unassigned.
 - District property derivation exists in the domain package for combining authored baseline profiles with runtime tension, exposure, and police-presence modifiers.
 - A deterministic headless city debug report formatter exists in the content package.
-- No gameplay systems have been implemented yet.
-- No campaign creation flow loads the canonical city yet.
-- No event bus, scheduler, save/load, AI, economy, operation, pressure, character, organization, business ownership, or playable UI systems exist yet.
+- Minimal runtime character state exists with capability tags, health, legal state, assignment state, competence, loyalty, and personal exposure.
+- Character availability is derived from health, legal state, and assignment state; it is not stored as separate state.
+- Minimal runtime organization state exists with leader, members, money, and operational capacity.
+- Player organization creation delegates to the base organization factory and starts with the leader as the only member.
+- Minimal business state exists with location and nullable owner references.
+- Authored rival organization seeds exist in the content package.
+- Cross-model organization lifecycle tests cover current EPIC 3 relationships without introducing a global validator.
+- No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
+- No event bus, scheduler, save/load, AI, economy, operation, pressure, recruitment, ownership transfer, or playable UI systems exist yet.
 
 Accepted implementation baseline:
 
@@ -238,21 +245,21 @@ Final verification:
 GitHub Actions run 29232731045 — success
 ```
 
-Latest reviewed EPIC 2 implementation baseline before documentation sync:
+Latest reviewed EPIC 3 implementation baseline before documentation sync:
 
 ```text
-4408ad5 feat(content): add city debug formatter
+e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 ```
 
 Current roadmap phase:
 
-> **EPIC 3 — Characters and Organizations planning**
+> **EPIC 4 — First End-to-End Operation Vertical Slice planning**
 
 Current next task:
 
-> **E3-01 — Define MVP character state and traits.**
+> **E4-01 — Finalize the first operation specification and outcome table.**
 
-No EPIC 3 implementation should begin before the E3-01 scope is analyzed and accepted through the normal PM workflow.
+EPIC 3 is complete. Do not begin EPIC 4 implementation until the first operation slice is scoped, accepted, and reviewed against the current domain/content boundaries.
 
 ---
 
@@ -659,14 +666,14 @@ apps/
   desktop/          React + Vite + Tauri desktop shell
 
 packages/
-  domain/           pure headless domain package, runtime city state, district property derivation
+  domain/           pure headless domain package, runtime city, character, organization, and business state
   application/      commands, queries, use cases, read models
-  content/          immutable content definitions, canonical MVP city, city validation/debug output
+  content/          immutable content definitions, canonical MVP city, rival organization seeds, city validation/debug output
   infrastructure/   platform adapters and persistence boundary
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation plus the minimal EPIC 2 runtime city shell. Authored city data remains in `packages/content`. The repository still does not contain gameplay systems or playable gameplay.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, and the EPIC 3 character, organization, business, ownership-reference, and availability foundations. Authored city data and rival organization seeds remain in `packages/content`. The repository still does not contain operation gameplay, campaign creation, or playable gameplay.
 
 ---
 
@@ -685,18 +692,19 @@ Completed:
 - deterministic test seed support,
 - repository-level developer instructions,
 - EPIC 1 domain kernel and deterministic simulation clock foundation,
-- EPIC 2 controlled city shell.
+- EPIC 2 controlled city shell,
+- EPIC 3 characters and organizations foundation.
 
 Next:
 
-> **E3-01 — Define MVP character state and traits.**
+> **E4-01 — Finalize the first operation specification and outcome table.**
 
 Required PM output before implementation:
 
-- define character state ownership and package boundaries,
-- define the minimal MVP boss/recruit/availability shape and validation expectations,
-- define tests and acceptance criteria,
-- keep organization runtime, operation assignment, recruitment gameplay, and UI out of scope until explicitly accepted.
+- define the first operation's target, cost, duration, requirements, and outcome table,
+- define operation template/runtime ownership and package boundaries,
+- define deterministic tests and acceptance criteria,
+- keep operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
 
 ---
 

@@ -115,22 +115,22 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 3 — Characters and Organizations planning**
+> **EPIC 4 — First End-to-End Operation Vertical Slice planning**
 
 The current task is:
 
-> **E3-01 — Define MVP character state and traits.**
+> **E4-01 — Finalize the first operation specification and outcome table.**
 
-EPIC 0, EPIC 1, and EPIC 2 are complete.
+EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
 
 The immediate sequence is:
 
-1. define the minimal MVP character state and traits,
-2. define organization state, membership, roles, money, and capacity,
-3. implement player organization creation,
-4. implement two rival organization seeds,
-5. add only the ownership and assignment references required by the accepted EPIC 3 scope,
-6. keep operation gameplay, recruitment actions, economy simulation, pressure systems, and UI work out of scope until their epics.
+1. finalize the first operation specification and outcome table,
+2. define the minimal operation template and runtime state required for that slice,
+3. implement operation availability and prerequisite checks,
+4. implement planning and crew assignment through the accepted command boundary,
+5. implement the smallest operation lifecycle and resolver needed for one complete flow,
+6. keep the full operation catalogue, economy simulation, recruitment actions, pressure systems, rival AI, save/load, and full UI work out of scope until their epics.
 
 ---
 
@@ -331,13 +331,13 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E3-01 — Define MVP character state and traits.**
+> **E4-01 — Finalize the first operation specification and outcome table.**
 
-The task should define a small, stable character-state foundation for the first playable path and produce:
+The task should define a small, stable first operation specification for the first playable path and produce:
 
 - package ownership and dependency boundaries,
-- the minimum fields required for the player boss and future recruitable characters,
+- the operation target, cost, duration, requirements, and outcome table,
 - deterministic validation and test expectations,
-- explicit exclusions for organization behavior, recruitment gameplay, operation assignment, and UI.
+- explicit exclusions for the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, and full UI.
 
-E3-01 must not begin EPIC 4 operation gameplay or expand into full NPC life simulation.
+E4-01 must not implement operation gameplay. It should prepare the accepted specification for the first vertical-slice implementation tasks.

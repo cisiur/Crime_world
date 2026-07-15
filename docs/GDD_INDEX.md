@@ -70,17 +70,17 @@ For active implementation work, begin with:
 
 ## Current project status
 
-The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, and controlled city shell are complete.
+The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, and characters-and-organizations foundation are complete.
 
-The project has moved from city-shell implementation into EPIC 3 planning.
+The project has moved from characters-and-organizations implementation into EPIC 4 planning.
 
 Current priority:
 
-1. define MVP character state and traits,
-2. define organization state and membership boundaries,
-3. seed the player organization and two rivals when accepted,
-4. preserve the existing package boundaries,
-5. avoid operation gameplay until EPIC 4.
+1. finalize the first operation specification and outcome table,
+2. define the minimal operation template and runtime ownership boundaries,
+3. preserve the existing package boundaries,
+4. reuse derived character availability and existing organization state,
+5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, or full UI before their accepted tasks.
 
 Do not add another large design system unless implementation reveals a real design gap.
 

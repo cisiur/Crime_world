@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, and EPIC 2 complete; EPIC 3 ready for accepted task scoping
+> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 ready for accepted task scoping
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** Controlled city shell complete; next accepted scope starts EPIC 3.
+> **Current phase:** Characters and organizations foundation complete; next accepted scope starts EPIC 4.
 
 ---
 
@@ -103,6 +103,7 @@ Technical Stack Decision     ██████████ 100%
 Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
+Characters & Organizations   ██████████ 100%
 First Operation Slice        ░░░░░░░░░░   0%
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
@@ -236,7 +237,7 @@ EPIC 2 is complete as a controlled city shell. The content package owns immutabl
 
 ### EPIC 2 follow-up notes
 
-- Campaign creation still needs an application-level use case that validates `canonicalMvpCityDefinition` and creates runtime city state when EPIC 3 or save/load work requires it.
+- Campaign creation still needs an application-level use case that validates `canonicalMvpCityDefinition` and creates runtime city state when the operation slice or save/load work requires it.
 - City validation currently reports structural content errors; runtime invariants that compare `CityState` against an authored definition should be added when city state becomes part of root `GameState`.
 - The debug report is a developer formatter, not a UI read model. Do not treat it as the future map or district overview API.
 
@@ -250,14 +251,14 @@ Create the player boss, recruits, crews, rival organizations, ownership, and bas
 
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E3-01 | Define MVP character state and traits | `[BOTH]` | Pending |
-| E3-02 | Define organization state, membership, roles, money, and capacity | `[BOTH]` | Pending |
-| E3-03 | Implement player organization creation | `[CODEX]` | Pending |
-| E3-04 | Implement two rival organization seeds | `[CODEX]` | Pending |
-| E3-05 | Implement location and business ownership references | `[CODEX]` | Pending |
-| E3-06 | Implement crew availability and assignment rules | `[CODEX]` | Pending |
-| E3-07 | Implement loyalty and competence as minimal MVP values | `[CODEX]` | Pending |
-| E3-08 | Add organization invariant and lifecycle tests | `[CODEX]` | Pending |
+| E3-01 | Define MVP character state and traits | `[BOTH]` | Done |
+| E3-02 | Define organization state, membership, roles, money, and capacity | `[BOTH]` | Done |
+| E3-03 | Implement player organization creation | `[CODEX]` | Done |
+| E3-04 | Implement two rival organization seeds | `[CODEX]` | Done |
+| E3-05 | Implement location and business ownership references | `[CODEX]` | Done |
+| E3-06 | Implement crew availability and assignment rules | `[CODEX]` | Done |
+| E3-07 | Implement loyalty and competence as minimal MVP values | `[CODEX]` | Done |
+| E3-08 | Add organization invariant and lifecycle tests | `[CODEX]` | Done |
 
 ### Acceptance criteria
 
@@ -265,6 +266,8 @@ Create the player boss, recruits, crews, rival organizations, ownership, and bas
 - Organizations have stable members, money, capacity, and owned assets.
 - One character cannot be assigned to incompatible simultaneous work.
 - Removing a character cannot leave invalid references.
+
+EPIC 3 is complete as a minimal characters-and-organizations foundation. The domain package owns runtime `CharacterState`, `OrganizationState`, `BusinessState`, city ownership references, player organization creation, and derived character availability. The content package owns immutable rival organization seeds. Lifecycle tests verify the current cross-model relationships without introducing campaign creation, operation gameplay, recruitment, economy simulation, ownership transfer, or a global invariant engine.
 
 ---
 
@@ -591,11 +594,11 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E3-01 — define MVP character state and traits**.
+The next task is **E4-01 — finalize the first operation specification and outcome table**.
 
-ChatGPT should prepare a bounded EPIC 3 task before Codex implementation, including:
+ChatGPT should prepare a bounded EPIC 4 task before Codex implementation, including:
 
-- character state ownership and package boundaries,
-- the minimal MVP boss/recruit/availability shape,
-- validation and test expectations,
-- and explicit exclusions to avoid implementing organizations, recruitment gameplay, operation assignment, or UI early.
+- the first operation's target, cost, duration, requirements, and outcome table,
+- operation template and runtime ownership boundaries,
+- deterministic validation and test expectations,
+- and explicit exclusions to avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, or full UI early.

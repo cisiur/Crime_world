@@ -180,6 +180,7 @@ They should not contain mutable campaign state.
 Current implementation:
 - `packages/content` owns the neutral `CityDefinition` schema and the canonical MVP city definition.
 - The canonical MVP city contains four districts, 29 strategic locations, and five routes.
+- The content package owns immutable rival organization seed definitions for the current MVP rivals.
 - City validation is structural and headless; it checks schema version, required collections, duplicate IDs, route validity, orphan locations, and district graph connectivity.
 - The content package may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state.
 
@@ -204,8 +205,11 @@ Primary domain modules:
 Domain code should not depend on UI frameworks, storage implementations, or external map formats.
 
 Current implementation:
-- `packages/domain` owns stable entity IDs, deterministic simulation time, seeded randomness, root `GameState`, command/result/event foundations, the ordered tick pipeline, invariant helpers, runtime city state, and district property derivation.
+- `packages/domain` owns stable entity IDs, deterministic simulation time, seeded randomness, root `GameState`, command/result/event foundations, the ordered tick pipeline, invariant helpers, runtime city state, district property derivation, runtime character state, runtime organization state, runtime business state, and derived character availability.
 - Runtime city state stores IDs and mutable shell values only. Authored city names, tags, location kinds, route endpoints, and baseline profiles remain content definitions.
+- `LocationState` and `BusinessState` contain explicit nullable ownership references. `OrganizationState` does not store derived owned-location or owned-business collections.
+- `CharacterState` stores assignment state, health, legal state, competence, loyalty, and personal exposure. Availability is derived and not cached.
+- `createPlayerOrganization` delegates to the base organization factory and creates the leader as the only initial member.
 - Domain currently has no dependency on React, Konva, Tauri, filesystem APIs, browser APIs, application, presentation, infrastructure, or content packages.
 
 ### 3. Application layer
@@ -379,8 +383,8 @@ Stable IDs should connect entities.
 Runtime objects should not rely on direct serialized object references.
 
 Current implementation note:
-- The root `GameState` foundation exists, but EPIC 2 city state has not yet been attached to campaign creation or save/load.
-- `CityState`, `DistrictState`, `LocationState`, and `RouteState` exist as standalone domain types for the controlled city shell.
+- The root `GameState` foundation exists, but EPIC 2 and EPIC 3 runtime state has not yet been attached to campaign creation or save/load.
+- `CityState`, `DistrictState`, `LocationState`, `RouteState`, `CharacterState`, `OrganizationState`, and `BusinessState` exist as standalone domain types for the controlled city and organization foundation.
 
 ## Time and tick architecture
 
@@ -704,23 +708,25 @@ The MVP should not use:
 
 ## Current architecture status
 
-EPIC 0, EPIC 1, and EPIC 2 are complete.
+EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
 
-The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, and the controlled city shell.
+The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, and the minimal characters-and-organizations foundation.
 
-The architecture review after EPIC 2 found the package boundaries intact:
+The architecture review after EPIC 3 found the package boundaries intact:
 - domain remains pure and renderer/platform independent,
-- content owns immutable authored city data and structural validation,
+- content owns immutable authored city data, rival organization seeds, and structural validation,
 - application, infrastructure, and presentation remain thin scaffolds,
 - Konva remains confined to presentation dependencies,
-- and no gameplay systems were added during the city-shell work.
+- and no operation gameplay, recruitment gameplay, economy simulation, ownership transfer, AI, or playable UI was added during the character-and-organization foundation work.
 
-The next architecture-sensitive task is EPIC 3 character-state planning. It should define only the smallest character model needed before the first operation slice.
+The next architecture-sensitive phase is EPIC 4, the first operation vertical slice. It should define only the smallest operation template/runtime model needed to prove one complete operation loop.
 
 ## Technical debt and postponed work
 
 - Campaign creation does not yet validate the canonical city and attach runtime `CityState` to root `GameState`.
+- Campaign creation does not yet attach runtime character, organization, business, or rival seed state to root `GameState`.
 - City-state invariants are not yet integrated with root invariant validation because city state is not part of campaign state.
+- Cross-model organization lifecycle checks currently exist as tests only; there is no campaign-level invariant validator yet.
 - The city debug report is a developer inspection formatter, not a stable application read model.
 - Save/load, content compatibility checks, and migration policy still need concrete implementation when campaign state becomes persistent.
 
