@@ -6,12 +6,15 @@ export type CharacterHealthState = "healthy" | "injured" | "critical" | "dead";
 
 export type CharacterLegalState = "free" | "detained" | "imprisoned";
 
+export type AssignmentState = "idle" | "assigned";
+
 export interface CharacterState {
   readonly characterId: CharacterId;
   readonly displayName: string;
   readonly capabilityTags: readonly CharacterCapabilityTag[];
   readonly healthState: CharacterHealthState;
   readonly legalState: CharacterLegalState;
+  readonly assignmentState: AssignmentState;
   readonly personalExposure: number;
 }
 
@@ -21,6 +24,7 @@ export interface CreateCharacterStateInput {
   readonly capabilityTags: readonly CharacterCapabilityTag[];
   readonly healthState: CharacterHealthState;
   readonly legalState: CharacterLegalState;
+  readonly assignmentState: AssignmentState;
   readonly personalExposure: number;
 }
 
@@ -29,6 +33,7 @@ export type InvalidCharacterStateField =
   | "capabilityTags"
   | "healthState"
   | "legalState"
+  | "assignmentState"
   | "personalExposure";
 
 export class InvalidCharacterStateError extends Error {
@@ -63,6 +68,8 @@ const VALID_CHARACTER_LEGAL_STATES = new Set<CharacterLegalState>([
   "imprisoned",
 ]);
 
+const VALID_ASSIGNMENT_STATES = new Set<AssignmentState>(["idle", "assigned"]);
+
 const MIN_PERSONAL_EXPOSURE = 0;
 const MAX_PERSONAL_EXPOSURE = 100;
 
@@ -71,6 +78,7 @@ export function createCharacterState(input: CreateCharacterStateInput): Characte
   validateCapabilityTags(input.capabilityTags);
   validateHealthState(input.healthState);
   validateLegalState(input.legalState);
+  validateAssignmentState(input.assignmentState);
   validatePersonalExposure(input.personalExposure);
 
   return {
@@ -79,8 +87,17 @@ export function createCharacterState(input: CreateCharacterStateInput): Characte
     capabilityTags: [...input.capabilityTags],
     healthState: input.healthState,
     legalState: input.legalState,
+    assignmentState: input.assignmentState,
     personalExposure: input.personalExposure,
   };
+}
+
+export function isCharacterAvailable(character: CharacterState): boolean {
+  return (
+    character.healthState === "healthy" &&
+    character.legalState === "free" &&
+    character.assignmentState === "idle"
+  );
 }
 
 function validateDisplayName(displayName: unknown): asserts displayName is string {
@@ -175,6 +192,18 @@ function validateLegalState(legalState: unknown): asserts legalState is Characte
   }
 }
 
+function validateAssignmentState(
+  assignmentState: unknown,
+): asserts assignmentState is AssignmentState {
+  if (!isAssignmentState(assignmentState)) {
+    throw new InvalidCharacterStateError(
+      "assignmentState",
+      `unsupported assignment state "${String(assignmentState)}"`,
+      assignmentState,
+    );
+  }
+}
+
 function validatePersonalExposure(personalExposure: unknown): asserts personalExposure is number {
   if (typeof personalExposure !== "number") {
     throw new InvalidCharacterStateError(
@@ -226,6 +255,10 @@ function isCharacterLegalState(value: unknown): value is CharacterLegalState {
   return (
     typeof value === "string" && VALID_CHARACTER_LEGAL_STATES.has(value as CharacterLegalState)
   );
+}
+
+function isAssignmentState(value: unknown): value is AssignmentState {
+  return typeof value === "string" && VALID_ASSIGNMENT_STATES.has(value as AssignmentState);
 }
 
 function describeValueType(value: unknown): string {

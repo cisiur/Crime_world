@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   InvalidCharacterStateError,
   createCharacterState,
+  isCharacterAvailable,
   parseCharacterId,
   type CharacterCapabilityTag,
+  type CharacterHealthState,
+  type CharacterLegalState,
   type CharacterState,
   type CreateCharacterStateInput,
   type InvalidCharacterStateField,
@@ -20,6 +23,7 @@ describe("character state", () => {
       capabilityTags: ["force", "stealth", "social"],
       healthState: "healthy",
       legalState: "free",
+      assignmentState: "idle",
       personalExposure: 10,
     });
   });
@@ -127,6 +131,18 @@ describe("character state", () => {
     );
   });
 
+  it("rejects unsupported runtime assignment states", () => {
+    expectInvalidCharacterStateError(
+      () =>
+        createCharacterState(
+          createValidCharacterInput({
+            assignmentState: "recovering" as CreateCharacterStateInput["assignmentState"],
+          }),
+        ),
+      "assignmentState",
+    );
+  });
+
   it.each([-1, 101, 1.5, Number.NaN, Infinity, -Infinity])(
     "rejects invalid personal exposure: %s",
     (personalExposure) => {
@@ -134,6 +150,48 @@ describe("character state", () => {
         () => createCharacterState(createValidCharacterInput({ personalExposure })),
         "personalExposure",
       );
+    },
+  );
+
+  it("reports healthy, free, idle characters as available", () => {
+    const characterState = createCharacterState(
+      createValidCharacterInput({
+        healthState: "healthy",
+        legalState: "free",
+        assignmentState: "idle",
+      }),
+    );
+
+    expect(isCharacterAvailable(characterState)).toBe(true);
+  });
+
+  it("reports healthy, free, assigned characters as unavailable", () => {
+    const characterState = createCharacterState(
+      createValidCharacterInput({
+        healthState: "healthy",
+        legalState: "free",
+        assignmentState: "assigned",
+      }),
+    );
+
+    expect(isCharacterAvailable(characterState)).toBe(false);
+  });
+
+  it.each<CharacterHealthState>(["injured", "critical", "dead"])(
+    "reports %s characters as unavailable",
+    (healthState) => {
+      const characterState = createCharacterState(createValidCharacterInput({ healthState }));
+
+      expect(isCharacterAvailable(characterState)).toBe(false);
+    },
+  );
+
+  it.each<CharacterLegalState>(["detained", "imprisoned"])(
+    "reports %s characters as unavailable",
+    (legalState) => {
+      const characterState = createCharacterState(createValidCharacterInput({ legalState }));
+
+      expect(isCharacterAvailable(characterState)).toBe(false);
     },
   );
 });
@@ -147,6 +205,7 @@ function createValidCharacterInput(
     capabilityTags: ["force", "stealth", "social"],
     healthState: "healthy",
     legalState: "free",
+    assignmentState: "idle",
     personalExposure: 10,
     ...overrides,
   };
