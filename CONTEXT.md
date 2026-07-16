@@ -250,7 +250,7 @@ GitHub Actions run 29232731045 — success
 Latest reviewed gameplay implementation baseline before E4-01 specification:
 
 ```text
-2dd04c7257d091ddbb8f3d7f3cb4fe1e9ae5db83
+e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 ```
 
 Current roadmap phase:
