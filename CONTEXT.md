@@ -225,14 +225,16 @@ Completed document groups:
 - Authored rival organization seeds exist in the content package.
 - Cross-model organization lifecycle tests cover current EPIC 3 relationships without introducing a global validator.
 - The accepted E4-01 Local Collection first operation specification is recorded in `docs/BUILD_ROADMAP.md`.
+- Minimal immutable runtime `OperationState` exists in the domain package.
+- Minimal immutable authored `OperationTemplateDefinition` exists in the content package.
 - No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
-- No event bus, scheduler, save/load, AI, economy, operation, pressure, recruitment, ownership transfer, or playable UI systems exist yet.
+- No operation planning commands, operation availability evaluation, operation execution, operation resolver, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, or playable UI systems exist yet.
 - No EPIC 4 gameplay implementation exists yet.
 
-Owner-accepted project baseline before E4-01:
+Accepted project baseline after E4-02:
 
 ```text
-2dd04c7257d091ddbb8f3d7f3cb4fe1e9ae5db83
+1807d6ff2480230cc41252b74982c407172f9501
 ```
 
 Final accepted EPIC 1 commit:
@@ -259,9 +261,9 @@ Current roadmap phase:
 
 Current next task:
 
-> **E4-02 — Define operation template and runtime instance schemas.**
+> **E4-03 — Implement operation availability and prerequisite evaluation.**
 
-EPIC 3 is complete and E4-01 is complete as a documentation/specification task. The First Operation Slice is not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
+EPIC 3 is complete. E4-01 is complete as a documentation/specification task, and E4-02 is complete as a schema-only implementation task. The First Operation Slice gameplay is not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
 
 ---
 
@@ -675,7 +677,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, and the EPIC 3 character, organization, business, ownership-reference, and availability foundations. Authored city data and rival organization seeds remain in `packages/content`. The repository still does not contain operation gameplay, campaign creation, or playable gameplay. The E4-01 Local Collection specification is documentation only.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, and the E4-02 runtime `OperationState` schema. Authored city data, rival organization seeds, and the E4-02 authored `OperationTemplateDefinition` schema remain in `packages/content`. The repository still does not contain operation gameplay, campaign creation, or playable gameplay. The E4-01 Local Collection specification remains the authoritative operation design reference.
 
 ---
 
@@ -696,17 +698,18 @@ Completed:
 - EPIC 1 domain kernel and deterministic simulation clock foundation,
 - EPIC 2 controlled city shell,
 - EPIC 3 characters and organizations foundation,
-- E4-01 first operation specification and outcome table.
+- E4-01 first operation specification and outcome table,
+- E4-02 operation template and runtime instance schemas.
 
 Next:
 
-> **E4-02 — Define operation template and runtime instance schemas.**
+> **E4-03 — Implement operation availability and prerequisite evaluation.**
 
 Required PM output before implementation:
 
-- define the minimal authored operation template schema required for Local Collection,
-- define the minimal runtime operation instance schema required for the first slice,
-- keep availability, commands, lifecycle resolution, resolver behavior, production tests, campaign creation, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
+- define the minimal availability and prerequisite evaluation scope for Local Collection,
+- identify how authored `OperationTemplateDefinition` data combines with runtime `OperationState`, city, organization, character, and business state for validation,
+- keep planning commands, lifecycle execution, resolver behavior, production tests beyond the accepted scope, campaign creation, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
 
 ---
 

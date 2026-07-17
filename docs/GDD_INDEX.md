@@ -72,14 +72,14 @@ For active implementation work, begin with:
 
 The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, and characters-and-organizations foundation are complete.
 
-The project has moved from characters-and-organizations implementation into EPIC 4 specification and schema planning.
+The project has moved from characters-and-organizations implementation into EPIC 4 availability planning.
 
-E4-01 is complete as documentation only. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay implementation exists yet.
+E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay implementation exists yet.
 
 Current priority:
 
-1. define the minimal operation template and runtime instance schemas,
-2. use the accepted Local Collection specification in `BUILD_ROADMAP.md` as the source of truth,
+1. implement operation availability and prerequisite evaluation for Local Collection,
+2. use the accepted Local Collection specification in `BUILD_ROADMAP.md` and the E4-02 schemas as the source of truth,
 3. preserve the existing package boundaries,
 4. reuse derived character availability and existing organization state,
 5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, or full UI before their accepted tasks.

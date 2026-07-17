@@ -3,7 +3,7 @@
 > **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 specification work has started, but no EPIC 4 gameplay implementation exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** First Operation Slice specification complete; next accepted scope defines operation template and runtime instance schemas.
+> **Current phase:** First Operation Slice schema milestone complete; next accepted scope evaluates operation availability and prerequisites.
 
 ---
 
@@ -104,7 +104,7 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification complete
+First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification and E4-02 schemas complete
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
@@ -284,7 +284,7 @@ Recommended first slice: a small income operation against a local target, select
 | ID | Task | Who | Status |
 |---|---|---|---|
 | E4-01 | Finalize the first operation specification and outcome table | `[PM]` | Done |
-| E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Pending |
+| E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Done |
 | E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Pending |
 | E4-04 | Implement planning and crew assignment command | `[CODEX]` | Pending |
 | E4-05 | Implement operation lifecycle: planned → active → resolved | `[CODEX]` | Pending |
@@ -301,6 +301,12 @@ Recommended first slice: a small income operation against a local target, select
 - Partial success is materially different from both success and failure.
 - Consequences persist in `GameState`.
 - The entire loop is covered by deterministic tests.
+
+### Current EPIC 4 implementation status
+
+E4-02 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`.
+
+No EPIC 4 gameplay exists yet. There are still no operation planning commands, availability evaluation, lifecycle execution, resolver, forecasts, money or exposure consequences, assignment locking, `GameState` integration, campaign creation, or UI for operations.
 
 ### E4-01 accepted first operation specification
 
@@ -812,6 +818,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-02 — Define operation template and runtime instance schemas**.
+The next task is **E4-03 — Implement operation availability and prerequisite evaluation**.
 
-E4-02 should use the accepted **Local Collection** specification in the EPIC 4 section as its authoritative input, while keeping E4-03 and later runtime behavior pending. It should define only the minimal authored template shape and runtime operation instance shape needed for the first operation slice, preserve package ownership boundaries, and avoid implementing availability, commands, lifecycle resolution, economy systems, pressure systems, rival AI, save/load, or full UI early.
+E4-03 should use the accepted **Local Collection** specification in the EPIC 4 section and the E4-02 schema milestone as its input. It should implement only operation availability and prerequisite evaluation, while keeping planning commands, lifecycle execution, resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
