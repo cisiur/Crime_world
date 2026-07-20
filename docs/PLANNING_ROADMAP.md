@@ -115,21 +115,27 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 4 — First End-to-End Operation Vertical Slice command planning**
+> **EPIC 4 - First End-to-End Operation Vertical Slice lifecycle implementation planning**
 
 The current next task is:
 
-> **E4-04 — Implement planning and crew assignment command.**
+> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
-E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay execution exists yet.
+E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. Planning exists, but operation lifecycle execution and outcome resolution do not yet exist.
+
+Accepted implementation baseline after E4-04:
+
+```text
+be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+```
 
 The immediate sequence is:
 
-1. implement the planning and crew-assignment command,
-2. use the accepted E4-03 evaluator as the prerequisite gate,
-3. implement the minimal lifecycle in later tasks,
-4. keep resolver and gameplay consequences pending until their roadmap tasks.
+1. planning and crew/resource reservation are complete,
+2. implement lifecycle transitions for planned operations next,
+3. keep resolver and gameplay consequences pending until their roadmap tasks,
+4. continue to avoid premature economy, pressure, AI, UI, save/load, and campaign-creation work.
 
 ---
 
@@ -330,12 +336,12 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E4-04 — Implement planning and crew assignment command.**
+> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
 
-The task should use the accepted Local Collection specification in `BUILD_ROADMAP.md`, the E4-02 schemas, and the accepted E4-03 availability evaluator as inputs, then produce:
+The task should build on accepted E4-04 planning output and implement only the minimal lifecycle transitions for Local Collection operation instances using the existing concrete statuses `planned`, `running`, and `resolved`.
 
-- minimal planning and crew-assignment command behavior for Local Collection,
-- clear package ownership and dependency boundaries,
-- explicit exclusions for resolution, RNG, outcome probabilities, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, lifecycle resolution, resolver behavior, campaign creation, full operation catalogue, economy simulation, recruitment, and full UI.
+- minimal lifecycle transition behavior for already planned Local Collection operations,
+- preservation of clear package ownership and dependency boundaries,
+- explicit exclusions for resolver behavior, RNG outcomes, rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, campaign creation, full operation catalogue, economy simulation, recruitment, and full UI.
 
-E4-04 must not implement operation execution, outcome resolution, RNG, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, or gameplay consequences beyond the accepted planning-command scope.
+E4-05 must not implement outcome resolution, RNG, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, campaign creation, or gameplay consequences beyond the accepted lifecycle-transition scope.

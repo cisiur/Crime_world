@@ -72,17 +72,25 @@ For active implementation work, begin with:
 
 The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, and characters-and-organizations foundation are complete.
 
-The project has moved from characters-and-organizations implementation into EPIC 4 planning-command work.
+The project has moved through EPIC 4 planning-command work and is now preparing operation lifecycle implementation.
 
-E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay execution exists yet.
+E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. E4-04 is complete as deterministic domain planning and resource reservation for Local Collection. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`.
+
+Deterministic planning now creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Operation execution, lifecycle advancement, outcome resolution, rewards, exposure changes, injuries, campaign creation, save/load, AI operation execution, and UI operation flow remain unimplemented.
+
+Accepted implementation baseline after E4-04:
+
+```text
+be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+```
 
 Current priority:
 
-1. implement the planning and crew-assignment command for Local Collection,
-2. use the accepted Local Collection specification in `BUILD_ROADMAP.md`, the E4-02 schemas, and the E4-03 availability evaluator as the source of truth,
-3. preserve the existing package boundaries,
-4. keep planning separate from execution and outcome resolution,
-5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, or full UI before their accepted tasks.
+1. implement E4-05 operation lifecycle transitions for `planned -> running -> resolved`,
+2. build on the accepted Local Collection specification, E4-02 schemas, E4-03 availability evaluator, and E4-04 planning result as the source of truth,
+3. preserve the existing package boundaries, including no `packages/content` dependency from `packages/domain`,
+4. keep lifecycle separate from outcome resolution and gameplay consequences,
+5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, campaign creation, or full UI before their accepted tasks.
 
 Do not add another large design system unless implementation reveals a real design gap.
 

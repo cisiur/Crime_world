@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 specification and prerequisite evaluation work has started, but no EPIC 4 gameplay execution exists yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 now has specification, schemas, prerequisite evaluation, and bounded planning/reservation behavior. Lifecycle execution and outcome resolution do not yet exist.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** First Operation Slice availability milestone complete; next accepted scope implements planning and crew assignment.
+> **Current phase:** First Operation Slice planning milestone complete; next accepted scope is operation lifecycle: planned -> running -> resolved.
 
 ---
 
@@ -104,7 +104,7 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification, E4-02 schemas, and E4-03 availability evaluation complete
+First Operation Slice        in progress; E4-01 specification, E4-02 schemas, E4-03 availability evaluation, and E4-04 planning/reservation complete; lifecycle execution and resolution pending
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
@@ -286,8 +286,8 @@ Recommended first slice: a small income operation against a local target, select
 | E4-01 | Finalize the first operation specification and outcome table | `[PM]` | Done |
 | E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Done |
 | E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Done |
-| E4-04 | Implement planning and crew assignment command | `[CODEX]` | Pending |
-| E4-05 | Implement operation lifecycle: planned → active → resolved | `[CODEX]` | Pending |
+| E4-04 | Implement planning and crew assignment command | `[CODEX]` | Done |
+| E4-05 | Implement operation lifecycle: planned -> running -> resolved | `[CODEX]` | Pending |
 | E4-06 | Implement centralized outcome resolver with seeded randomness | `[CODEX]` | Pending |
 | E4-07 | Implement success, partial success, failure, and critical failure | `[CODEX]` | Pending |
 | E4-08 | Apply money, exposure, injury, and event consequences | `[CODEX]` | Pending |
@@ -304,11 +304,19 @@ Recommended first slice: a small income operation against a local target, select
 
 ### Current EPIC 4 implementation status
 
-E4-03 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation.
+E4-04 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation plus bounded deterministic operation planning.
 
 The availability evaluator returns typed rejection reasons rather than only a boolean, accumulates multiple independent failures deterministically, reuses existing derived character availability, and enforces the accepted Local Collection rule that exactly one character is assigned. It evaluates money, operational capacity, organization membership, character availability, target validity, target restrictions, and ownership prerequisites without mutating state.
 
-No EPIC 4 gameplay execution exists yet. There are still no operation planning commands, lifecycle execution, resolver, forecasts, money or exposure consequences, assignment locking, `GameState` integration, campaign creation, or UI for operations.
+Accepted E4-04 behavior adds immutable `PlanOperationCommand` and pure `planOperation(...)` in `packages/domain`. Planning accepts explicit runtime organization, character, location, business, and operation collections plus narrow authored template/location inputs. It reuses E4-03 availability as the authoritative prerequisite gate, rejects duplicate `OperationId` values separately, creates exactly one planned operation through `createOperationState(...)`, sets `plannedAtTick` from the current tick, derives `plannedCompletionTick` from authored duration through `MINUTES_PER_TICK`, reserves the assigned character, reserves operational capacity, deducts the start cost immediately and exactly once, and emits semantic events for operation planned, character assigned, operational capacity reserved, and organization money changed.
+
+Planning is not integrated with root `GameState` or the global command dispatcher. The root `GameState` is still not a complete campaign aggregate, and no campaign creation or operation UI flow exists. Operation lifecycle execution, `planned -> running -> resolved` advancement, resolver logic, RNG outcomes, rewards, exposure changes, injuries, forecasts, save/load, AI operation execution, and gameplay resolution remain pending.
+
+Accepted implementation baseline after E4-04:
+
+```text
+be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+```
 
 ### E4-01 accepted first operation specification
 
@@ -820,6 +828,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-04 — Implement planning and crew assignment command**.
+The next task is **E4-05 - Implement operation lifecycle: planned -> running -> resolved**.
 
-E4-04 should use the accepted **Local Collection** specification in the EPIC 4 section, the E4-02 schema milestone, and the E4-03 availability evaluator as inputs. It should implement only the planning and crew-assignment command, while keeping lifecycle execution, resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
+E4-05 should build on the accepted E4-04 planned-operation output and implement only the minimal lifecycle transitions for `planned -> running -> resolved`, while keeping resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
