@@ -31,6 +31,76 @@ describe("operation availability", () => {
     });
   });
 
+  it("rejects zero assigned characters with an invalid count reason", () => {
+    const result = evaluateOperationAvailability(
+      createValidAvailabilityInput({
+        assignedCharacterIds: [],
+      }),
+    );
+
+    expect(result.available).toBe(false);
+    expect(result.reasons).toEqual([OperationAvailabilityReason.InvalidAssignedCharacterCount]);
+  });
+
+  it("allows exactly one valid assigned character to pass the count prerequisite", () => {
+    const result = evaluateOperationAvailability(
+      createValidAvailabilityInput({
+        assignedCharacterIds: [BOSS_ID],
+      }),
+    );
+
+    expect(result.available).toBe(true);
+    expect(result.reasons).not.toContain(OperationAvailabilityReason.InvalidAssignedCharacterCount);
+  });
+
+  it("rejects multiple valid available organization members", () => {
+    const secondCharacterId = parseCharacterId("character:second_member");
+    const result = evaluateOperationAvailability(
+      createValidAvailabilityInput({
+        assignedCharacterIds: [BOSS_ID, secondCharacterId],
+        organizations: [
+          createStarterOrganization({
+            memberCharacterIds: [BOSS_ID, secondCharacterId],
+          }),
+        ],
+        characters: [
+          createAvailableCharacter(BOSS_ID),
+          createAvailableCharacter(secondCharacterId),
+        ],
+      }),
+    );
+
+    expect(result.available).toBe(false);
+    expect(result.reasons).toEqual([OperationAvailabilityReason.InvalidAssignedCharacterCount]);
+  });
+
+  it("reports the invalid assigned character count once for many assigned characters", () => {
+    const secondCharacterId = parseCharacterId("character:second_member");
+    const thirdCharacterId = parseCharacterId("character:third_member");
+    const result = evaluateOperationAvailability(
+      createValidAvailabilityInput({
+        assignedCharacterIds: [BOSS_ID, secondCharacterId, thirdCharacterId],
+        organizations: [
+          createStarterOrganization({
+            memberCharacterIds: [BOSS_ID, secondCharacterId, thirdCharacterId],
+          }),
+        ],
+        characters: [
+          createAvailableCharacter(BOSS_ID),
+          createAvailableCharacter(secondCharacterId),
+          createAvailableCharacter(thirdCharacterId),
+        ],
+      }),
+    );
+
+    expect(result.available).toBe(false);
+    expect(
+      result.reasons.filter(
+        (reason) => reason === OperationAvailabilityReason.InvalidAssignedCharacterCount,
+      ),
+    ).toHaveLength(1);
+  });
+
   it("rejects insufficient organization money", () => {
     const result = evaluateOperationAvailability(
       createValidAvailabilityInput({
@@ -265,6 +335,27 @@ describe("operation availability", () => {
       OperationAvailabilityReason.InsufficientOperationalCapacity,
       OperationAvailabilityReason.CharacterMissing,
       OperationAvailabilityReason.InvalidTarget,
+    ]);
+  });
+
+  it("accumulates independent failures in deterministic order with invalid assigned count", () => {
+    const outsiderId = parseCharacterId("character:outsider");
+    const result = evaluateOperationAvailability(
+      createValidAvailabilityInput({
+        assignedCharacterIds: [outsiderId, parseCharacterId("character:missing")],
+        organizations: [createStarterOrganization({ money: 0 })],
+        characters: [createAvailableCharacter(outsiderId)],
+        locationDefinitions: [createLocationDefinition({ kind: "hideout" })],
+      }),
+    );
+
+    expect(result.available).toBe(false);
+    expect(result.reasons).toEqual([
+      OperationAvailabilityReason.InsufficientMoney,
+      OperationAvailabilityReason.InvalidAssignedCharacterCount,
+      OperationAvailabilityReason.CharacterNotMember,
+      OperationAvailabilityReason.CharacterMissing,
+      OperationAvailabilityReason.InvalidTargetKind,
     ]);
   });
 

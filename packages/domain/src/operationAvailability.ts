@@ -9,6 +9,7 @@ export const OperationAvailabilityReason = {
   OrganizationMissing: "OrganizationMissing",
   InsufficientMoney: "InsufficientMoney",
   InsufficientOperationalCapacity: "InsufficientOperationalCapacity",
+  InvalidAssignedCharacterCount: "InvalidAssignedCharacterCount",
   CharacterMissing: "CharacterMissing",
   CharacterNotMember: "CharacterNotMember",
   CharacterUnavailable: "CharacterUnavailable",
@@ -116,9 +117,8 @@ function evaluateAssignedCharacterPrerequisites(
   organization: OrganizationState | undefined,
   reasons: OperationAvailabilityReason[],
 ): void {
-  if (assignedCharacterIds.length === 0) {
-    addReason(reasons, OperationAvailabilityReason.CharacterMissing);
-    return;
+  if (assignedCharacterIds.length !== 1) {
+    addReason(reasons, OperationAvailabilityReason.InvalidAssignedCharacterCount);
   }
 
   for (const characterId of assignedCharacterIds) {
