@@ -61,3 +61,4 @@ export * from "./businessState";
 export * from "./operationState";
 export * from "./operationAvailability";
 export * from "./operationPlanning";
+export * from "./operationLifecycle";

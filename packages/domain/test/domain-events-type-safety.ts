@@ -3,7 +3,9 @@ import {
   createCharacterAssignedToOperationEvent,
   createDomainExecution,
   createInitialGameState,
+  createOperationLifecycleCompletedEvent,
   createOperationPlannedEvent,
+  createOperationStartedEvent,
   createOrganizationMoneyChangedEvent,
   createOrganizationOperationalCapacityReservedEvent,
   parseCharacterId,
@@ -20,7 +22,9 @@ import type {
   CharacterAssignedToOperationEvent,
   DomainEvent,
   DomainExecution,
+  OperationLifecycleCompletedEvent,
   OperationPlannedEvent,
+  OperationStartedEvent,
   OrganizationMoneyChangedEvent,
   OrganizationOperationalCapacityReservedEvent,
   SimulationResumedEvent,
@@ -45,6 +49,28 @@ const operationPlannedEvent = createOperationPlannedEvent({
   targetLocationId,
   assignedCharacterIds: [characterId],
   plannedAtTick: tick,
+  plannedCompletionTick: parseSimulationTick(7),
+});
+const operationStartedEvent = createOperationStartedEvent({
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  previousStatus: "planned",
+  currentStatus: "running",
+  transitionTick: parseSimulationTick(2),
+  plannedCompletionTick: parseSimulationTick(7),
+});
+const operationLifecycleCompletedEvent = createOperationLifecycleCompletedEvent({
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  previousStatus: "running",
+  currentStatus: "resolved",
+  transitionTick: parseSimulationTick(7),
   plannedCompletionTick: parseSimulationTick(7),
 });
 const characterAssignedEvent = createCharacterAssignedToOperationEvent({
@@ -81,6 +107,8 @@ const eventUnionC: DomainEvent = operationPlannedEvent;
 const eventUnionD: DomainEvent = characterAssignedEvent;
 const eventUnionE: DomainEvent = capacityReservedEvent;
 const eventUnionF: DomainEvent = moneyChangedEvent;
+const eventUnionG: DomainEvent = operationStartedEvent;
+const eventUnionH: DomainEvent = operationLifecycleCompletedEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -93,6 +121,34 @@ const invalidOperationPlannedEvent: OperationPlannedEvent = {
   targetLocationId,
   assignedCharacterIds: [characterId],
   plannedAtTick: tick,
+  plannedCompletionTick: parseSimulationTick(7),
+};
+
+// @ts-expect-error Arbitrary objects cannot be OperationStartedEvent.
+const invalidOperationStartedEvent: OperationStartedEvent = {
+  type: DomainEventType.OperationStarted,
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  previousStatus: "planned",
+  currentStatus: "running",
+  transitionTick: parseSimulationTick(2),
+  plannedCompletionTick: parseSimulationTick(7),
+};
+
+// @ts-expect-error Arbitrary objects cannot be OperationLifecycleCompletedEvent.
+const invalidOperationLifecycleCompletedEvent: OperationLifecycleCompletedEvent = {
+  type: DomainEventType.OperationLifecycleCompleted,
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  previousStatus: "running",
+  currentStatus: "resolved",
+  transitionTick: parseSimulationTick(7),
   plannedCompletionTick: parseSimulationTick(7),
 };
 
@@ -171,6 +227,10 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.OperationPlanned:
       return event.type;
+    case DomainEventType.OperationStarted:
+      return event.type;
+    case DomainEventType.OperationLifecycleCompleted:
+      return event.type;
     case DomainEventType.OrganizationMoneyChanged:
       return event.type;
     case DomainEventType.OrganizationOperationalCapacityReserved:
@@ -192,8 +252,12 @@ void eventUnionC;
 void eventUnionD;
 void eventUnionE;
 void eventUnionF;
+void eventUnionG;
+void eventUnionH;
 void typedExecution;
 void invalidOperationPlannedEvent;
+void invalidOperationStartedEvent;
+void invalidOperationLifecycleCompletedEvent;
 void invalidCharacterAssignedEvent;
 void invalidCapacityReservedEvent;
 void invalidMoneyChangedEvent;

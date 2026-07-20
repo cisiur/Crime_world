@@ -7,6 +7,7 @@ import type {
   OperationTemplateId,
   OrganizationId,
 } from "./entityIds";
+import type { OperationStatus } from "./operationState";
 import type { SimulationMinute, SimulationTick } from "./simulationClock";
 
 declare const domainEventBrand: unique symbol;
@@ -14,7 +15,9 @@ declare const domainExecutionBrand: unique symbol;
 
 export const DomainEventType = {
   CharacterAssignedToOperation: "CharacterAssignedToOperation",
+  OperationLifecycleCompleted: "OperationLifecycleCompleted",
   OperationPlanned: "OperationPlanned",
+  OperationStarted: "OperationStarted",
   OrganizationMoneyChanged: "OrganizationMoneyChanged",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
   SimulationResumed: "SimulationResumed",
@@ -51,6 +54,34 @@ export interface OperationPlannedEvent {
   readonly [domainEventBrand]: "OperationPlannedEvent";
 }
 
+export interface OperationStartedEvent {
+  readonly type: typeof DomainEventType.OperationStarted;
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly assignedCharacterIds: readonly CharacterId[];
+  readonly previousStatus: OperationStatus;
+  readonly currentStatus: OperationStatus;
+  readonly transitionTick: SimulationTick;
+  readonly plannedCompletionTick: SimulationTick;
+  readonly [domainEventBrand]: "OperationStartedEvent";
+}
+
+export interface OperationLifecycleCompletedEvent {
+  readonly type: typeof DomainEventType.OperationLifecycleCompleted;
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly assignedCharacterIds: readonly CharacterId[];
+  readonly previousStatus: OperationStatus;
+  readonly currentStatus: OperationStatus;
+  readonly transitionTick: SimulationTick;
+  readonly plannedCompletionTick: SimulationTick;
+  readonly [domainEventBrand]: "OperationLifecycleCompletedEvent";
+}
+
 export interface CharacterAssignedToOperationEvent {
   readonly type: typeof DomainEventType.CharacterAssignedToOperation;
   readonly characterId: CharacterId;
@@ -83,7 +114,9 @@ export interface OrganizationMoneyChangedEvent {
 
 export type DomainEvent =
   | CharacterAssignedToOperationEvent
+  | OperationLifecycleCompletedEvent
   | OperationPlannedEvent
+  | OperationStartedEvent
   | OrganizationMoneyChangedEvent
   | OrganizationOperationalCapacityReservedEvent
   | SimulationResumedEvent
@@ -112,6 +145,18 @@ export interface CreateOperationPlannedEventInput {
   readonly targetLocationId: LocationId;
   readonly assignedCharacterIds: readonly CharacterId[];
   readonly plannedAtTick: SimulationTick;
+  readonly plannedCompletionTick: SimulationTick;
+}
+
+export interface CreateOperationLifecycleTransitionEventInput {
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly assignedCharacterIds: readonly CharacterId[];
+  readonly previousStatus: OperationStatus;
+  readonly currentStatus: OperationStatus;
+  readonly transitionTick: SimulationTick;
   readonly plannedCompletionTick: SimulationTick;
 }
 
@@ -175,6 +220,40 @@ export function createOperationPlannedEvent(
     plannedAtTick: input.plannedAtTick,
     plannedCompletionTick: input.plannedCompletionTick,
   }) as OperationPlannedEvent;
+}
+
+export function createOperationStartedEvent(
+  input: CreateOperationLifecycleTransitionEventInput,
+): OperationStartedEvent {
+  return Object.freeze({
+    type: DomainEventType.OperationStarted,
+    operationId: input.operationId,
+    operationTemplateId: input.operationTemplateId,
+    organizationId: input.organizationId,
+    targetLocationId: input.targetLocationId,
+    assignedCharacterIds: Object.freeze([...input.assignedCharacterIds]),
+    previousStatus: input.previousStatus,
+    currentStatus: input.currentStatus,
+    transitionTick: input.transitionTick,
+    plannedCompletionTick: input.plannedCompletionTick,
+  }) as OperationStartedEvent;
+}
+
+export function createOperationLifecycleCompletedEvent(
+  input: CreateOperationLifecycleTransitionEventInput,
+): OperationLifecycleCompletedEvent {
+  return Object.freeze({
+    type: DomainEventType.OperationLifecycleCompleted,
+    operationId: input.operationId,
+    operationTemplateId: input.operationTemplateId,
+    organizationId: input.organizationId,
+    targetLocationId: input.targetLocationId,
+    assignedCharacterIds: Object.freeze([...input.assignedCharacterIds]),
+    previousStatus: input.previousStatus,
+    currentStatus: input.currentStatus,
+    transitionTick: input.transitionTick,
+    plannedCompletionTick: input.plannedCompletionTick,
+  }) as OperationLifecycleCompletedEvent;
 }
 
 export function createCharacterAssignedToOperationEvent(

@@ -3,7 +3,9 @@ import {
   type CharacterAssignedToOperationEvent,
   type DomainEvent,
   type DomainExecution,
+  type OperationLifecycleCompletedEvent,
   type OperationPlannedEvent,
+  type OperationStartedEvent,
   type OrganizationMoneyChangedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type SimulationResumedEvent,
@@ -19,6 +21,7 @@ import {
   parseOrganizationId,
 } from "./entityIds";
 import { parseSchemaVersion } from "./gameState";
+import { OperationStatus } from "./operationState";
 import { parseRandomState, type RandomState } from "./randomService";
 import {
   MINUTES_PER_TICK,
@@ -155,8 +158,14 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.CharacterAssignedToOperation:
       assertCharacterAssignedToOperationEventInvariant(event);
       return;
+    case DomainEventType.OperationLifecycleCompleted:
+      assertOperationLifecycleCompletedEventInvariant(event);
+      return;
     case DomainEventType.OperationPlanned:
       assertOperationPlannedEventInvariant(event);
+      return;
+    case DomainEventType.OperationStarted:
+      assertOperationStartedEventInvariant(event);
       return;
     case DomainEventType.OrganizationMoneyChanged:
       assertOrganizationMoneyChangedEventInvariant(event);
@@ -173,6 +182,87 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     default:
       throw new InvariantViolationError("DomainEvent.type", "event type must be supported", event);
   }
+}
+
+function assertOperationStartedEventInvariant(event: OperationStartedEvent): void {
+  assertOperationLifecycleEventFields("OperationStarted", event);
+
+  if (
+    event.previousStatus !== OperationStatus.Planned ||
+    event.currentStatus !== OperationStatus.Running
+  ) {
+    throw new InvariantViolationError(
+      "OperationStarted.statusTransition",
+      "status transition must be planned -> running",
+      event,
+    );
+  }
+}
+
+function assertOperationLifecycleCompletedEventInvariant(
+  event: OperationLifecycleCompletedEvent,
+): void {
+  assertOperationLifecycleEventFields("OperationLifecycleCompleted", event);
+
+  if (
+    event.previousStatus !== OperationStatus.Running ||
+    event.currentStatus !== OperationStatus.Resolved
+  ) {
+    throw new InvariantViolationError(
+      "OperationLifecycleCompleted.statusTransition",
+      "status transition must be running -> resolved",
+      event,
+    );
+  }
+}
+
+function assertOperationLifecycleEventFields(
+  eventName: "OperationStarted" | "OperationLifecycleCompleted",
+  event: OperationStartedEvent | OperationLifecycleCompletedEvent,
+): void {
+  assertInvariant(`${eventName}.operationId`, () => parseOperationId(event.operationId), event);
+  assertInvariant(
+    `${eventName}.operationTemplateId`,
+    () => parseOperationTemplateId(event.operationTemplateId),
+    event,
+  );
+  assertInvariant(
+    `${eventName}.organizationId`,
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    `${eventName}.targetLocationId`,
+    () => parseLocationId(event.targetLocationId),
+    event,
+  );
+
+  if (!Array.isArray(event.assignedCharacterIds) || event.assignedCharacterIds.length === 0) {
+    throw new InvariantViolationError(
+      `${eventName}.assignedCharacterIds`,
+      "assignedCharacterIds must be a non-empty array",
+      event,
+    );
+  }
+
+  for (const characterId of event.assignedCharacterIds) {
+    assertInvariant(
+      `${eventName}.assignedCharacterIds`,
+      () => parseCharacterId(characterId),
+      event,
+    );
+  }
+
+  assertInvariant(
+    `${eventName}.transitionTick`,
+    () => parseSimulationTick(event.transitionTick),
+    event,
+  );
+  assertInvariant(
+    `${eventName}.plannedCompletionTick`,
+    () => parseSimulationTick(event.plannedCompletionTick),
+    event,
+  );
 }
 
 function assertOperationPlannedEventInvariant(event: OperationPlannedEvent): void {
