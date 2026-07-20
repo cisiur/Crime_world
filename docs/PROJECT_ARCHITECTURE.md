@@ -210,7 +210,7 @@ Current implementation:
 - Runtime city state stores IDs and mutable shell values only. Authored city names, tags, location kinds, route endpoints, and baseline profiles remain content definitions.
 - `LocationState` and `BusinessState` contain explicit nullable ownership references. `OrganizationState` does not store derived owned-location or owned-business collections.
 - `CharacterState` stores assignment state, health, legal state, competence, loyalty, and personal exposure. Availability is derived and not cached.
-- `OperationState` stores the minimal runtime operation instance schema. No operation commands, availability evaluation, lifecycle execution, resolver, or `GameState` integration exists yet.
+- `OperationState` stores the minimal runtime operation instance schema. The domain package also owns pure operation availability and prerequisite evaluation with typed operation availability results and rejection reasons. The evaluator is synchronous, deterministic, accumulates failures, accepts only the structural authored fields needed for evaluation, does not mutate state, and does not plan or execute operations.
 - `createPlayerOrganization` delegates to the base organization factory and creates the leader as the only initial member.
 - Domain currently has no dependency on React, Konva, Tauri, filesystem APIs, browser APIs, application, presentation, infrastructure, or content packages.
 
@@ -468,7 +468,8 @@ They should not each implement a completely separate execution engine.
 Current EPIC 4 specification status:
 - E4-01 accepts **Local Collection** as the first operation and records the authoritative detailed specification in `BUILD_ROADMAP.md`.
 - E4-02 adds minimal schemas: `packages/content` owns authored operation templates through `OperationTemplateDefinition`, and `packages/domain` owns runtime operation state through `OperationState`.
-- No operation command, availability evaluation, lifecycle execution, resolver, forecast, UI, or `GameState` integration exists yet.
+- E4-03 adds pure operation availability and prerequisite evaluation in `packages/domain`, with typed availability results and rejection reasons. Authored operation templates remain owned by `packages/content`; `packages/domain` accepts only the structural authored fields needed for evaluation and must not depend on `packages/content`.
+- No operation command, lifecycle execution, resolver, forecast, UI, or `GameState` integration exists yet.
 - The first operation implementation depends on attaching the current standalone EPIC 2 city state and EPIC 3 character, organization, and business state foundations to a minimal root campaign state. Do not decide a broad final campaign aggregate before the first operation slice requires it.
 - For the first EPIC 4 money consequence only, domain operation resolution may update `OrganizationState.money` directly with an explicit event or traceable result; the EPIC 5 transaction ledger remains pending and must not be preempted by a competing economy system.
 - EPIC 4 may update `CharacterState.personalExposure`, but organization-wide exposure, district tension changes, police pressure, investigations, evidence, decay, and law-enforcement reactions remain EPIC 6 scope unless later accepted scope changes the roadmap.
@@ -718,7 +719,7 @@ The MVP should not use:
 
 ## Current architecture status
 
-EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task, and E4-02 is complete as a schema-only implementation task.
+EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, and E4-03 is complete as an availability/prerequisite evaluation task.
 
 The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, and the minimal characters-and-organizations foundation.
 
@@ -729,7 +730,9 @@ The architecture review after EPIC 3 found the package boundaries intact:
 - Konva remains confined to presentation dependencies,
 - and no operation gameplay, recruitment gameplay, economy simulation, ownership transfer, AI, or playable UI was added during the character-and-organization foundation work.
 
-The next architecture-sensitive task is E4-03, implementing operation availability and prerequisite evaluation against the smallest operation template and runtime instance schemas needed for the accepted Local Collection slice. The First Operation Slice gameplay is not implemented yet.
+The E4-03 availability evaluator preserves the domain/content boundary: authored operation templates remain in `packages/content`, while `packages/domain` owns only the pure prerequisite rules and structural template input shape needed to evaluate availability. Application, presentation, and infrastructure remain unchanged.
+
+The next architecture-sensitive task is E4-04, implementing the planning and crew-assignment command against the accepted Local Collection slice. The First Operation Slice gameplay execution is not implemented yet.
 
 ## Technical debt and postponed work
 

@@ -115,21 +115,21 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 4 — First End-to-End Operation Vertical Slice availability planning**
+> **EPIC 4 — First End-to-End Operation Vertical Slice command planning**
 
 The current next task is:
 
-> **E4-03 — Implement operation availability and prerequisite evaluation.**
+> **E4-04 — Implement planning and crew assignment command.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
-E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay implementation exists yet.
+E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. No EPIC 4 gameplay execution exists yet.
 
 The immediate sequence is:
 
-1. implement operation availability and prerequisite checks,
-2. implement planning and crew assignment through the accepted command boundary,
-3. implement the smallest operation lifecycle and resolver needed for one complete flow,
-4. keep the full operation catalogue, economy simulation, recruitment actions, pressure systems, rival AI, save/load, and full UI work out of scope until their epics.
+1. implement the planning and crew-assignment command,
+2. use the accepted E4-03 evaluator as the prerequisite gate,
+3. implement the minimal lifecycle in later tasks,
+4. keep resolver and gameplay consequences pending until their roadmap tasks.
 
 ---
 
@@ -330,12 +330,12 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E4-03 — Implement operation availability and prerequisite evaluation.**
+> **E4-04 — Implement planning and crew assignment command.**
 
-The task should use the accepted Local Collection specification in `BUILD_ROADMAP.md` and the E4-02 schemas as inputs, then produce:
+The task should use the accepted Local Collection specification in `BUILD_ROADMAP.md`, the E4-02 schemas, and the accepted E4-03 availability evaluator as inputs, then produce:
 
-- minimal availability and prerequisite evaluation for Local Collection,
+- minimal planning and crew-assignment command behavior for Local Collection,
 - clear package ownership and dependency boundaries,
-- explicit exclusions for planning commands, lifecycle resolution, resolver behavior, campaign creation, full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, and full UI.
+- explicit exclusions for resolution, RNG, outcome probabilities, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, lifecycle resolution, resolver behavior, campaign creation, full operation catalogue, economy simulation, recruitment, and full UI.
 
-E4-03 must not implement planning commands, operation execution, outcome resolution, or gameplay consequences beyond the accepted availability/prerequisite scope.
+E4-04 must not implement operation execution, outcome resolution, RNG, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, or gameplay consequences beyond the accepted planning-command scope.

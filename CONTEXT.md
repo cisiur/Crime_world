@@ -227,14 +227,18 @@ Completed document groups:
 - The accepted E4-01 Local Collection first operation specification is recorded in `docs/BUILD_ROADMAP.md`.
 - Minimal immutable runtime `OperationState` exists in the domain package.
 - Minimal immutable authored `OperationTemplateDefinition` exists in the content package.
+- Pure deterministic `evaluateOperationAvailability(...)` exists in the domain package.
+- Typed operation availability rejection reasons exist.
+- Local Collection availability requires exactly one assigned character.
+- Operation prerequisite evaluation is deterministic and side-effect free.
 - No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
-- No operation planning commands, operation availability evaluation, operation execution, operation resolver, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, or playable UI systems exist yet.
-- No EPIC 4 gameplay implementation exists yet.
+- No operation planning command, operation creation through an application command, assignment locking or reservation, money or operational-capacity deduction, lifecycle execution, resolver, outcomes, exposure or health consequences, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, or operation UI systems exist yet.
+- No EPIC 4 gameplay execution exists yet.
 
-Accepted project baseline after E4-02:
+Accepted project baseline after E4-03:
 
 ```text
-1807d6ff2480230cc41252b74982c407172f9501
+6879058df85ddea6324a12cceae0c9cf0fac1129
 ```
 
 Final accepted EPIC 1 commit:
@@ -257,13 +261,13 @@ e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 
 Current roadmap phase:
 
-> **EPIC 4 — First End-to-End Operation Vertical Slice specification**
+> **EPIC 4 — First End-to-End Operation Vertical Slice planning**
 
 Current next task:
 
-> **E4-03 — Implement operation availability and prerequisite evaluation.**
+> **E4-04 — Implement planning and crew assignment command.**
 
-EPIC 3 is complete. E4-01 is complete as a documentation/specification task, and E4-02 is complete as a schema-only implementation task. The First Operation Slice gameplay is not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
+EPIC 3 is complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, and E4-03 is complete as an availability/prerequisite evaluation task. The First Operation Slice gameplay is not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
 
 ---
 
@@ -677,7 +681,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, and the E4-02 runtime `OperationState` schema. Authored city data, rival organization seeds, and the E4-02 authored `OperationTemplateDefinition` schema remain in `packages/content`. The repository still does not contain operation gameplay, campaign creation, or playable gameplay. The E4-01 Local Collection specification remains the authoritative operation design reference.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the E4-02 runtime `OperationState` schema, and the E4-03 pure operation availability evaluator with typed rejection reasons. Authored city data, rival organization seeds, and the E4-02 authored `OperationTemplateDefinition` schema remain in `packages/content`. The repository still does not contain operation planning commands, operation execution, operation gameplay consequences, campaign creation, or playable gameplay. The E4-01 Local Collection specification remains the authoritative operation design reference.
 
 ---
 
@@ -699,17 +703,18 @@ Completed:
 - EPIC 2 controlled city shell,
 - EPIC 3 characters and organizations foundation,
 - E4-01 first operation specification and outcome table,
-- E4-02 operation template and runtime instance schemas.
+- E4-02 operation template and runtime instance schemas,
+- E4-03 operation availability and prerequisite evaluation.
 
 Next:
 
-> **E4-03 — Implement operation availability and prerequisite evaluation.**
+> **E4-04 — Implement planning and crew assignment command.**
 
 Required PM output before implementation:
 
-- define the minimal availability and prerequisite evaluation scope for Local Collection,
-- identify how authored `OperationTemplateDefinition` data combines with runtime `OperationState`, city, organization, character, and business state for validation,
-- keep planning commands, lifecycle execution, resolver behavior, production tests beyond the accepted scope, campaign creation, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
+- define the minimal planning and crew-assignment command scope for Local Collection,
+- use the accepted E4-03 availability evaluator as the prerequisite gate,
+- keep lifecycle execution, resolver behavior, outcomes, money rewards, exposure changes, injury, campaign creation, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
 
 ---
 

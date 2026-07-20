@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 specification work has started, but no EPIC 4 gameplay implementation exists yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 specification and prerequisite evaluation work has started, but no EPIC 4 gameplay execution exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** First Operation Slice schema milestone complete; next accepted scope evaluates operation availability and prerequisites.
+> **Current phase:** First Operation Slice availability milestone complete; next accepted scope implements planning and crew assignment.
 
 ---
 
@@ -104,7 +104,7 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification and E4-02 schemas complete
+First Operation Slice        ░░░░░░░░░░   0% gameplay implemented; E4-01 specification, E4-02 schemas, and E4-03 availability evaluation complete
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
@@ -285,7 +285,7 @@ Recommended first slice: a small income operation against a local target, select
 |---|---|---|---|
 | E4-01 | Finalize the first operation specification and outcome table | `[PM]` | Done |
 | E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Done |
-| E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Pending |
+| E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Done |
 | E4-04 | Implement planning and crew assignment command | `[CODEX]` | Pending |
 | E4-05 | Implement operation lifecycle: planned → active → resolved | `[CODEX]` | Pending |
 | E4-06 | Implement centralized outcome resolver with seeded randomness | `[CODEX]` | Pending |
@@ -304,9 +304,11 @@ Recommended first slice: a small income operation against a local target, select
 
 ### Current EPIC 4 implementation status
 
-E4-02 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`.
+E4-03 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation.
 
-No EPIC 4 gameplay exists yet. There are still no operation planning commands, availability evaluation, lifecycle execution, resolver, forecasts, money or exposure consequences, assignment locking, `GameState` integration, campaign creation, or UI for operations.
+The availability evaluator returns typed rejection reasons rather than only a boolean, accumulates multiple independent failures deterministically, reuses existing derived character availability, and enforces the accepted Local Collection rule that exactly one character is assigned. It evaluates money, operational capacity, organization membership, character availability, target validity, target restrictions, and ownership prerequisites without mutating state.
+
+No EPIC 4 gameplay execution exists yet. There are still no operation planning commands, lifecycle execution, resolver, forecasts, money or exposure consequences, assignment locking, `GameState` integration, campaign creation, or UI for operations.
 
 ### E4-01 accepted first operation specification
 
@@ -818,6 +820,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-03 — Implement operation availability and prerequisite evaluation**.
+The next task is **E4-04 — Implement planning and crew assignment command**.
 
-E4-03 should use the accepted **Local Collection** specification in the EPIC 4 section and the E4-02 schema milestone as its input. It should implement only operation availability and prerequisite evaluation, while keeping planning commands, lifecycle execution, resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
+E4-04 should use the accepted **Local Collection** specification in the EPIC 4 section, the E4-02 schema milestone, and the E4-03 availability evaluator as inputs. It should implement only the planning and crew-assignment command, while keeping lifecycle execution, resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
