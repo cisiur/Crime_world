@@ -12,6 +12,7 @@ export * from "./cityDefinition";
 export * from "./cityDebugReport";
 export * from "./cityDefinitionValidation";
 export * from "./operationTemplateDefinition";
+export * from "./localCollectionOutcomeDefinition";
 export * from "./organizationSeeds";
 export * from "./cities/canonicalMvpCity";
 export * from "./cities/districts";

@@ -1,5 +1,17 @@
 export const DomainErrorCode = {
   DistrictPropertyInputMismatch: "DISTRICT_PROPERTY_INPUT_MISMATCH",
+  OperationOutcomeClassificationCategoryDuplicated:
+    "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
+  OperationOutcomeClassificationCategoryMissing:
+    "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_MISSING",
+  OperationOutcomeClassificationCategoryUnsupported:
+    "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_UNSUPPORTED",
+  OperationOutcomeClassificationCanonicalOrderInvalid:
+    "OPERATION_OUTCOME_CLASSIFICATION_CANONICAL_ORDER_INVALID",
+  OperationOutcomeClassificationResolverRejected:
+    "OPERATION_OUTCOME_CLASSIFICATION_RESOLVER_REJECTED",
+  OperationOutcomeClassificationSelectedCategoryUnknown:
+    "OPERATION_OUTCOME_CLASSIFICATION_SELECTED_CATEGORY_UNKNOWN",
   OperationOutcomeResolutionBandKeyDuplicated: "OPERATION_OUTCOME_RESOLUTION_BAND_KEY_DUPLICATED",
   OperationOutcomeResolutionBandKeyInvalid: "OPERATION_OUTCOME_RESOLUTION_BAND_KEY_INVALID",
   OperationOutcomeResolutionBandWeightInvalid: "OPERATION_OUTCOME_RESOLUTION_BAND_WEIGHT_INVALID",

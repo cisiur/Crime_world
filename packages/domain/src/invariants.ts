@@ -4,6 +4,7 @@ import {
   type DomainEvent,
   type DomainExecution,
   type OperationLifecycleCompletedEvent,
+  type OperationOutcomeClassifiedEvent,
   type OperationOutcomeRolledEvent,
   type OperationPlannedEvent,
   type OperationStartedEvent,
@@ -22,6 +23,7 @@ import {
   parseOrganizationId,
 } from "./entityIds";
 import { parseSchemaVersion } from "./gameState";
+import { isOperationOutcomeCategory } from "./operationOutcomeClassification";
 import { OperationStatus } from "./operationState";
 import { parseRandomState, type RandomState } from "./randomService";
 import {
@@ -162,6 +164,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.OperationLifecycleCompleted:
       assertOperationLifecycleCompletedEventInvariant(event);
       return;
+    case DomainEventType.OperationOutcomeClassified:
+      assertOperationOutcomeClassifiedEventInvariant(event);
+      return;
     case DomainEventType.OperationOutcomeRolled:
       assertOperationOutcomeRolledEventInvariant(event);
       return;
@@ -189,42 +194,7 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
 }
 
 function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolledEvent): void {
-  assertInvariant(
-    "OperationOutcomeRolled.operationId",
-    () => parseOperationId(event.operationId),
-    event,
-  );
-  assertInvariant(
-    "OperationOutcomeRolled.operationTemplateId",
-    () => parseOperationTemplateId(event.operationTemplateId),
-    event,
-  );
-  assertInvariant(
-    "OperationOutcomeRolled.organizationId",
-    () => parseOrganizationId(event.organizationId),
-    event,
-  );
-  assertInvariant(
-    "OperationOutcomeRolled.targetLocationId",
-    () => parseLocationId(event.targetLocationId),
-    event,
-  );
-
-  if (!Array.isArray(event.assignedCharacterIds) || event.assignedCharacterIds.length === 0) {
-    throw new InvariantViolationError(
-      "OperationOutcomeRolled.assignedCharacterIds",
-      "assignedCharacterIds must be a non-empty array",
-      event,
-    );
-  }
-
-  for (const characterId of event.assignedCharacterIds) {
-    assertInvariant(
-      "OperationOutcomeRolled.assignedCharacterIds",
-      () => parseCharacterId(characterId),
-      event,
-    );
-  }
+  assertOperationOutcomeEventFields("OperationOutcomeRolled", event);
 
   if (event.selectedBandKey.trim().length === 0) {
     throw new InvariantViolationError(
@@ -233,22 +203,66 @@ function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolle
       event,
     );
   }
+}
 
-  assertFiniteInteger("OperationOutcomeRolled.percentileRoll", event.percentileRoll, event);
-  assertFiniteInteger(
-    "OperationOutcomeRolled.selectedBandLowerBound",
-    event.selectedBandLowerBound,
+function assertOperationOutcomeClassifiedEventInvariant(
+  event: OperationOutcomeClassifiedEvent,
+): void {
+  assertOperationOutcomeEventFields("OperationOutcomeClassified", event);
+
+  if (!isOperationOutcomeCategory(event.category)) {
+    throw new InvariantViolationError(
+      "OperationOutcomeClassified.category",
+      "category must be a supported operation outcome category",
+      event,
+    );
+  }
+}
+
+function assertOperationOutcomeEventFields(
+  eventName: "OperationOutcomeRolled" | "OperationOutcomeClassified",
+  event: OperationOutcomeRolledEvent | OperationOutcomeClassifiedEvent,
+): void {
+  assertInvariant(`${eventName}.operationId`, () => parseOperationId(event.operationId), event);
+  assertInvariant(
+    `${eventName}.operationTemplateId`,
+    () => parseOperationTemplateId(event.operationTemplateId),
     event,
   );
-  assertFiniteInteger(
-    "OperationOutcomeRolled.selectedBandUpperBound",
-    event.selectedBandUpperBound,
+  assertInvariant(
+    `${eventName}.organizationId`,
+    () => parseOrganizationId(event.organizationId),
     event,
   );
+  assertInvariant(
+    `${eventName}.targetLocationId`,
+    () => parseLocationId(event.targetLocationId),
+    event,
+  );
+
+  if (!Array.isArray(event.assignedCharacterIds) || event.assignedCharacterIds.length === 0) {
+    throw new InvariantViolationError(
+      `${eventName}.assignedCharacterIds`,
+      "assignedCharacterIds must be a non-empty array",
+      event,
+    );
+  }
+
+  for (const characterId of event.assignedCharacterIds) {
+    assertInvariant(
+      `${eventName}.assignedCharacterIds`,
+      () => parseCharacterId(characterId),
+      event,
+    );
+  }
+
+  assertFiniteInteger(`${eventName}.percentileRoll`, event.percentileRoll, event);
+  assertFiniteInteger(`${eventName}.selectedBandLowerBound`, event.selectedBandLowerBound, event);
+  assertFiniteInteger(`${eventName}.selectedBandUpperBound`, event.selectedBandUpperBound, event);
 
   if (event.percentileRoll < 1 || event.percentileRoll > 100) {
     throw new InvariantViolationError(
-      "OperationOutcomeRolled.percentileRoll",
+      `${eventName}.percentileRoll`,
       "percentileRoll must be within 1..100",
       event,
     );
@@ -260,7 +274,7 @@ function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolle
     event.selectedBandLowerBound > event.selectedBandUpperBound
   ) {
     throw new InvariantViolationError(
-      "OperationOutcomeRolled.selectedBandRange",
+      `${eventName}.selectedBandRange`,
       "selected range must be within 1..100 and lowerBound <= upperBound",
       event,
     );
@@ -271,16 +285,16 @@ function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolle
     event.percentileRoll > event.selectedBandUpperBound
   ) {
     throw new InvariantViolationError(
-      "OperationOutcomeRolled.rollRange",
+      `${eventName}.rollRange`,
       "percentileRoll must be contained by the selected band range",
       event,
     );
   }
 
-  assertObject("OperationOutcomeRolled.modifierContributions", event.modifierContributions);
+  assertObject(`${eventName}.modifierContributions`, event.modifierContributions);
   for (const field of ["base", "competence", "capability", "district", "exposure"] as const) {
     assertFiniteInteger(
-      `OperationOutcomeRolled.modifierContributions.${field}`,
+      `${eventName}.modifierContributions.${field}`,
       event.modifierContributions[field],
       event,
     );
