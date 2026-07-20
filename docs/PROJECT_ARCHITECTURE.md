@@ -182,8 +182,9 @@ Current implementation:
 - The canonical MVP city contains four districts, 29 strategic locations, and five routes.
 - The content package owns immutable rival organization seed definitions for the current MVP rivals.
 - The content package owns the minimal authored `OperationTemplateDefinition` schema for operation templates.
+- The content package owns the immutable canonical Local Collection outcome-band definition in `localCollectionOutcomeDefinition.ts`, with ordered category weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`.
 - City validation is structural and headless; it checks schema version, required collections, duplicate IDs, route validity, orphan locations, and district graph connectivity.
-- The content package may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state.
+- The content package may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state. This dependency direction is allowed; `packages/domain` must not import `packages/content`.
 
 ### 2. Domain layer
 
@@ -212,7 +213,11 @@ Current implementation:
 - `CharacterState` stores assignment state, health, legal state, competence, loyalty, and personal exposure. Availability is derived and not cached.
 - `OperationState` stores the minimal runtime operation instance schema. The domain package also owns pure operation availability and prerequisite evaluation with typed operation availability results and rejection reasons. The evaluator is synchronous, deterministic, accumulates failures, accepts only the structural authored fields needed for evaluation, and does not mutate state.
 - The domain package now owns bounded deterministic operation planning through `PlanOperationCommand` and `planOperation(...)`. Planning accepts explicit runtime collections and narrow authored structural template/location inputs, validates through the existing availability evaluator, creates immutable planned operation state, reserves character assignment, reserves operational capacity, deducts the operation start cost, and emits semantic events.
-- Operation planning is not integrated with root `GameState` or the global command dispatcher. Future application-layer orchestration remains responsible for locating content definitions, assembling runtime state, invoking domain planning, and later connecting the result to a campaign-level command path.
+- The domain package now owns bounded operation lifecycle transitions through `advanceOperationLifecycles(...)`. The function accepts an explicit current simulation tick and immutable operation collection, advances `planned -> running -> resolved` timing deterministically, preserves collection order, handles overdue planned operations in one evaluation, recreates changed operation states through the operation-state validation path, and emits lifecycle events.
+- The domain package now owns generic seeded weighted outcome resolution through `resolveOperationOutcome(...)`. The resolver accepts one lifecycle-resolved operation, immutable `RandomState`, ordered weighted bands totaling exactly 100, and explicit modifier diagnostics. It uses the existing seeded PCG32 random service, advances and returns `RandomState`, emits `OperationOutcomeRolled`, and does not apply consequences.
+- The domain package now owns typed runtime outcome categories and Local Collection outcome classification through `classifyOperationOutcome(...)`. The classifier validates supplied Local Collection bands, delegates RNG and weighted selection to the centralized E4-06 resolver, maps the selected band to `success`, `partial-success`, `failure`, or `critical-failure`, preserves resolver diagnostics, and emits `OperationOutcomeClassified` after the roll event.
+- Modifier diagnostics for base, competence, capability, district, and exposure are currently supplied explicitly to the resolver/classifier. No formula calculates them yet, and they do not alter probabilities.
+- Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. Future application-layer orchestration remains responsible for locating content definitions, assembling runtime state, selecting eligible resolved operations, invoking domain planning/lifecycle/classification, storing RNG state, applying later consequences, and eventually connecting results to a campaign-level command path.
 - `createPlayerOrganization` delegates to the base organization factory and creates the leader as the only initial member.
 - Domain currently has no dependency on React, Konva, Tauri, filesystem APIs, browser APIs, application, presentation, infrastructure, or content packages.
 
@@ -472,8 +477,11 @@ Current EPIC 4 specification status:
 - E4-02 adds minimal schemas: `packages/content` owns authored operation templates through `OperationTemplateDefinition`, and `packages/domain` owns runtime operation state through `OperationState`.
 - E4-03 adds pure operation availability and prerequisite evaluation in `packages/domain`, with typed availability results and rejection reasons. Authored operation templates remain owned by `packages/content`; `packages/domain` accepts only the structural authored fields needed for evaluation and must not depend on `packages/content`.
 - E4-04 adds bounded deterministic operation planning in `packages/domain`. `PlanOperationCommand` and `planOperation(...)` accept explicit runtime collections and narrow authored template/location inputs, reuse the E4-03 availability evaluator, reject duplicate `OperationId` values, create immutable planned operation state, reserve the assigned character, reserve operational capacity, deduct the start cost, and emit semantic planning events.
-- Planning is not integrated with root `GameState` or the global command dispatcher. The root `GameState` still contains only the current domain-kernel fields and is not the complete campaign aggregate.
-- No operation lifecycle execution, `planned -> running -> resolved` processing, resolver, forecast, UI, campaign creation, save/load, AI operation execution, or outcome consequence flow exists yet.
+- E4-05 adds bounded deterministic operation lifecycle transitions in `packages/domain`. `advanceOperationLifecycles(...)` accepts the current tick and immutable operation collection, preserves collection order, advances `planned -> running -> resolved` timing, emits `OperationStarted` and `OperationLifecycleCompleted`, and treats `resolved` as ready for outcome resolution rather than consequence completion.
+- E4-06 adds centralized seeded weighted outcome resolution in `packages/domain`. `resolveOperationOutcome(...)` validates lifecycle-resolved operation input, ordered opaque weighted bands, and explicit modifier diagnostics before consuming RNG, uses one `nextInt(randomState, 1, 100)` call per success, returns roll/range/band/RNG diagnostics, and emits `OperationOutcomeRolled`.
+- E4-07 adds typed Local Collection outcome classification in `packages/domain` and the canonical immutable Local Collection outcome-band definition in `packages/content`. `classifyOperationOutcome(...)` delegates weighted selection to E4-06 and returns one of `success`, `partial-success`, `failure`, or `critical-failure` with diagnostics and `OperationOutcomeClassified`.
+- Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. The root `GameState` still contains only the current domain-kernel fields and is not the complete campaign aggregate.
+- No operation consequence application, reward payment, exposure change, injury application, assignment release, capacity release, forecast, UI, campaign creation, save/load, AI operation execution, or full outcome persistence flow exists yet.
 - For the first EPIC 4 money consequence only, domain operation planning currently updates `OrganizationState.money` directly with an explicit semantic event. The EPIC 5 transaction ledger remains pending and must not be preempted by a competing economy system.
 - EPIC 4 may update `CharacterState.personalExposure` during later resolution work, but organization-wide exposure, district tension changes, police pressure, investigations, evidence, decay, and law-enforcement reactions remain EPIC 6 scope unless later accepted scope changes the roadmap.
 
@@ -722,12 +730,12 @@ The MVP should not use:
 
 ## Current architecture status
 
-EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, and E4-04 is complete as a bounded domain planning and reservation implementation.
+EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, E4-04 is complete as a bounded domain planning and reservation implementation, E4-05 is complete as operation lifecycle transitions, E4-06 is complete as centralized seeded weighted resolution, and E4-07 is complete as typed Local Collection outcome classification.
 
-Accepted implementation baseline after E4-04:
+Accepted implementation baseline after E4-07:
 
 ```text
-be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+ba640c7a8da900ee3d2470f93331cb4cb5baee4a
 ```
 
 The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, and the minimal characters-and-organizations foundation.
@@ -739,9 +747,9 @@ The architecture review after EPIC 3 found the package boundaries intact:
 - Konva remains confined to presentation dependencies,
 - and no operation gameplay, recruitment gameplay, economy simulation, ownership transfer, AI, or playable UI was added during the character-and-organization foundation work.
 
-The E4-03 availability evaluator and E4-04 planning function preserve the domain/content boundary: authored operation templates remain in `packages/content`, while `packages/domain` owns only pure prerequisite and planning rules over structural template/location inputs. Application, presentation, and infrastructure remain unchanged.
+The E4-03 availability evaluator, E4-04 planning function, E4-05 lifecycle function, E4-06 resolver, and E4-07 classifier preserve the domain/content boundary: authored operation templates and canonical Local Collection outcome bands remain in `packages/content`, while `packages/domain` owns pure prerequisite, planning, lifecycle, seeded resolution, and classification rules over explicit runtime state and structural authored inputs. Application, presentation, and infrastructure remain unchanged.
 
-The next architecture-sensitive task is E4-05, implementing the operation lifecycle from `planned` to `running` to `resolved` without yet adding resolver logic, outcome consequences, campaign creation, save/load, AI operation execution, or UI.
+The next architecture-sensitive task is E4-08, applying the accepted Local Collection money, personal exposure, injury, assignment-release, capacity-release, and event consequences without yet adding campaign creation, broad economy systems, pressure systems, save/load, AI operation execution, operation UI, or full campaign orchestration.
 
 ## Technical debt and postponed work
 

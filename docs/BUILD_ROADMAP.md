@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 now has specification, schemas, prerequisite evaluation, and bounded planning/reservation behavior. Lifecycle execution and outcome resolution do not yet exist.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 now has specification, schemas, prerequisite evaluation, bounded planning/reservation, lifecycle transitions, seeded weighted resolution, and typed Local Collection outcome classification. Consequence application remains pending.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** First Operation Slice planning milestone complete; next accepted scope is operation lifecycle: planned -> running -> resolved.
+> **Current phase:** First Operation Slice outcome-classification milestone complete; next accepted scope is E4-08 consequence application.
 
 ---
 
@@ -104,7 +104,7 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        in progress; E4-01 specification, E4-02 schemas, E4-03 availability evaluation, and E4-04 planning/reservation complete; lifecycle execution and resolution pending
+First Operation Slice        in progress; E4-01 specification, E4-02 schemas, E4-03 availability evaluation, E4-04 planning/reservation, E4-05 lifecycle transitions, E4-06 seeded resolver, and E4-07 outcome classification complete; consequence application pending
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
@@ -287,9 +287,9 @@ Recommended first slice: a small income operation against a local target, select
 | E4-02 | Define operation template and runtime instance schemas | `[BOTH]` | Done |
 | E4-03 | Implement operation availability and prerequisite evaluation | `[CODEX]` | Done |
 | E4-04 | Implement planning and crew assignment command | `[CODEX]` | Done |
-| E4-05 | Implement operation lifecycle: planned -> running -> resolved | `[CODEX]` | Pending |
-| E4-06 | Implement centralized outcome resolver with seeded randomness | `[CODEX]` | Pending |
-| E4-07 | Implement success, partial success, failure, and critical failure | `[CODEX]` | Pending |
+| E4-05 | Implement operation lifecycle: planned -> running -> resolved | `[CODEX]` | Done |
+| E4-06 | Implement centralized outcome resolver with seeded randomness | `[CODEX]` | Done |
+| E4-07 | Implement success, partial success, failure, and critical failure | `[CODEX]` | Done |
 | E4-08 | Apply money, exposure, injury, and event consequences | `[CODEX]` | Pending |
 | E4-09 | Add full vertical-slice integration tests | `[CODEX]` | Pending |
 | E4-10 | Add minimal developer UI or debug harness to run the slice | `[CODEX]` | Pending |
@@ -304,18 +304,24 @@ Recommended first slice: a small income operation against a local target, select
 
 ### Current EPIC 4 implementation status
 
-E4-04 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation plus bounded deterministic operation planning.
+E4-07 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation, bounded deterministic operation planning, lifecycle transitions, centralized seeded outcome resolution, and typed Local Collection outcome classification.
 
 The availability evaluator returns typed rejection reasons rather than only a boolean, accumulates multiple independent failures deterministically, reuses existing derived character availability, and enforces the accepted Local Collection rule that exactly one character is assigned. It evaluates money, operational capacity, organization membership, character availability, target validity, target restrictions, and ownership prerequisites without mutating state.
 
 Accepted E4-04 behavior adds immutable `PlanOperationCommand` and pure `planOperation(...)` in `packages/domain`. Planning accepts explicit runtime organization, character, location, business, and operation collections plus narrow authored template/location inputs. It reuses E4-03 availability as the authoritative prerequisite gate, rejects duplicate `OperationId` values separately, creates exactly one planned operation through `createOperationState(...)`, sets `plannedAtTick` from the current tick, derives `plannedCompletionTick` from authored duration through `MINUTES_PER_TICK`, reserves the assigned character, reserves operational capacity, deducts the start cost immediately and exactly once, and emits semantic events for operation planned, character assigned, operational capacity reserved, and organization money changed.
 
-Planning is not integrated with root `GameState` or the global command dispatcher. The root `GameState` is still not a complete campaign aggregate, and no campaign creation or operation UI flow exists. Operation lifecycle execution, `planned -> running -> resolved` advancement, resolver logic, RNG outcomes, rewards, exposure changes, injuries, forecasts, save/load, AI operation execution, and gameplay resolution remain pending.
+Accepted E4-05 behavior adds pure `advanceOperationLifecycles(...)` in `packages/domain`. It accepts the current simulation tick and an immutable operation collection, preserves collection order, keeps planned operations planned at or before `plannedAtTick`, starts planned operations after planning and before completion, completes running operations at or after `plannedCompletionTick`, and advances overdue planned operations directly to `resolved` in one evaluation while emitting `OperationStarted` before `OperationLifecycleCompleted`. In E4-05, `resolved` means the scheduled lifecycle duration has completed and the operation is ready for outcome resolution; it does not mean consequences have been applied.
 
-Accepted implementation baseline after E4-04:
+Accepted E4-06 behavior adds pure `resolveOperationOutcome(...)` in `packages/domain`. It accepts one lifecycle-resolved operation, immutable `RandomState`, caller-ordered weighted bands totaling exactly 100, and explicit modifier diagnostics for base, competence, capability, district, and exposure. It validates before consuming RNG, uses the existing seeded PCG32 service through one `nextInt(randomState, 1, 100)` call per successful invocation, selects the first cumulative band containing the roll, returns full roll/range/band/RNG diagnostics, carries modifier diagnostics unchanged, and emits `OperationOutcomeRolled`.
+
+Accepted E4-07 behavior adds runtime outcome categories `success`, `partial-success`, `failure`, and `critical-failure` plus pure `classifyOperationOutcome(...)` in `packages/domain`. The classifier validates supplied Local Collection classification bands, delegates seeded weighted selection to E4-06, maps the selected band to a typed category, preserves resolver diagnostics, returns the advanced random state, and emits `OperationOutcomeRolled` followed by `OperationOutcomeClassified`. The immutable canonical Local Collection authored distribution lives in `packages/content/src/localCollectionOutcomeDefinition.ts` as `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`, in that order. Generic classification-band validation remains reusable for other valid 100-total distributions, while canonical Local Collection validation additionally enforces all four categories, the accepted order, and exact `45/30/20/5` weights.
+
+Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. The root `GameState` is still not a complete campaign aggregate, and no campaign creation or operation UI flow exists. Local Collection consequence application, reward payment, exposure changes, injuries, assignment release, capacity release, classified-outcome persistence, forecasts, save/load, AI operation execution, full operation orchestration, and gameplay resolution remain pending.
+
+Accepted implementation baseline after E4-07:
 
 ```text
-be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+ba640c7a8da900ee3d2470f93331cb4cb5baee4a
 ```
 
 ### E4-01 accepted first operation specification
@@ -828,6 +834,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-05 - Implement operation lifecycle: planned -> running -> resolved**.
+The next task is **E4-08 - Apply money, exposure, injury, and event consequences**.
 
-E4-05 should build on the accepted E4-04 planned-operation output and implement only the minimal lifecycle transitions for `planned -> running -> resolved`, while keeping resolver behavior, economy systems, pressure systems, rival AI, save/load, and full UI pending.
+E4-08 should build on accepted E4-04 planning and reservation, E4-05 lifecycle transitions, E4-06 seeded resolver diagnostics, E4-07 typed Local Collection classification, and the E4-01 consequence table. It should apply only the accepted Local Collection money, personal exposure, injury, assignment-release, capacity-release, and event consequences while keeping full campaign creation, economy systems, pressure systems, rival AI, save/load, operation UI, and broader operation orchestration pending.

@@ -235,14 +235,22 @@ Completed document groups:
 - Operation planning accepts explicit runtime collections and narrow authored template/location inputs rather than expanding root `GameState` or importing content definitions.
 - Valid planning creates exactly one immutable planned `OperationState`, reserves exactly one assigned character by changing `assignmentState` from `idle` to `assigned`, reserves operational capacity, deducts the start cost immediately and exactly once, and emits ordered semantic planning events.
 - Operation planning rejects duplicate `OperationId` values explicitly and preserves typed `OperationAvailabilityReason` values in availability failures.
+- Pure deterministic `advanceOperationLifecycles(...)` exists in the domain package for bounded `planned -> running -> resolved` operation lifecycle transitions over explicit immutable operation collections.
+- Lifecycle evaluation preserves collection order, emits `OperationStarted` and `OperationLifecycleCompleted` events, handles overdue planned operations in one evaluation, and treats `resolved` as "ready for outcome resolution" rather than "consequences applied".
+- Pure deterministic `resolveOperationOutcome(...)` exists in the domain package as a centralized seeded percentile resolver. It accepts one lifecycle-resolved operation, immutable `RandomState`, ordered weighted bands totaling exactly 100, and explicit modifier diagnostics for base, competence, capability, district, and exposure.
+- The outcome resolver uses the existing seeded PCG32 service through one `nextInt(randomState, 1, 100)` call per successful resolution, preserves caller band order, returns roll/range/band/RNG diagnostics, and emits `OperationOutcomeRolled`.
+- Runtime operation outcome categories now exist for `success`, `partial-success`, `failure`, and `critical-failure`.
+- Pure deterministic `classifyOperationOutcome(...)` exists in the domain package for Local Collection outcome classification. It validates supplied Local Collection bands, delegates seeded weighted resolution to E4-06, maps the selected band to a typed category, preserves resolver diagnostics, returns the advanced random state, and emits `OperationOutcomeRolled` followed by `OperationOutcomeClassified`.
+- The canonical immutable Local Collection outcome band definition exists in `packages/content/src/localCollectionOutcomeDefinition.ts` with the accepted ordered weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`.
+- Generic classification-band validation remains reusable for other valid 100-total distributions, while canonical Local Collection validation additionally enforces all four categories, their accepted order, and exact `45/30/20/5` weights.
 - No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
-- No operation lifecycle execution, `planned -> running -> resolved` advancement, resolver, outcomes, rewards, exposure or health consequences, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, campaign orchestration, or operation UI systems exist yet.
+- No Local Collection consequence application, reward payment, exposure change, injury application, character assignment release, operational-capacity release, classified-outcome persistence, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, campaign orchestration, or operation UI systems exist yet.
 - The root `GameState` still contains only the current domain-kernel fields and is not yet a complete campaign aggregate.
 
-Accepted project baseline after E4-04:
+Accepted project baseline after E4-07:
 
 ```text
-be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+ba640c7a8da900ee3d2470f93331cb4cb5baee4a
 ```
 
 Final accepted EPIC 1 commit:
@@ -265,13 +273,13 @@ e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 
 Current roadmap phase:
 
-> **EPIC 4 - First End-to-End Operation Vertical Slice lifecycle planning**
+> **EPIC 4 - First End-to-End Operation Vertical Slice consequence-application planning**
 
 Current next task:
 
-> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
+> **E4-08 - Apply money, exposure, injury, and event consequences.**
 
-EPIC 3 is complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, and E4-04 is complete as a bounded domain planning and reservation implementation. The First Operation Slice can evaluate prerequisites and create planned operations, but lifecycle execution and outcome resolution are not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
+EPIC 3 is complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, E4-04 is complete as a bounded domain planning and reservation implementation, E4-05 is complete as bounded lifecycle transitions, E4-06 is complete as a centralized seeded percentile resolver, and E4-07 is complete as typed Local Collection outcome classification. The First Operation Slice can evaluate prerequisites, create planned operations, advance lifecycle timing, roll a seeded weighted outcome, and classify Local Collection results, but consequence application and campaign orchestration are not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
 
 ---
 
@@ -685,7 +693,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the E4-02 runtime `OperationState` schema, the E4-03 pure operation availability evaluator with typed rejection reasons, and the E4-04 bounded deterministic planning function for Local Collection. Authored city data, rival organization seeds, and the E4-02 authored `OperationTemplateDefinition` schema remain in `packages/content`. The repository still does not contain operation lifecycle execution, outcome resolution, campaign creation, or playable operation UI. The E4-01 Local Collection specification remains the authoritative operation design reference.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the E4-02 runtime `OperationState` schema, the E4-03 pure operation availability evaluator with typed rejection reasons, the E4-04 bounded deterministic planning function for Local Collection, the E4-05 bounded lifecycle transition function, the E4-06 seeded weighted outcome resolver, and the E4-07 typed Local Collection outcome classifier. Authored city data, rival organization seeds, the E4-02 authored `OperationTemplateDefinition` schema, and the E4-07 canonical Local Collection outcome bands remain in `packages/content`. The repository still does not contain consequence application, campaign creation, classified-outcome persistence in campaign state, or playable operation UI. The E4-01 Local Collection specification remains the authoritative operation design reference.
 
 ---
 
@@ -709,17 +717,20 @@ Completed:
 - E4-01 first operation specification and outcome table,
 - E4-02 operation template and runtime instance schemas,
 - E4-03 operation availability and prerequisite evaluation,
-- E4-04 planning and crew/resource reservation command.
+- E4-04 planning and crew/resource reservation command,
+- E4-05 operation lifecycle transitions,
+- E4-06 centralized seeded operation outcome resolver,
+- E4-07 Local Collection outcome classification.
 
 Next:
 
-> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
+> **E4-08 - Apply money, exposure, injury, and event consequences.**
 
 Required PM output before implementation:
 
-- define the minimal lifecycle transition scope for planned Local Collection operations,
-- preserve the accepted E4-04 planning and reservation behavior,
-- keep resolver behavior, outcomes, money rewards, exposure changes, injury, campaign creation, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
+- define the minimal consequence-application scope for classified Local Collection outcomes,
+- preserve the accepted E4-04 planning/reservation, E4-05 lifecycle, E4-06 resolver, and E4-07 classification behavior,
+- keep campaign creation, full orchestration, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
 
 ---
 

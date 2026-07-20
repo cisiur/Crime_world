@@ -72,24 +72,24 @@ For active implementation work, begin with:
 
 The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, and characters-and-organizations foundation are complete.
 
-The project has moved through EPIC 4 planning-command work and is now preparing operation lifecycle implementation.
+The project has moved through EPIC 4 planning, lifecycle, seeded resolution, and outcome-classification work and is now preparing consequence application.
 
-E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. E4-04 is complete as deterministic domain planning and resource reservation for Local Collection. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`.
+E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. E4-04 is complete as deterministic domain planning and resource reservation for Local Collection. E4-05 is complete as deterministic operation lifecycle timing for `planned -> running -> resolved`. E4-06 is complete as seeded weighted operation outcome rolling. E4-07 is complete as typed Local Collection outcome classification. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`.
 
-Deterministic planning now creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Operation execution, lifecycle advancement, outcome resolution, rewards, exposure changes, injuries, campaign creation, save/load, AI operation execution, and UI operation flow remain unimplemented.
+Deterministic planning now creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Lifecycle timing now advances operations through the existing `planned`, `running`, and `resolved` statuses. Seeded weighted rolling now uses the central resolver and existing deterministic random service. Typed outcome classification now maps Local Collection rolls to `success`, `partial-success`, `failure`, or `critical-failure`, with canonical authored probabilities `45/30/20/5` in `packages/content`. Consequence application, reward payment, exposure changes, injuries, campaign creation, save/load, AI operation execution, and UI operation flow remain unimplemented.
 
-Accepted implementation baseline after E4-04:
+Accepted implementation baseline after E4-07:
 
 ```text
-be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+ba640c7a8da900ee3d2470f93331cb4cb5baee4a
 ```
 
 Current priority:
 
-1. implement E4-05 operation lifecycle transitions for `planned -> running -> resolved`,
-2. build on the accepted Local Collection specification, E4-02 schemas, E4-03 availability evaluator, and E4-04 planning result as the source of truth,
+1. implement E4-08 consequence application for Local Collection outcomes,
+2. build on the accepted Local Collection specification, E4-02 schemas, E4-03 availability evaluator, E4-04 planning result, E4-05 lifecycle transitions, E4-06 resolver, and E4-07 classification result as the source of truth,
 3. preserve the existing package boundaries, including no `packages/content` dependency from `packages/domain`,
-4. keep lifecycle separate from outcome resolution and gameplay consequences,
+4. keep consequence application bounded to the accepted E4-01 table and do not introduce probability formulas,
 5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, campaign creation, or full UI before their accepted tasks.
 
 Do not add another large design system unless implementation reveals a real design gap.

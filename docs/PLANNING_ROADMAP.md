@@ -115,27 +115,29 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 4 - First End-to-End Operation Vertical Slice lifecycle implementation planning**
+> **EPIC 4 - First End-to-End Operation Vertical Slice consequence-application planning**
 
 The current next task is:
 
-> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
+> **E4-08 - Apply money, exposure, injury, and event consequences.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
-E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. Planning exists, but operation lifecycle execution and outcome resolution do not yet exist.
+E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. E4-05 is complete as bounded deterministic lifecycle transitions. E4-06 is complete as a centralized seeded percentile resolver. E4-07 is complete as typed Local Collection outcome classification with canonical authored weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. Planning, lifecycle timing, seeded weighted rolling, and typed classification exist, but consequence application and campaign orchestration do not yet exist. Documentation was intentionally synchronized as one batch after E4-05 through E4-07.
 
-Accepted implementation baseline after E4-04:
+Accepted implementation baseline after E4-07:
 
 ```text
-be5dbce90ff91783e2137d3df8b9cd089cdafbfd
+ba640c7a8da900ee3d2470f93331cb4cb5baee4a
 ```
 
 The immediate sequence is:
 
 1. planning and crew/resource reservation are complete,
-2. implement lifecycle transitions for planned operations next,
-3. keep resolver and gameplay consequences pending until their roadmap tasks,
-4. continue to avoid premature economy, pressure, AI, UI, save/load, and campaign-creation work.
+2. lifecycle transitions are complete,
+3. seeded weighted outcome resolution is complete,
+4. typed Local Collection outcome classification is complete,
+5. apply accepted Local Collection consequences next,
+6. continue to avoid premature full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, and broad orchestration work.
 
 ---
 
@@ -336,12 +338,12 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E4-05 - Implement operation lifecycle: planned -> running -> resolved.**
+> **E4-08 - Apply money, exposure, injury, and event consequences.**
 
-The task should build on accepted E4-04 planning output and implement only the minimal lifecycle transitions for Local Collection operation instances using the existing concrete statuses `planned`, `running`, and `resolved`.
+The task should build on accepted E4-04 planning/reservation, E4-05 lifecycle transitions, E4-06 seeded resolver diagnostics, E4-07 typed Local Collection classification, and the accepted E4-01 consequence table.
 
-- minimal lifecycle transition behavior for already planned Local Collection operations,
+- minimal consequence application for classified Local Collection outcomes,
 - preservation of clear package ownership and dependency boundaries,
-- explicit exclusions for resolver behavior, RNG outcomes, rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, campaign creation, full operation catalogue, economy simulation, recruitment, and full UI.
+- explicit exclusions for full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, operation catalogue expansion, recruitment, and broad orchestration.
 
-E4-05 must not implement outcome resolution, RNG, money rewards, exposure changes, injury, UI, broad economy systems, pressure systems, AI, save/load, campaign creation, or gameplay consequences beyond the accepted lifecycle-transition scope.
+E4-08 must not expand into full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, or broader operation catalogue work beyond the accepted Local Collection consequence-application scope.
