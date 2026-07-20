@@ -4,6 +4,7 @@ import {
   type DomainEvent,
   type DomainExecution,
   type OperationLifecycleCompletedEvent,
+  type OperationOutcomeRolledEvent,
   type OperationPlannedEvent,
   type OperationStartedEvent,
   type OrganizationMoneyChangedEvent,
@@ -161,6 +162,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.OperationLifecycleCompleted:
       assertOperationLifecycleCompletedEventInvariant(event);
       return;
+    case DomainEventType.OperationOutcomeRolled:
+      assertOperationOutcomeRolledEventInvariant(event);
+      return;
     case DomainEventType.OperationPlanned:
       assertOperationPlannedEventInvariant(event);
       return;
@@ -182,6 +186,108 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     default:
       throw new InvariantViolationError("DomainEvent.type", "event type must be supported", event);
   }
+}
+
+function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolledEvent): void {
+  assertInvariant(
+    "OperationOutcomeRolled.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+  assertInvariant(
+    "OperationOutcomeRolled.operationTemplateId",
+    () => parseOperationTemplateId(event.operationTemplateId),
+    event,
+  );
+  assertInvariant(
+    "OperationOutcomeRolled.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OperationOutcomeRolled.targetLocationId",
+    () => parseLocationId(event.targetLocationId),
+    event,
+  );
+
+  if (!Array.isArray(event.assignedCharacterIds) || event.assignedCharacterIds.length === 0) {
+    throw new InvariantViolationError(
+      "OperationOutcomeRolled.assignedCharacterIds",
+      "assignedCharacterIds must be a non-empty array",
+      event,
+    );
+  }
+
+  for (const characterId of event.assignedCharacterIds) {
+    assertInvariant(
+      "OperationOutcomeRolled.assignedCharacterIds",
+      () => parseCharacterId(characterId),
+      event,
+    );
+  }
+
+  if (event.selectedBandKey.trim().length === 0) {
+    throw new InvariantViolationError(
+      "OperationOutcomeRolled.selectedBandKey",
+      "selectedBandKey must be non-empty",
+      event,
+    );
+  }
+
+  assertFiniteInteger("OperationOutcomeRolled.percentileRoll", event.percentileRoll, event);
+  assertFiniteInteger(
+    "OperationOutcomeRolled.selectedBandLowerBound",
+    event.selectedBandLowerBound,
+    event,
+  );
+  assertFiniteInteger(
+    "OperationOutcomeRolled.selectedBandUpperBound",
+    event.selectedBandUpperBound,
+    event,
+  );
+
+  if (event.percentileRoll < 1 || event.percentileRoll > 100) {
+    throw new InvariantViolationError(
+      "OperationOutcomeRolled.percentileRoll",
+      "percentileRoll must be within 1..100",
+      event,
+    );
+  }
+
+  if (
+    event.selectedBandLowerBound < 1 ||
+    event.selectedBandUpperBound > 100 ||
+    event.selectedBandLowerBound > event.selectedBandUpperBound
+  ) {
+    throw new InvariantViolationError(
+      "OperationOutcomeRolled.selectedBandRange",
+      "selected range must be within 1..100 and lowerBound <= upperBound",
+      event,
+    );
+  }
+
+  if (
+    event.percentileRoll < event.selectedBandLowerBound ||
+    event.percentileRoll > event.selectedBandUpperBound
+  ) {
+    throw new InvariantViolationError(
+      "OperationOutcomeRolled.rollRange",
+      "percentileRoll must be contained by the selected band range",
+      event,
+    );
+  }
+
+  assertObject("OperationOutcomeRolled.modifierContributions", event.modifierContributions);
+  for (const field of ["base", "competence", "capability", "district", "exposure"] as const) {
+    assertFiniteInteger(
+      `OperationOutcomeRolled.modifierContributions.${field}`,
+      event.modifierContributions[field],
+      event,
+    );
+  }
+
+  assertRandomStateInvariant(event.previousRandomState);
+  assertRandomStateInvariant(event.nextRandomState);
 }
 
 function assertOperationStartedEventInvariant(event: OperationStartedEvent): void {

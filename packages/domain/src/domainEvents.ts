@@ -7,7 +7,9 @@ import type {
   OperationTemplateId,
   OrganizationId,
 } from "./entityIds";
+import type { OperationOutcomeModifierContributions } from "./operationOutcomeResolver";
 import type { OperationStatus } from "./operationState";
+import type { RandomState } from "./randomService";
 import type { SimulationMinute, SimulationTick } from "./simulationClock";
 
 declare const domainEventBrand: unique symbol;
@@ -16,6 +18,7 @@ declare const domainExecutionBrand: unique symbol;
 export const DomainEventType = {
   CharacterAssignedToOperation: "CharacterAssignedToOperation",
   OperationLifecycleCompleted: "OperationLifecycleCompleted",
+  OperationOutcomeRolled: "OperationOutcomeRolled",
   OperationPlanned: "OperationPlanned",
   OperationStarted: "OperationStarted",
   OrganizationMoneyChanged: "OrganizationMoneyChanged",
@@ -82,6 +85,23 @@ export interface OperationLifecycleCompletedEvent {
   readonly [domainEventBrand]: "OperationLifecycleCompletedEvent";
 }
 
+export interface OperationOutcomeRolledEvent {
+  readonly type: typeof DomainEventType.OperationOutcomeRolled;
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly assignedCharacterIds: readonly CharacterId[];
+  readonly selectedBandKey: string;
+  readonly percentileRoll: number;
+  readonly selectedBandLowerBound: number;
+  readonly selectedBandUpperBound: number;
+  readonly modifierContributions: OperationOutcomeModifierContributions;
+  readonly previousRandomState: RandomState;
+  readonly nextRandomState: RandomState;
+  readonly [domainEventBrand]: "OperationOutcomeRolledEvent";
+}
+
 export interface CharacterAssignedToOperationEvent {
   readonly type: typeof DomainEventType.CharacterAssignedToOperation;
   readonly characterId: CharacterId;
@@ -115,6 +135,7 @@ export interface OrganizationMoneyChangedEvent {
 export type DomainEvent =
   | CharacterAssignedToOperationEvent
   | OperationLifecycleCompletedEvent
+  | OperationOutcomeRolledEvent
   | OperationPlannedEvent
   | OperationStartedEvent
   | OrganizationMoneyChangedEvent
@@ -158,6 +179,21 @@ export interface CreateOperationLifecycleTransitionEventInput {
   readonly currentStatus: OperationStatus;
   readonly transitionTick: SimulationTick;
   readonly plannedCompletionTick: SimulationTick;
+}
+
+export interface CreateOperationOutcomeRolledEventInput {
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly assignedCharacterIds: readonly CharacterId[];
+  readonly selectedBandKey: string;
+  readonly percentileRoll: number;
+  readonly selectedBandLowerBound: number;
+  readonly selectedBandUpperBound: number;
+  readonly modifierContributions: OperationOutcomeModifierContributions;
+  readonly previousRandomState: RandomState;
+  readonly nextRandomState: RandomState;
 }
 
 export interface CreateCharacterAssignedToOperationEventInput {
@@ -254,6 +290,32 @@ export function createOperationLifecycleCompletedEvent(
     transitionTick: input.transitionTick,
     plannedCompletionTick: input.plannedCompletionTick,
   }) as OperationLifecycleCompletedEvent;
+}
+
+export function createOperationOutcomeRolledEvent(
+  input: CreateOperationOutcomeRolledEventInput,
+): OperationOutcomeRolledEvent {
+  return Object.freeze({
+    type: DomainEventType.OperationOutcomeRolled,
+    operationId: input.operationId,
+    operationTemplateId: input.operationTemplateId,
+    organizationId: input.organizationId,
+    targetLocationId: input.targetLocationId,
+    assignedCharacterIds: Object.freeze([...input.assignedCharacterIds]),
+    selectedBandKey: input.selectedBandKey,
+    percentileRoll: input.percentileRoll,
+    selectedBandLowerBound: input.selectedBandLowerBound,
+    selectedBandUpperBound: input.selectedBandUpperBound,
+    modifierContributions: Object.freeze({
+      base: input.modifierContributions.base,
+      competence: input.modifierContributions.competence,
+      capability: input.modifierContributions.capability,
+      district: input.modifierContributions.district,
+      exposure: input.modifierContributions.exposure,
+    }),
+    previousRandomState: Object.freeze({ ...input.previousRandomState }) as RandomState,
+    nextRandomState: Object.freeze({ ...input.nextRandomState }) as RandomState,
+  }) as OperationOutcomeRolledEvent;
 }
 
 export function createCharacterAssignedToOperationEvent(

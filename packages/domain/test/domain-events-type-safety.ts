@@ -4,6 +4,7 @@ import {
   createDomainExecution,
   createInitialGameState,
   createOperationLifecycleCompletedEvent,
+  createOperationOutcomeRolledEvent,
   createOperationPlannedEvent,
   createOperationStartedEvent,
   createOrganizationMoneyChangedEvent,
@@ -13,8 +14,11 @@ import {
   parseOperationId,
   parseOperationTemplateId,
   parseOrganizationId,
+  createRandomState,
   createSimulationResumedEvent,
   createSimulationTickAdvancedEvent,
+  nextInt,
+  parseRandomSeed,
   parseSimulationMinute,
   parseSimulationTick,
 } from "../src/index";
@@ -23,6 +27,7 @@ import type {
   DomainEvent,
   DomainExecution,
   OperationLifecycleCompletedEvent,
+  OperationOutcomeRolledEvent,
   OperationPlannedEvent,
   OperationStartedEvent,
   OrganizationMoneyChangedEvent,
@@ -73,6 +78,28 @@ const operationLifecycleCompletedEvent = createOperationLifecycleCompletedEvent(
   transitionTick: parseSimulationTick(7),
   plannedCompletionTick: parseSimulationTick(7),
 });
+const randomState = createRandomState(parseRandomSeed(123));
+const nextRandomResult = nextInt(randomState, 1, 100);
+const operationOutcomeRolledEvent = createOperationOutcomeRolledEvent({
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  selectedBandKey: "band-a",
+  percentileRoll: nextRandomResult.value,
+  selectedBandLowerBound: 1,
+  selectedBandUpperBound: 100,
+  modifierContributions: {
+    base: 0,
+    competence: 1,
+    capability: 2,
+    district: -1,
+    exposure: -2,
+  },
+  previousRandomState: randomState,
+  nextRandomState: nextRandomResult.state,
+});
 const characterAssignedEvent = createCharacterAssignedToOperationEvent({
   characterId,
   operationId,
@@ -109,6 +136,7 @@ const eventUnionE: DomainEvent = capacityReservedEvent;
 const eventUnionF: DomainEvent = moneyChangedEvent;
 const eventUnionG: DomainEvent = operationStartedEvent;
 const eventUnionH: DomainEvent = operationLifecycleCompletedEvent;
+const eventUnionI: DomainEvent = operationOutcomeRolledEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -150,6 +178,29 @@ const invalidOperationLifecycleCompletedEvent: OperationLifecycleCompletedEvent 
   currentStatus: "resolved",
   transitionTick: parseSimulationTick(7),
   plannedCompletionTick: parseSimulationTick(7),
+};
+
+// @ts-expect-error Arbitrary objects cannot be OperationOutcomeRolledEvent.
+const invalidOperationOutcomeRolledEvent: OperationOutcomeRolledEvent = {
+  type: DomainEventType.OperationOutcomeRolled,
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  assignedCharacterIds: [characterId],
+  selectedBandKey: "band-a",
+  percentileRoll: nextRandomResult.value,
+  selectedBandLowerBound: 1,
+  selectedBandUpperBound: 100,
+  modifierContributions: {
+    base: 0,
+    competence: 1,
+    capability: 2,
+    district: -1,
+    exposure: -2,
+  },
+  previousRandomState: randomState,
+  nextRandomState: nextRandomResult.state,
 };
 
 // @ts-expect-error Arbitrary objects cannot be CharacterAssignedToOperationEvent.
@@ -231,6 +282,8 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.OperationLifecycleCompleted:
       return event.type;
+    case DomainEventType.OperationOutcomeRolled:
+      return event.type;
     case DomainEventType.OrganizationMoneyChanged:
       return event.type;
     case DomainEventType.OrganizationOperationalCapacityReserved:
@@ -254,10 +307,12 @@ void eventUnionE;
 void eventUnionF;
 void eventUnionG;
 void eventUnionH;
+void eventUnionI;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;
 void invalidOperationLifecycleCompletedEvent;
+void invalidOperationOutcomeRolledEvent;
 void invalidCharacterAssignedEvent;
 void invalidCapacityReservedEvent;
 void invalidMoneyChangedEvent;
