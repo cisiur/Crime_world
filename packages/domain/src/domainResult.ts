@@ -1,5 +1,8 @@
 export const DomainErrorCode = {
   DistrictPropertyInputMismatch: "DISTRICT_PROPERTY_INPUT_MISMATCH",
+  OperationPlanningAvailabilityRejected: "OPERATION_PLANNING_AVAILABILITY_REJECTED",
+  OperationPlanningDuplicateOperationId: "OPERATION_PLANNING_DUPLICATE_OPERATION_ID",
+  OperationPlanningInvalidData: "OPERATION_PLANNING_INVALID_DATA",
   SimulationPaused: "SIMULATION_PAUSED",
   UnsupportedCommand: "UNSUPPORTED_COMMAND",
 } as const;

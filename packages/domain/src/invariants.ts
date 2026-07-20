@@ -1,12 +1,23 @@
 import {
   DomainEventType,
+  type CharacterAssignedToOperationEvent,
   type DomainEvent,
   type DomainExecution,
+  type OperationPlannedEvent,
+  type OrganizationMoneyChangedEvent,
+  type OrganizationOperationalCapacityReservedEvent,
   type SimulationResumedEvent,
   type SimulationTickAdvancedEvent,
 } from "./domainEvents";
 import type { GameState } from "./gameState";
-import { parseCampaignId } from "./entityIds";
+import {
+  parseCampaignId,
+  parseCharacterId,
+  parseLocationId,
+  parseOperationId,
+  parseOperationTemplateId,
+  parseOrganizationId,
+} from "./entityIds";
 import { parseSchemaVersion } from "./gameState";
 import { parseRandomState, type RandomState } from "./randomService";
 import {
@@ -141,6 +152,18 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
   assertObject("DomainEvent", event);
 
   switch (event.type) {
+    case DomainEventType.CharacterAssignedToOperation:
+      assertCharacterAssignedToOperationEventInvariant(event);
+      return;
+    case DomainEventType.OperationPlanned:
+      assertOperationPlannedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationMoneyChanged:
+      assertOrganizationMoneyChangedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationOperationalCapacityReserved:
+      assertOrganizationOperationalCapacityReservedEventInvariant(event);
+      return;
     case DomainEventType.SimulationResumed:
       assertSimulationResumedEventInvariant(event);
       return;
@@ -149,6 +172,149 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     default:
       throw new InvariantViolationError("DomainEvent.type", "event type must be supported", event);
+  }
+}
+
+function assertOperationPlannedEventInvariant(event: OperationPlannedEvent): void {
+  assertInvariant("OperationPlanned.operationId", () => parseOperationId(event.operationId), event);
+  assertInvariant(
+    "OperationPlanned.operationTemplateId",
+    () => parseOperationTemplateId(event.operationTemplateId),
+    event,
+  );
+  assertInvariant(
+    "OperationPlanned.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OperationPlanned.targetLocationId",
+    () => parseLocationId(event.targetLocationId),
+    event,
+  );
+
+  if (!Array.isArray(event.assignedCharacterIds) || event.assignedCharacterIds.length === 0) {
+    throw new InvariantViolationError(
+      "OperationPlanned.assignedCharacterIds",
+      "assignedCharacterIds must be a non-empty array",
+      event,
+    );
+  }
+
+  for (const characterId of event.assignedCharacterIds) {
+    assertInvariant(
+      "OperationPlanned.assignedCharacterIds",
+      () => parseCharacterId(characterId),
+      event,
+    );
+  }
+
+  assertInvariant(
+    "OperationPlanned.plannedAtTick",
+    () => parseSimulationTick(event.plannedAtTick),
+    event,
+  );
+  assertInvariant(
+    "OperationPlanned.plannedCompletionTick",
+    () => parseSimulationTick(event.plannedCompletionTick),
+    event,
+  );
+
+  if (event.plannedCompletionTick < event.plannedAtTick) {
+    throw new InvariantViolationError(
+      "OperationPlanned.tickOrder",
+      "plannedCompletionTick must be greater than or equal to plannedAtTick",
+      event,
+    );
+  }
+}
+
+function assertCharacterAssignedToOperationEventInvariant(
+  event: CharacterAssignedToOperationEvent,
+): void {
+  assertInvariant(
+    "CharacterAssignedToOperation.characterId",
+    () => parseCharacterId(event.characterId),
+    event,
+  );
+  assertInvariant(
+    "CharacterAssignedToOperation.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+
+  if (event.previousAssignmentState !== "idle" || event.currentAssignmentState !== "assigned") {
+    throw new InvariantViolationError(
+      "CharacterAssignedToOperation.assignmentTransition",
+      "assignment transition must be idle -> assigned",
+      event,
+    );
+  }
+}
+
+function assertOrganizationOperationalCapacityReservedEventInvariant(
+  event: OrganizationOperationalCapacityReservedEvent,
+): void {
+  assertInvariant(
+    "OrganizationOperationalCapacityReserved.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationOperationalCapacityReserved.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityReserved.previousOperationalCapacity",
+    event.previousOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityReserved.currentOperationalCapacity",
+    event.currentOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger("OrganizationOperationalCapacityReserved.delta", event.delta, event);
+
+  if (event.currentOperationalCapacity !== event.previousOperationalCapacity + event.delta) {
+    throw new InvariantViolationError(
+      "OrganizationOperationalCapacityReserved.delta",
+      "currentOperationalCapacity must equal previousOperationalCapacity + delta",
+      event,
+    );
+  }
+}
+
+function assertOrganizationMoneyChangedEventInvariant(event: OrganizationMoneyChangedEvent): void {
+  assertInvariant(
+    "OrganizationMoneyChanged.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationMoneyChanged.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+  assertFiniteInteger("OrganizationMoneyChanged.previousMoney", event.previousMoney, event);
+  assertFiniteInteger("OrganizationMoneyChanged.currentMoney", event.currentMoney, event);
+  assertFiniteInteger("OrganizationMoneyChanged.delta", event.delta, event);
+
+  if (event.reason !== "operation-start-cost-paid") {
+    throw new InvariantViolationError(
+      "OrganizationMoneyChanged.reason",
+      "reason must be operation-start-cost-paid",
+      event,
+    );
+  }
+
+  if (event.currentMoney !== event.previousMoney + event.delta) {
+    throw new InvariantViolationError(
+      "OrganizationMoneyChanged.delta",
+      "currentMoney must equal previousMoney + delta",
+      event,
+    );
   }
 }
 
@@ -193,6 +359,12 @@ function assertSimulationTickAdvancedEventInvariant(event: SimulationTickAdvance
       `currentMinute must equal previousMinute + ${MINUTES_PER_TICK}`,
       event,
     );
+  }
+}
+
+function assertFiniteInteger(invariantName: string, value: unknown, source: unknown): void {
+  if (typeof value !== "number" || !Number.isFinite(value) || !Number.isInteger(value)) {
+    throw new InvariantViolationError(invariantName, "value must be a finite integer", source);
   }
 }
 
