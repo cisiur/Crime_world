@@ -8,6 +8,8 @@ export const DomainErrorCode = {
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_UNSUPPORTED",
   OperationOutcomeClassificationCanonicalOrderInvalid:
     "OPERATION_OUTCOME_CLASSIFICATION_CANONICAL_ORDER_INVALID",
+  OperationOutcomeClassificationCanonicalWeightInvalid:
+    "OPERATION_OUTCOME_CLASSIFICATION_CANONICAL_WEIGHT_INVALID",
   OperationOutcomeClassificationResolverRejected:
     "OPERATION_OUTCOME_CLASSIFICATION_RESOLVER_REJECTED",
   OperationOutcomeClassificationSelectedCategoryUnknown:

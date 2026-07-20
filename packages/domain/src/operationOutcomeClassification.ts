@@ -83,6 +83,14 @@ export interface OperationOutcomeClassificationCanonicalOrderInvalidError extend
   readonly actualCategory: OperationOutcomeCategory;
 }
 
+export interface OperationOutcomeClassificationCanonicalWeightInvalidError extends DomainError {
+  readonly code: typeof DomainErrorCode.OperationOutcomeClassificationCanonicalWeightInvalid;
+  readonly index: number;
+  readonly category: OperationOutcomeCategory;
+  readonly expectedWeight: number;
+  readonly actualWeight: number;
+}
+
 export interface OperationOutcomeClassificationResolverRejectedError extends DomainError {
   readonly code: typeof DomainErrorCode.OperationOutcomeClassificationResolverRejected;
   readonly resolverError: OperationOutcomeResolutionError;
@@ -95,6 +103,7 @@ export interface OperationOutcomeClassificationSelectedCategoryUnknownError exte
 
 export type OperationOutcomeClassificationError =
   | OperationOutcomeClassificationCanonicalOrderInvalidError
+  | OperationOutcomeClassificationCanonicalWeightInvalidError
   | OperationOutcomeClassificationCategoryDuplicatedError
   | OperationOutcomeClassificationCategoryMissingError
   | OperationOutcomeClassificationCategoryUnsupportedError
@@ -113,6 +122,14 @@ export const LOCAL_COLLECTION_OUTCOME_CATEGORY_ORDER: readonly OperationOutcomeC
     OperationOutcomeCategory.PartialSuccess,
     OperationOutcomeCategory.Failure,
     OperationOutcomeCategory.CriticalFailure,
+  ]);
+
+const LOCAL_COLLECTION_OUTCOME_WEIGHT_BY_CATEGORY: ReadonlyMap<OperationOutcomeCategory, number> =
+  new Map([
+    [OperationOutcomeCategory.Success, 45],
+    [OperationOutcomeCategory.PartialSuccess, 30],
+    [OperationOutcomeCategory.Failure, 20],
+    [OperationOutcomeCategory.CriticalFailure, 5],
   ]);
 
 const OUTCOME_CATEGORY_VALUES = new Set<string>(Object.values(OperationOutcomeCategory));
@@ -206,15 +223,28 @@ export function validateLocalCollectionOutcomeBands(
   }
 
   for (const [index, expectedCategory] of LOCAL_COLLECTION_OUTCOME_CATEGORY_ORDER.entries()) {
-    const actualCategory = genericValidationResult.value[index]?.category;
+    const actualBand = genericValidationResult.value[index];
+    const actualCategory = actualBand?.category;
 
-    if (actualCategory !== expectedCategory) {
+    if (actualBand === undefined || actualCategory !== expectedCategory) {
       return failure({
         code: DomainErrorCode.OperationOutcomeClassificationCanonicalOrderInvalid,
         message: `Local Collection outcome band at index ${index} must be "${expectedCategory}".`,
         index,
         expectedCategory,
         actualCategory: actualCategory as OperationOutcomeCategory,
+      });
+    }
+
+    const expectedWeight = LOCAL_COLLECTION_OUTCOME_WEIGHT_BY_CATEGORY.get(expectedCategory);
+    if (actualBand.weight !== expectedWeight) {
+      return failure({
+        code: DomainErrorCode.OperationOutcomeClassificationCanonicalWeightInvalid,
+        message: `Local Collection outcome band "${expectedCategory}" at index ${index} must have weight ${expectedWeight}.`,
+        index,
+        category: expectedCategory,
+        expectedWeight: expectedWeight as number,
+        actualWeight: actualBand.weight,
       });
     }
   }

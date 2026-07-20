@@ -19,6 +19,7 @@ import {
   parseRandomSeed,
   parseSimulationTick,
   resolveOperationOutcome,
+  validateOperationOutcomeClassificationBands,
   type OperationOutcomeClassificationBandInput,
   type OperationOutcomeModifierContributions,
   type OperationState,
@@ -83,6 +84,54 @@ describe("operation outcome classification", () => {
           index: 0,
           expectedCategory: OperationOutcomeCategory.Success,
           actualCategory: OperationOutcomeCategory.PartialSuccess,
+        },
+      ],
+      [
+        "altered canonical edge weights",
+        [
+          { category: OperationOutcomeCategory.Success, weight: 40 },
+          { category: OperationOutcomeCategory.PartialSuccess, weight: 30 },
+          { category: OperationOutcomeCategory.Failure, weight: 20 },
+          { category: OperationOutcomeCategory.CriticalFailure, weight: 10 },
+        ],
+        DomainErrorCode.OperationOutcomeClassificationCanonicalWeightInvalid,
+        {
+          index: 0,
+          category: OperationOutcomeCategory.Success,
+          expectedWeight: 45,
+          actualWeight: 40,
+        },
+      ],
+      [
+        "swapped canonical middle weights",
+        [
+          { category: OperationOutcomeCategory.Success, weight: 45 },
+          { category: OperationOutcomeCategory.PartialSuccess, weight: 20 },
+          { category: OperationOutcomeCategory.Failure, weight: 30 },
+          { category: OperationOutcomeCategory.CriticalFailure, weight: 5 },
+        ],
+        DomainErrorCode.OperationOutcomeClassificationCanonicalWeightInvalid,
+        {
+          index: 1,
+          category: OperationOutcomeCategory.PartialSuccess,
+          expectedWeight: 30,
+          actualWeight: 20,
+        },
+      ],
+      [
+        "altered canonical later weights",
+        [
+          { category: OperationOutcomeCategory.Success, weight: 45 },
+          { category: OperationOutcomeCategory.PartialSuccess, weight: 30 },
+          { category: OperationOutcomeCategory.Failure, weight: 15 },
+          { category: OperationOutcomeCategory.CriticalFailure, weight: 10 },
+        ],
+        DomainErrorCode.OperationOutcomeClassificationCanonicalWeightInvalid,
+        {
+          index: 2,
+          category: OperationOutcomeCategory.Failure,
+          expectedWeight: 20,
+          actualWeight: 15,
         },
       ],
       [
@@ -189,6 +238,17 @@ describe("operation outcome classification", () => {
       expect("events" in result.error).toBe(false);
       expect("nextRandomState" in result.error).toBe(false);
     }
+  });
+
+  it("keeps the generic classification-band validator open to non-canonical valid weights", () => {
+    const result = validateOperationOutcomeClassificationBands([
+      { category: OperationOutcomeCategory.Success, weight: 40 },
+      { category: OperationOutcomeCategory.PartialSuccess, weight: 30 },
+      { category: OperationOutcomeCategory.Failure, weight: 20 },
+      { category: OperationOutcomeCategory.CriticalFailure, weight: 10 },
+    ]);
+
+    expect(result.ok).toBe(true);
   });
 
   it("classifies a resolved operation by delegating roll selection to the E4-06 resolver", () => {
