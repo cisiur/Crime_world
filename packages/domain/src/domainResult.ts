@@ -1,5 +1,38 @@
 export const DomainErrorCode = {
   DistrictPropertyInputMismatch: "DISTRICT_PROPERTY_INPUT_MISMATCH",
+  LocalCollectionConsequenceApplicationAlreadyRecorded:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_ALREADY_RECORDED",
+  LocalCollectionConsequenceApplicationArithmeticInvalid:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_ARITHMETIC_INVALID",
+  LocalCollectionConsequenceApplicationCharacterNotAssigned:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_CHARACTER_NOT_ASSIGNED",
+  LocalCollectionConsequenceApplicationCharacterNotMember:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_CHARACTER_NOT_MEMBER",
+  LocalCollectionConsequenceApplicationInvalidAssignedCharacterCount:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_INVALID_ASSIGNED_CHARACTER_COUNT",
+  LocalCollectionConsequenceApplicationInvalidHealth:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_INVALID_HEALTH",
+  LocalCollectionConsequenceApplicationMissingAssignedCharacter:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_MISSING_ASSIGNED_CHARACTER",
+  LocalCollectionConsequenceApplicationMissingOrganization:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_MISSING_ORGANIZATION",
+  LocalCollectionConsequenceApplicationOperationNotResolved:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_OPERATION_NOT_RESOLVED",
+  LocalCollectionConsequenceApplicationOutcomeCategoryUnsupported:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_OUTCOME_CATEGORY_UNSUPPORTED",
+  LocalCollectionConsequenceApplicationOutcomeMismatch:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_OUTCOME_MISMATCH",
+  LocalCollectionConsequenceDefinitionCategoryDuplicated:
+    "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_CATEGORY_DUPLICATED",
+  LocalCollectionConsequenceDefinitionCategoryMissing:
+    "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_CATEGORY_MISSING",
+  LocalCollectionConsequenceDefinitionCategoryUnsupported:
+    "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_CATEGORY_UNSUPPORTED",
+  LocalCollectionConsequenceDefinitionEmpty: "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_EMPTY",
+  LocalCollectionConsequenceDefinitionHealthInvalid:
+    "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_HEALTH_INVALID",
+  LocalCollectionConsequenceDefinitionValueInvalid:
+    "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_VALUE_INVALID",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:

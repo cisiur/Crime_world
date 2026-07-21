@@ -1,14 +1,19 @@
 import {
   DomainEventType,
+  createCharacterAssignmentReleasedEvent,
   createCharacterAssignedToOperationEvent,
+  createCharacterHealthChangedEvent,
+  createCharacterPersonalExposureChangedEvent,
   createDomainExecution,
   createInitialGameState,
+  createOperationConsequencesAppliedEvent,
   createOperationLifecycleCompletedEvent,
   createOperationOutcomeClassifiedEvent,
   createOperationOutcomeRolledEvent,
   createOperationPlannedEvent,
   createOperationStartedEvent,
   createOrganizationMoneyChangedEvent,
+  createOrganizationOperationalCapacityReleasedEvent,
   createOrganizationOperationalCapacityReservedEvent,
   parseCharacterId,
   parseLocationId,
@@ -25,15 +30,20 @@ import {
   parseSimulationTick,
 } from "../src/index";
 import type {
+  CharacterAssignmentReleasedEvent,
   CharacterAssignedToOperationEvent,
+  CharacterHealthChangedEvent,
+  CharacterPersonalExposureChangedEvent,
   DomainEvent,
   DomainExecution,
+  OperationConsequencesAppliedEvent,
   OperationLifecycleCompletedEvent,
   OperationOutcomeClassifiedEvent,
   OperationOutcomeRolledEvent,
   OperationPlannedEvent,
   OperationStartedEvent,
   OrganizationMoneyChangedEvent,
+  OrganizationOperationalCapacityReleasedEvent,
   OrganizationOperationalCapacityReservedEvent,
   SimulationResumedEvent,
   SimulationTickAdvancedEvent,
@@ -129,12 +139,42 @@ const characterAssignedEvent = createCharacterAssignedToOperationEvent({
   previousAssignmentState: "idle",
   currentAssignmentState: "assigned",
 });
+const characterAssignmentReleasedEvent = createCharacterAssignmentReleasedEvent({
+  characterId,
+  operationId,
+  previousAssignmentState: "assigned",
+  currentAssignmentState: "idle",
+});
+const characterPersonalExposureChangedEvent = createCharacterPersonalExposureChangedEvent({
+  characterId,
+  operationId,
+  category: OperationOutcomeCategory.Success,
+  previousPersonalExposure: 10,
+  requestedDelta: 4,
+  actualDelta: 4,
+  currentPersonalExposure: 14,
+  clamped: false,
+});
+const characterHealthChangedEvent = createCharacterHealthChangedEvent({
+  characterId,
+  operationId,
+  category: OperationOutcomeCategory.CriticalFailure,
+  previousHealthState: "healthy",
+  currentHealthState: "injured",
+});
 const capacityReservedEvent = createOrganizationOperationalCapacityReservedEvent({
   organizationId,
   operationId,
   previousOperationalCapacity: 1,
   currentOperationalCapacity: 0,
   delta: -1,
+});
+const capacityReleasedEvent = createOrganizationOperationalCapacityReleasedEvent({
+  organizationId,
+  operationId,
+  previousOperationalCapacity: 0,
+  currentOperationalCapacity: 1,
+  delta: 1,
 });
 const moneyChangedEvent = createOrganizationMoneyChangedEvent({
   organizationId,
@@ -143,6 +183,27 @@ const moneyChangedEvent = createOrganizationMoneyChangedEvent({
   previousMoney: 100,
   currentMoney: 80,
   delta: -20,
+});
+const grossRewardMoneyChangedEvent = createOrganizationMoneyChangedEvent({
+  organizationId,
+  operationId,
+  reason: "operation-gross-reward-paid",
+  previousMoney: 80,
+  currentMoney: 160,
+  delta: 80,
+});
+const operationConsequencesAppliedEvent = createOperationConsequencesAppliedEvent({
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  releasedCharacterIds: [characterId],
+  category: OperationOutcomeCategory.Success,
+  grossReward: 80,
+  requestedPersonalExposureDelta: 4,
+  actualPersonalExposureDelta: 4,
+  healthConsequence: "none",
+  operationalCapacityReleased: 1,
 });
 const resumedEvent = createSimulationResumedEvent(tick, minute);
 const tickAdvancedEvent = createSimulationTickAdvancedEvent({
@@ -161,6 +222,12 @@ const eventUnionG: DomainEvent = operationStartedEvent;
 const eventUnionH: DomainEvent = operationLifecycleCompletedEvent;
 const eventUnionI: DomainEvent = operationOutcomeRolledEvent;
 const eventUnionJ: DomainEvent = operationOutcomeClassifiedEvent;
+const eventUnionK: DomainEvent = characterAssignmentReleasedEvent;
+const eventUnionL: DomainEvent = characterPersonalExposureChangedEvent;
+const eventUnionM: DomainEvent = characterHealthChangedEvent;
+const eventUnionN: DomainEvent = capacityReleasedEvent;
+const eventUnionO: DomainEvent = grossRewardMoneyChangedEvent;
+const eventUnionP: DomainEvent = operationConsequencesAppliedEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -259,6 +326,38 @@ const invalidCharacterAssignedEvent: CharacterAssignedToOperationEvent = {
   currentAssignmentState: "assigned",
 };
 
+// @ts-expect-error Arbitrary objects cannot be CharacterAssignmentReleasedEvent.
+const invalidCharacterAssignmentReleasedEvent: CharacterAssignmentReleasedEvent = {
+  type: DomainEventType.CharacterAssignmentReleased,
+  characterId,
+  operationId,
+  previousAssignmentState: "assigned",
+  currentAssignmentState: "idle",
+};
+
+// @ts-expect-error Arbitrary objects cannot be CharacterPersonalExposureChangedEvent.
+const invalidCharacterPersonalExposureChangedEvent: CharacterPersonalExposureChangedEvent = {
+  type: DomainEventType.CharacterPersonalExposureChanged,
+  characterId,
+  operationId,
+  category: OperationOutcomeCategory.Success,
+  previousPersonalExposure: 10,
+  requestedDelta: 4,
+  actualDelta: 4,
+  currentPersonalExposure: 14,
+  clamped: false,
+};
+
+// @ts-expect-error Arbitrary objects cannot be CharacterHealthChangedEvent.
+const invalidCharacterHealthChangedEvent: CharacterHealthChangedEvent = {
+  type: DomainEventType.CharacterHealthChanged,
+  characterId,
+  operationId,
+  category: OperationOutcomeCategory.CriticalFailure,
+  previousHealthState: "healthy",
+  currentHealthState: "injured",
+};
+
 // @ts-expect-error Arbitrary objects cannot be OrganizationOperationalCapacityReservedEvent.
 const invalidCapacityReservedEvent: OrganizationOperationalCapacityReservedEvent = {
   type: DomainEventType.OrganizationOperationalCapacityReserved,
@@ -267,6 +366,16 @@ const invalidCapacityReservedEvent: OrganizationOperationalCapacityReservedEvent
   previousOperationalCapacity: 1,
   currentOperationalCapacity: 0,
   delta: -1,
+};
+
+// @ts-expect-error Arbitrary objects cannot be OrganizationOperationalCapacityReleasedEvent.
+const invalidCapacityReleasedEvent: OrganizationOperationalCapacityReleasedEvent = {
+  type: DomainEventType.OrganizationOperationalCapacityReleased,
+  organizationId,
+  operationId,
+  previousOperationalCapacity: 0,
+  currentOperationalCapacity: 1,
+  delta: 1,
 };
 
 // @ts-expect-error Arbitrary objects cannot be OrganizationMoneyChangedEvent.
@@ -278,6 +387,22 @@ const invalidMoneyChangedEvent: OrganizationMoneyChangedEvent = {
   previousMoney: 100,
   currentMoney: 80,
   delta: -20,
+};
+
+// @ts-expect-error Arbitrary objects cannot be OperationConsequencesAppliedEvent.
+const invalidOperationConsequencesAppliedEvent: OperationConsequencesAppliedEvent = {
+  type: DomainEventType.OperationConsequencesApplied,
+  operationId,
+  operationTemplateId,
+  organizationId,
+  targetLocationId,
+  releasedCharacterIds: [characterId],
+  category: OperationOutcomeCategory.Success,
+  grossReward: 80,
+  requestedPersonalExposureDelta: 4,
+  actualPersonalExposureDelta: 4,
+  healthConsequence: "none",
+  operationalCapacityReleased: 1,
 };
 
 // @ts-expect-error Arbitrary objects cannot be SimulationResumedEvent.
@@ -323,6 +448,12 @@ function assertDomainEventUnion(event: DomainEvent): string {
   switch (event.type) {
     case DomainEventType.CharacterAssignedToOperation:
       return event.type;
+    case DomainEventType.CharacterAssignmentReleased:
+      return event.type;
+    case DomainEventType.CharacterPersonalExposureChanged:
+      return event.type;
+    case DomainEventType.CharacterHealthChanged:
+      return event.type;
     case DomainEventType.OperationPlanned:
       return event.type;
     case DomainEventType.OperationStarted:
@@ -333,9 +464,13 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.OperationOutcomeClassified:
       return event.type;
+    case DomainEventType.OperationConsequencesApplied:
+      return event.type;
     case DomainEventType.OrganizationMoneyChanged:
       return event.type;
     case DomainEventType.OrganizationOperationalCapacityReserved:
+      return event.type;
+    case DomainEventType.OrganizationOperationalCapacityReleased:
       return event.type;
     case DomainEventType.SimulationResumed:
       return event.type;
@@ -358,6 +493,12 @@ void eventUnionG;
 void eventUnionH;
 void eventUnionI;
 void eventUnionJ;
+void eventUnionK;
+void eventUnionL;
+void eventUnionM;
+void eventUnionN;
+void eventUnionO;
+void eventUnionP;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;
@@ -365,8 +506,13 @@ void invalidOperationLifecycleCompletedEvent;
 void invalidOperationOutcomeRolledEvent;
 void invalidOperationOutcomeClassifiedEvent;
 void invalidCharacterAssignedEvent;
+void invalidCharacterAssignmentReleasedEvent;
+void invalidCharacterPersonalExposureChangedEvent;
+void invalidCharacterHealthChangedEvent;
 void invalidCapacityReservedEvent;
+void invalidCapacityReleasedEvent;
 void invalidMoneyChangedEvent;
+void invalidOperationConsequencesAppliedEvent;
 void invalidResumedEvent;
 void invalidTickAdvancedEvent;
 void invalidExecution;

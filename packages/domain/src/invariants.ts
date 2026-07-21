@@ -1,14 +1,19 @@
 import {
   DomainEventType,
+  type CharacterAssignmentReleasedEvent,
   type CharacterAssignedToOperationEvent,
+  type CharacterHealthChangedEvent,
+  type CharacterPersonalExposureChangedEvent,
   type DomainEvent,
   type DomainExecution,
+  type OperationConsequencesAppliedEvent,
   type OperationLifecycleCompletedEvent,
   type OperationOutcomeClassifiedEvent,
   type OperationOutcomeRolledEvent,
   type OperationPlannedEvent,
   type OperationStartedEvent,
   type OrganizationMoneyChangedEvent,
+  type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type SimulationResumedEvent,
   type SimulationTickAdvancedEvent,
@@ -161,6 +166,18 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.CharacterAssignedToOperation:
       assertCharacterAssignedToOperationEventInvariant(event);
       return;
+    case DomainEventType.CharacterAssignmentReleased:
+      assertCharacterAssignmentReleasedEventInvariant(event);
+      return;
+    case DomainEventType.CharacterHealthChanged:
+      assertCharacterHealthChangedEventInvariant(event);
+      return;
+    case DomainEventType.CharacterPersonalExposureChanged:
+      assertCharacterPersonalExposureChangedEventInvariant(event);
+      return;
+    case DomainEventType.OperationConsequencesApplied:
+      assertOperationConsequencesAppliedEventInvariant(event);
+      return;
     case DomainEventType.OperationLifecycleCompleted:
       assertOperationLifecycleCompletedEventInvariant(event);
       return;
@@ -178,6 +195,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     case DomainEventType.OrganizationMoneyChanged:
       assertOrganizationMoneyChangedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationOperationalCapacityReleased:
+      assertOrganizationOperationalCapacityReleasedEventInvariant(event);
       return;
     case DomainEventType.OrganizationOperationalCapacityReserved:
       assertOrganizationOperationalCapacityReservedEventInvariant(event);
@@ -462,6 +482,135 @@ function assertCharacterAssignedToOperationEventInvariant(
   }
 }
 
+function assertCharacterAssignmentReleasedEventInvariant(
+  event: CharacterAssignmentReleasedEvent,
+): void {
+  assertInvariant(
+    "CharacterAssignmentReleased.characterId",
+    () => parseCharacterId(event.characterId),
+    event,
+  );
+  assertInvariant(
+    "CharacterAssignmentReleased.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+
+  if (event.previousAssignmentState !== "assigned" || event.currentAssignmentState !== "idle") {
+    throw new InvariantViolationError(
+      "CharacterAssignmentReleased.assignmentTransition",
+      "assignment transition must be assigned -> idle",
+      event,
+    );
+  }
+}
+
+function assertCharacterPersonalExposureChangedEventInvariant(
+  event: CharacterPersonalExposureChangedEvent,
+): void {
+  assertInvariant(
+    "CharacterPersonalExposureChanged.characterId",
+    () => parseCharacterId(event.characterId),
+    event,
+  );
+  assertInvariant(
+    "CharacterPersonalExposureChanged.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+
+  if (!isOperationOutcomeCategory(event.category)) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.category",
+      "category must be a supported operation outcome category",
+      event,
+    );
+  }
+
+  assertFiniteInteger(
+    "CharacterPersonalExposureChanged.previousPersonalExposure",
+    event.previousPersonalExposure,
+    event,
+  );
+  assertFiniteInteger(
+    "CharacterPersonalExposureChanged.requestedDelta",
+    event.requestedDelta,
+    event,
+  );
+  assertFiniteInteger("CharacterPersonalExposureChanged.actualDelta", event.actualDelta, event);
+  assertFiniteInteger(
+    "CharacterPersonalExposureChanged.currentPersonalExposure",
+    event.currentPersonalExposure,
+    event,
+  );
+
+  if (
+    event.previousPersonalExposure < 0 ||
+    event.previousPersonalExposure > 100 ||
+    event.currentPersonalExposure < 0 ||
+    event.currentPersonalExposure > 100
+  ) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.exposureRange",
+      "exposure values must be within 0..100",
+      event,
+    );
+  }
+
+  if (event.requestedDelta < 0 || event.actualDelta < 0) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.delta",
+      "exposure deltas must be non-negative",
+      event,
+    );
+  }
+
+  if (event.currentPersonalExposure !== event.previousPersonalExposure + event.actualDelta) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.actualDelta",
+      "currentPersonalExposure must equal previousPersonalExposure + actualDelta",
+      event,
+    );
+  }
+
+  if (typeof event.clamped !== "boolean") {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.clamped",
+      "clamped must be a boolean",
+      event,
+    );
+  }
+}
+
+function assertCharacterHealthChangedEventInvariant(event: CharacterHealthChangedEvent): void {
+  assertInvariant(
+    "CharacterHealthChanged.characterId",
+    () => parseCharacterId(event.characterId),
+    event,
+  );
+  assertInvariant(
+    "CharacterHealthChanged.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+
+  if (!isOperationOutcomeCategory(event.category)) {
+    throw new InvariantViolationError(
+      "CharacterHealthChanged.category",
+      "category must be a supported operation outcome category",
+      event,
+    );
+  }
+
+  if (event.previousHealthState !== "healthy" || event.currentHealthState !== "injured") {
+    throw new InvariantViolationError(
+      "CharacterHealthChanged.healthTransition",
+      "health transition must be healthy -> injured",
+      event,
+    );
+  }
+}
+
 function assertOrganizationOperationalCapacityReservedEventInvariant(
   event: OrganizationOperationalCapacityReservedEvent,
 ): void {
@@ -496,6 +645,48 @@ function assertOrganizationOperationalCapacityReservedEventInvariant(
   }
 }
 
+function assertOrganizationOperationalCapacityReleasedEventInvariant(
+  event: OrganizationOperationalCapacityReleasedEvent,
+): void {
+  assertInvariant(
+    "OrganizationOperationalCapacityReleased.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationOperationalCapacityReleased.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityReleased.previousOperationalCapacity",
+    event.previousOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityReleased.currentOperationalCapacity",
+    event.currentOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger("OrganizationOperationalCapacityReleased.delta", event.delta, event);
+
+  if (event.delta <= 0) {
+    throw new InvariantViolationError(
+      "OrganizationOperationalCapacityReleased.delta",
+      "delta must be positive",
+      event,
+    );
+  }
+
+  if (event.currentOperationalCapacity !== event.previousOperationalCapacity + event.delta) {
+    throw new InvariantViolationError(
+      "OrganizationOperationalCapacityReleased.delta",
+      "currentOperationalCapacity must equal previousOperationalCapacity + delta",
+      event,
+    );
+  }
+}
+
 function assertOrganizationMoneyChangedEventInvariant(event: OrganizationMoneyChangedEvent): void {
   assertInvariant(
     "OrganizationMoneyChanged.organizationId",
@@ -511,10 +702,13 @@ function assertOrganizationMoneyChangedEventInvariant(event: OrganizationMoneyCh
   assertFiniteInteger("OrganizationMoneyChanged.currentMoney", event.currentMoney, event);
   assertFiniteInteger("OrganizationMoneyChanged.delta", event.delta, event);
 
-  if (event.reason !== "operation-start-cost-paid") {
+  if (
+    event.reason !== "operation-start-cost-paid" &&
+    event.reason !== "operation-gross-reward-paid"
+  ) {
     throw new InvariantViolationError(
       "OrganizationMoneyChanged.reason",
-      "reason must be operation-start-cost-paid",
+      "reason must be operation-start-cost-paid or operation-gross-reward-paid",
       event,
     );
   }
@@ -523,6 +717,93 @@ function assertOrganizationMoneyChangedEventInvariant(event: OrganizationMoneyCh
     throw new InvariantViolationError(
       "OrganizationMoneyChanged.delta",
       "currentMoney must equal previousMoney + delta",
+      event,
+    );
+  }
+}
+
+function assertOperationConsequencesAppliedEventInvariant(
+  event: OperationConsequencesAppliedEvent,
+): void {
+  assertInvariant(
+    "OperationConsequencesApplied.operationId",
+    () => parseOperationId(event.operationId),
+    event,
+  );
+  assertInvariant(
+    "OperationConsequencesApplied.operationTemplateId",
+    () => parseOperationTemplateId(event.operationTemplateId),
+    event,
+  );
+  assertInvariant(
+    "OperationConsequencesApplied.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OperationConsequencesApplied.targetLocationId",
+    () => parseLocationId(event.targetLocationId),
+    event,
+  );
+
+  if (!Array.isArray(event.releasedCharacterIds) || event.releasedCharacterIds.length === 0) {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.releasedCharacterIds",
+      "releasedCharacterIds must be a non-empty array",
+      event,
+    );
+  }
+
+  for (const characterId of event.releasedCharacterIds) {
+    assertInvariant(
+      "OperationConsequencesApplied.releasedCharacterIds",
+      () => parseCharacterId(characterId),
+      event,
+    );
+  }
+
+  if (!isOperationOutcomeCategory(event.category)) {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.category",
+      "category must be a supported operation outcome category",
+      event,
+    );
+  }
+
+  assertFiniteInteger("OperationConsequencesApplied.grossReward", event.grossReward, event);
+  assertFiniteInteger(
+    "OperationConsequencesApplied.requestedPersonalExposureDelta",
+    event.requestedPersonalExposureDelta,
+    event,
+  );
+  assertFiniteInteger(
+    "OperationConsequencesApplied.actualPersonalExposureDelta",
+    event.actualPersonalExposureDelta,
+    event,
+  );
+  assertFiniteInteger(
+    "OperationConsequencesApplied.operationalCapacityReleased",
+    event.operationalCapacityReleased,
+    event,
+  );
+
+  if (
+    event.grossReward < 0 ||
+    event.requestedPersonalExposureDelta < 0 ||
+    event.actualPersonalExposureDelta < 0 ||
+    event.operationalCapacityReleased <= 0
+  ) {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.values",
+      "reward and exposure values must be non-negative and capacity release must be positive",
+      event,
+    );
+  }
+
+  if (event.healthConsequence !== "none" && event.healthConsequence !== "injured") {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.healthConsequence",
+      "healthConsequence must be none or injured",
       event,
     );
   }

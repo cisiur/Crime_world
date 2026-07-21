@@ -1,5 +1,5 @@
 import type { GameState } from "./gameState";
-import type { AssignmentState } from "./characterState";
+import type { AssignmentState, CharacterHealthState } from "./characterState";
 import type {
   CharacterId,
   LocationId,
@@ -18,12 +18,17 @@ declare const domainExecutionBrand: unique symbol;
 
 export const DomainEventType = {
   CharacterAssignedToOperation: "CharacterAssignedToOperation",
+  CharacterAssignmentReleased: "CharacterAssignmentReleased",
+  CharacterHealthChanged: "CharacterHealthChanged",
+  CharacterPersonalExposureChanged: "CharacterPersonalExposureChanged",
+  OperationConsequencesApplied: "OperationConsequencesApplied",
   OperationLifecycleCompleted: "OperationLifecycleCompleted",
   OperationOutcomeClassified: "OperationOutcomeClassified",
   OperationOutcomeRolled: "OperationOutcomeRolled",
   OperationPlanned: "OperationPlanned",
   OperationStarted: "OperationStarted",
   OrganizationMoneyChanged: "OrganizationMoneyChanged",
+  OrganizationOperationalCapacityReleased: "OrganizationOperationalCapacityReleased",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
   SimulationResumed: "SimulationResumed",
   SimulationTickAdvanced: "SimulationTickAdvanced",
@@ -130,6 +135,38 @@ export interface CharacterAssignedToOperationEvent {
   readonly [domainEventBrand]: "CharacterAssignedToOperationEvent";
 }
 
+export interface CharacterAssignmentReleasedEvent {
+  readonly type: typeof DomainEventType.CharacterAssignmentReleased;
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly previousAssignmentState: AssignmentState;
+  readonly currentAssignmentState: AssignmentState;
+  readonly [domainEventBrand]: "CharacterAssignmentReleasedEvent";
+}
+
+export interface CharacterPersonalExposureChangedEvent {
+  readonly type: typeof DomainEventType.CharacterPersonalExposureChanged;
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly category: OperationOutcomeCategory;
+  readonly previousPersonalExposure: number;
+  readonly requestedDelta: number;
+  readonly actualDelta: number;
+  readonly currentPersonalExposure: number;
+  readonly clamped: boolean;
+  readonly [domainEventBrand]: "CharacterPersonalExposureChangedEvent";
+}
+
+export interface CharacterHealthChangedEvent {
+  readonly type: typeof DomainEventType.CharacterHealthChanged;
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly category: OperationOutcomeCategory;
+  readonly previousHealthState: CharacterHealthState;
+  readonly currentHealthState: CharacterHealthState;
+  readonly [domainEventBrand]: "CharacterHealthChangedEvent";
+}
+
 export interface OrganizationOperationalCapacityReservedEvent {
   readonly type: typeof DomainEventType.OrganizationOperationalCapacityReserved;
   readonly organizationId: OrganizationId;
@@ -140,25 +177,56 @@ export interface OrganizationOperationalCapacityReservedEvent {
   readonly [domainEventBrand]: "OrganizationOperationalCapacityReservedEvent";
 }
 
+export interface OrganizationOperationalCapacityReleasedEvent {
+  readonly type: typeof DomainEventType.OrganizationOperationalCapacityReleased;
+  readonly organizationId: OrganizationId;
+  readonly operationId: OperationId;
+  readonly previousOperationalCapacity: number;
+  readonly currentOperationalCapacity: number;
+  readonly delta: number;
+  readonly [domainEventBrand]: "OrganizationOperationalCapacityReleasedEvent";
+}
+
 export interface OrganizationMoneyChangedEvent {
   readonly type: typeof DomainEventType.OrganizationMoneyChanged;
   readonly organizationId: OrganizationId;
   readonly operationId: OperationId;
-  readonly reason: "operation-start-cost-paid";
+  readonly reason: "operation-start-cost-paid" | "operation-gross-reward-paid";
   readonly previousMoney: number;
   readonly currentMoney: number;
   readonly delta: number;
   readonly [domainEventBrand]: "OrganizationMoneyChangedEvent";
 }
 
+export interface OperationConsequencesAppliedEvent {
+  readonly type: typeof DomainEventType.OperationConsequencesApplied;
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly releasedCharacterIds: readonly CharacterId[];
+  readonly category: OperationOutcomeCategory;
+  readonly grossReward: number;
+  readonly requestedPersonalExposureDelta: number;
+  readonly actualPersonalExposureDelta: number;
+  readonly healthConsequence: "none" | "injured";
+  readonly operationalCapacityReleased: number;
+  readonly [domainEventBrand]: "OperationConsequencesAppliedEvent";
+}
+
 export type DomainEvent =
+  | CharacterAssignmentReleasedEvent
   | CharacterAssignedToOperationEvent
+  | CharacterHealthChangedEvent
+  | CharacterPersonalExposureChangedEvent
+  | OperationConsequencesAppliedEvent
   | OperationLifecycleCompletedEvent
   | OperationOutcomeClassifiedEvent
   | OperationOutcomeRolledEvent
   | OperationPlannedEvent
   | OperationStartedEvent
   | OrganizationMoneyChangedEvent
+  | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
   | SimulationResumedEvent
   | SimulationTickAdvancedEvent;
@@ -238,7 +306,41 @@ export interface CreateCharacterAssignedToOperationEventInput {
   readonly currentAssignmentState: AssignmentState;
 }
 
+export interface CreateCharacterAssignmentReleasedEventInput {
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly previousAssignmentState: AssignmentState;
+  readonly currentAssignmentState: AssignmentState;
+}
+
+export interface CreateCharacterPersonalExposureChangedEventInput {
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly category: OperationOutcomeCategory;
+  readonly previousPersonalExposure: number;
+  readonly requestedDelta: number;
+  readonly actualDelta: number;
+  readonly currentPersonalExposure: number;
+  readonly clamped: boolean;
+}
+
+export interface CreateCharacterHealthChangedEventInput {
+  readonly characterId: CharacterId;
+  readonly operationId: OperationId;
+  readonly category: OperationOutcomeCategory;
+  readonly previousHealthState: CharacterHealthState;
+  readonly currentHealthState: CharacterHealthState;
+}
+
 export interface CreateOrganizationOperationalCapacityReservedEventInput {
+  readonly organizationId: OrganizationId;
+  readonly operationId: OperationId;
+  readonly previousOperationalCapacity: number;
+  readonly currentOperationalCapacity: number;
+  readonly delta: number;
+}
+
+export interface CreateOrganizationOperationalCapacityReleasedEventInput {
   readonly organizationId: OrganizationId;
   readonly operationId: OperationId;
   readonly previousOperationalCapacity: number;
@@ -249,10 +351,24 @@ export interface CreateOrganizationOperationalCapacityReservedEventInput {
 export interface CreateOrganizationMoneyChangedEventInput {
   readonly organizationId: OrganizationId;
   readonly operationId: OperationId;
-  readonly reason: "operation-start-cost-paid";
+  readonly reason: "operation-start-cost-paid" | "operation-gross-reward-paid";
   readonly previousMoney: number;
   readonly currentMoney: number;
   readonly delta: number;
+}
+
+export interface CreateOperationConsequencesAppliedEventInput {
+  readonly operationId: OperationId;
+  readonly operationTemplateId: OperationTemplateId;
+  readonly organizationId: OrganizationId;
+  readonly targetLocationId: LocationId;
+  readonly releasedCharacterIds: readonly CharacterId[];
+  readonly category: OperationOutcomeCategory;
+  readonly grossReward: number;
+  readonly requestedPersonalExposureDelta: number;
+  readonly actualPersonalExposureDelta: number;
+  readonly healthConsequence: "none" | "injured";
+  readonly operationalCapacityReleased: number;
 }
 
 export function createSimulationResumedEvent(
@@ -391,6 +507,47 @@ export function createCharacterAssignedToOperationEvent(
   }) as CharacterAssignedToOperationEvent;
 }
 
+export function createCharacterAssignmentReleasedEvent(
+  input: CreateCharacterAssignmentReleasedEventInput,
+): CharacterAssignmentReleasedEvent {
+  return Object.freeze({
+    type: DomainEventType.CharacterAssignmentReleased,
+    characterId: input.characterId,
+    operationId: input.operationId,
+    previousAssignmentState: input.previousAssignmentState,
+    currentAssignmentState: input.currentAssignmentState,
+  }) as CharacterAssignmentReleasedEvent;
+}
+
+export function createCharacterPersonalExposureChangedEvent(
+  input: CreateCharacterPersonalExposureChangedEventInput,
+): CharacterPersonalExposureChangedEvent {
+  return Object.freeze({
+    type: DomainEventType.CharacterPersonalExposureChanged,
+    characterId: input.characterId,
+    operationId: input.operationId,
+    category: input.category,
+    previousPersonalExposure: input.previousPersonalExposure,
+    requestedDelta: input.requestedDelta,
+    actualDelta: input.actualDelta,
+    currentPersonalExposure: input.currentPersonalExposure,
+    clamped: input.clamped,
+  }) as CharacterPersonalExposureChangedEvent;
+}
+
+export function createCharacterHealthChangedEvent(
+  input: CreateCharacterHealthChangedEventInput,
+): CharacterHealthChangedEvent {
+  return Object.freeze({
+    type: DomainEventType.CharacterHealthChanged,
+    characterId: input.characterId,
+    operationId: input.operationId,
+    category: input.category,
+    previousHealthState: input.previousHealthState,
+    currentHealthState: input.currentHealthState,
+  }) as CharacterHealthChangedEvent;
+}
+
 export function createOrganizationOperationalCapacityReservedEvent(
   input: CreateOrganizationOperationalCapacityReservedEventInput,
 ): OrganizationOperationalCapacityReservedEvent {
@@ -402,6 +559,19 @@ export function createOrganizationOperationalCapacityReservedEvent(
     currentOperationalCapacity: input.currentOperationalCapacity,
     delta: input.delta,
   }) as OrganizationOperationalCapacityReservedEvent;
+}
+
+export function createOrganizationOperationalCapacityReleasedEvent(
+  input: CreateOrganizationOperationalCapacityReleasedEventInput,
+): OrganizationOperationalCapacityReleasedEvent {
+  return Object.freeze({
+    type: DomainEventType.OrganizationOperationalCapacityReleased,
+    organizationId: input.organizationId,
+    operationId: input.operationId,
+    previousOperationalCapacity: input.previousOperationalCapacity,
+    currentOperationalCapacity: input.currentOperationalCapacity,
+    delta: input.delta,
+  }) as OrganizationOperationalCapacityReleasedEvent;
 }
 
 export function createOrganizationMoneyChangedEvent(
@@ -416,6 +586,25 @@ export function createOrganizationMoneyChangedEvent(
     currentMoney: input.currentMoney,
     delta: input.delta,
   }) as OrganizationMoneyChangedEvent;
+}
+
+export function createOperationConsequencesAppliedEvent(
+  input: CreateOperationConsequencesAppliedEventInput,
+): OperationConsequencesAppliedEvent {
+  return Object.freeze({
+    type: DomainEventType.OperationConsequencesApplied,
+    operationId: input.operationId,
+    operationTemplateId: input.operationTemplateId,
+    organizationId: input.organizationId,
+    targetLocationId: input.targetLocationId,
+    releasedCharacterIds: Object.freeze([...input.releasedCharacterIds]),
+    category: input.category,
+    grossReward: input.grossReward,
+    requestedPersonalExposureDelta: input.requestedPersonalExposureDelta,
+    actualPersonalExposureDelta: input.actualPersonalExposureDelta,
+    healthConsequence: input.healthConsequence,
+    operationalCapacityReleased: input.operationalCapacityReleased,
+  }) as OperationConsequencesAppliedEvent;
 }
 
 export function createDomainExecution(

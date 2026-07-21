@@ -64,3 +64,4 @@ export * from "./operationPlanning";
 export * from "./operationLifecycle";
 export * from "./operationOutcomeResolver";
 export * from "./operationOutcomeClassification";
+export * from "./operationConsequences";
