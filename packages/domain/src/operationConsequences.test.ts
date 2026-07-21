@@ -7,7 +7,10 @@ import {
   OperationStatus,
   assertDomainEventInvariant,
   applyLocalCollectionConsequences,
+  createCharacterHealthChangedEvent,
+  createCharacterPersonalExposureChangedEvent,
   createCharacterState,
+  createOperationConsequencesAppliedEvent,
   createOperationState,
   createOrganizationState,
   createRandomState,
@@ -580,6 +583,146 @@ describe("local collection consequence application", () => {
       healthConsequence: "none",
       operationalCapacityReleased: 1,
     });
+  });
+
+  it("rejects semantically inconsistent consequence event payloads", () => {
+    const validUnclampedExposureEvent = createCharacterPersonalExposureChangedEvent({
+      characterId: BOSS_ID,
+      operationId: LOCAL_COLLECTION_OPERATION_ID,
+      category: OperationOutcomeCategory.Success,
+      previousPersonalExposure: 10,
+      requestedDelta: 4,
+      actualDelta: 4,
+      currentPersonalExposure: 14,
+      clamped: false,
+    });
+    const validClampedExposureEvent = createCharacterPersonalExposureChangedEvent({
+      characterId: BOSS_ID,
+      operationId: LOCAL_COLLECTION_OPERATION_ID,
+      category: OperationOutcomeCategory.PartialSuccess,
+      previousPersonalExposure: 96,
+      requestedDelta: 10,
+      actualDelta: 4,
+      currentPersonalExposure: 100,
+      clamped: true,
+    });
+    const validCriticalHealthEvent = createCharacterHealthChangedEvent({
+      characterId: BOSS_ID,
+      operationId: LOCAL_COLLECTION_OPERATION_ID,
+      category: OperationOutcomeCategory.CriticalFailure,
+      previousHealthState: "healthy",
+      currentHealthState: "injured",
+    });
+    const validNonCriticalCompletionEvent = createOperationConsequencesAppliedEvent({
+      operationId: LOCAL_COLLECTION_OPERATION_ID,
+      operationTemplateId: LOCAL_COLLECTION_TEMPLATE_ID,
+      organizationId: STARTER_ORGANIZATION_ID,
+      targetLocationId: CORNER_STORE_LOCATION_ID,
+      releasedCharacterIds: [BOSS_ID],
+      category: OperationOutcomeCategory.Success,
+      grossReward: 80,
+      requestedPersonalExposureDelta: 4,
+      actualPersonalExposureDelta: 4,
+      healthConsequence: "none",
+      operationalCapacityReleased: 1,
+    });
+    const validCriticalCompletionEvent = createOperationConsequencesAppliedEvent({
+      ...validNonCriticalCompletionEvent,
+      category: OperationOutcomeCategory.CriticalFailure,
+      grossReward: 0,
+      requestedPersonalExposureDelta: 25,
+      actualPersonalExposureDelta: 25,
+      healthConsequence: "injured",
+    });
+
+    expect(() => assertDomainEventInvariant(validUnclampedExposureEvent)).not.toThrow();
+    expect(() => assertDomainEventInvariant(validClampedExposureEvent)).not.toThrow();
+    expect(() => assertDomainEventInvariant(validCriticalHealthEvent)).not.toThrow();
+    expect(() => assertDomainEventInvariant(validNonCriticalCompletionEvent)).not.toThrow();
+    expect(() => assertDomainEventInvariant(validCriticalCompletionEvent)).not.toThrow();
+
+    const invalidEvents: readonly [string, unknown][] = [
+      [
+        "actual exposure delta greater than requested",
+        {
+          ...validUnclampedExposureEvent,
+          requestedDelta: 4,
+          actualDelta: 10,
+          currentPersonalExposure: 20,
+        },
+      ],
+      [
+        "clamped exposure with equal requested and actual deltas",
+        {
+          ...validUnclampedExposureEvent,
+          clamped: true,
+        },
+      ],
+      [
+        "unclamped exposure with actual delta lower than requested",
+        {
+          ...validClampedExposureEvent,
+          clamped: false,
+        },
+      ],
+      [
+        "clamped exposure that does not reach 100",
+        {
+          ...validClampedExposureEvent,
+          previousPersonalExposure: 80,
+          requestedDelta: 25,
+          actualDelta: 10,
+          currentPersonalExposure: 90,
+        },
+      ],
+      [
+        "success health injury",
+        {
+          ...validCriticalHealthEvent,
+          category: OperationOutcomeCategory.Success,
+        },
+      ],
+      [
+        "partial-success health injury",
+        {
+          ...validCriticalHealthEvent,
+          category: OperationOutcomeCategory.PartialSuccess,
+        },
+      ],
+      [
+        "failure health injury",
+        {
+          ...validCriticalHealthEvent,
+          category: OperationOutcomeCategory.Failure,
+        },
+      ],
+      [
+        "non-critical completion injury",
+        {
+          ...validNonCriticalCompletionEvent,
+          healthConsequence: "injured",
+        },
+      ],
+      [
+        "critical completion without injury",
+        {
+          ...validCriticalCompletionEvent,
+          healthConsequence: "none",
+        },
+      ],
+      [
+        "completion actual exposure greater than requested",
+        {
+          ...validNonCriticalCompletionEvent,
+          requestedPersonalExposureDelta: 4,
+          actualPersonalExposureDelta: 10,
+        },
+      ],
+    ];
+
+    for (const [caseName, event] of invalidEvents) {
+      expect(() => assertDomainEventInvariant(event as never), caseName).toThrow();
+    }
   });
 });
 

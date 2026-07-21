@@ -28,7 +28,10 @@ import {
   parseOrganizationId,
 } from "./entityIds";
 import { parseSchemaVersion } from "./gameState";
-import { isOperationOutcomeCategory } from "./operationOutcomeClassification";
+import {
+  OperationOutcomeCategory,
+  isOperationOutcomeCategory,
+} from "./operationOutcomeClassification";
 import { OperationStatus } from "./operationState";
 import { parseRandomState, type RandomState } from "./randomService";
 import {
@@ -580,6 +583,30 @@ function assertCharacterPersonalExposureChangedEventInvariant(
       event,
     );
   }
+
+  if (event.actualDelta > event.requestedDelta) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.actualDelta",
+      "actualDelta must be less than or equal to requestedDelta",
+      event,
+    );
+  }
+
+  if (event.clamped !== event.actualDelta < event.requestedDelta) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.clamped",
+      "clamped must be true exactly when actualDelta is lower than requestedDelta",
+      event,
+    );
+  }
+
+  if (event.clamped && event.currentPersonalExposure !== 100) {
+    throw new InvariantViolationError(
+      "CharacterPersonalExposureChanged.clampedExposure",
+      "clamped exposure changes must end at 100 personal exposure",
+      event,
+    );
+  }
 }
 
 function assertCharacterHealthChangedEventInvariant(event: CharacterHealthChangedEvent): void {
@@ -598,6 +625,14 @@ function assertCharacterHealthChangedEventInvariant(event: CharacterHealthChange
     throw new InvariantViolationError(
       "CharacterHealthChanged.category",
       "category must be a supported operation outcome category",
+      event,
+    );
+  }
+
+  if (event.category !== OperationOutcomeCategory.CriticalFailure) {
+    throw new InvariantViolationError(
+      "CharacterHealthChanged.category",
+      "health changes are only valid for critical-failure outcomes",
       event,
     );
   }
@@ -800,10 +835,28 @@ function assertOperationConsequencesAppliedEventInvariant(
     );
   }
 
+  if (event.actualPersonalExposureDelta > event.requestedPersonalExposureDelta) {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.actualPersonalExposureDelta",
+      "actualPersonalExposureDelta must be less than or equal to requestedPersonalExposureDelta",
+      event,
+    );
+  }
+
   if (event.healthConsequence !== "none" && event.healthConsequence !== "injured") {
     throw new InvariantViolationError(
       "OperationConsequencesApplied.healthConsequence",
       "healthConsequence must be none or injured",
+      event,
+    );
+  }
+
+  const expectedHealthConsequence =
+    event.category === OperationOutcomeCategory.CriticalFailure ? "injured" : "none";
+  if (event.healthConsequence !== expectedHealthConsequence) {
+    throw new InvariantViolationError(
+      "OperationConsequencesApplied.healthConsequence",
+      "healthConsequence must match the accepted category consequence",
       event,
     );
   }
