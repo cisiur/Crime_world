@@ -10,6 +10,7 @@
     }
   },
   "dependencies": {
+    "@crimeworld/content": "0.1.0",
     "@crimeworld/domain": "0.1.0"
   },
   "scripts": {

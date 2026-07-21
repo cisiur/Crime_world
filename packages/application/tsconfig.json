@@ -9,5 +9,5 @@
     "lib": ["ES2022"]
   },
   "include": ["src/**/*.ts"],
-  "references": [{ "path": "../domain" }]
+  "references": [{ "path": "../domain" }, { "path": "../content" }]
 }
