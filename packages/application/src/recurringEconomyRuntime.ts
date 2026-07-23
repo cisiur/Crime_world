@@ -1,6 +1,12 @@
 import {
   processRecurringEconomyDuePeriod,
+  failure,
   success,
+  DomainErrorCode,
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
+  type CharacterId,
+  type DomainError,
   type DomainEvent,
   type DomainResult,
   type MoneyTransaction,
@@ -38,6 +44,40 @@ export type ExecuteRecurringEconomyRuntimeResult = DomainResult<
   RecurringEconomyError
 >;
 
+export interface ExecuteCrewUpkeepPeriodInput {
+  readonly currentTick: SimulationTick;
+  readonly transactionId: TransactionId;
+  readonly organizationId: OrganizationState["organizationId"];
+  readonly characterId: CharacterId;
+  readonly organizations: readonly OrganizationState[];
+  readonly transactions: readonly MoneyTransaction[];
+  readonly processingRecords: readonly RecurringEconomyProcessingRecord[];
+  readonly schedules: readonly RecurringEconomySchedule[];
+}
+
+export interface CrewUpkeepRuntimeScheduleNotFoundError extends DomainError {
+  readonly code: typeof DomainErrorCode.CrewUpkeepRuntimeScheduleNotFound;
+  readonly organizationId: OrganizationState["organizationId"];
+  readonly characterId: CharacterId;
+}
+
+export interface CrewUpkeepRuntimeScheduleConflictError extends DomainError {
+  readonly code: typeof DomainErrorCode.CrewUpkeepRuntimeScheduleConflict;
+  readonly organizationId: OrganizationState["organizationId"];
+  readonly characterId: CharacterId;
+  readonly matchingScheduleCount: number;
+}
+
+export type ExecuteCrewUpkeepPeriodError =
+  | CrewUpkeepRuntimeScheduleConflictError
+  | CrewUpkeepRuntimeScheduleNotFoundError
+  | RecurringEconomyError;
+
+export type ExecuteCrewUpkeepPeriodResult = DomainResult<
+  ExecuteRecurringEconomyRuntimeSuccess,
+  ExecuteCrewUpkeepPeriodError
+>;
+
 export function executeRecurringEconomyRuntime(
   input: ExecuteRecurringEconomyRuntimeInput,
 ): ExecuteRecurringEconomyRuntimeResult {
@@ -65,4 +105,55 @@ export function executeRecurringEconomyRuntime(
       processingStatus: result.value.processingRecord.status,
     }),
   );
+}
+
+export function executeCrewUpkeepPeriod(
+  input: ExecuteCrewUpkeepPeriodInput,
+): ExecuteCrewUpkeepPeriodResult {
+  const matchingSchedules = input.schedules.filter(
+    (schedule) =>
+      schedule.organizationId === input.organizationId &&
+      schedule.category === MoneyTransactionCategory.CrewUpkeep &&
+      schedule.source.type === MoneyTransactionSourceType.CrewUpkeep &&
+      schedule.source.characterId === input.characterId,
+  );
+
+  if (matchingSchedules.length === 0) {
+    return failure({
+      code: DomainErrorCode.CrewUpkeepRuntimeScheduleNotFound,
+      message: `Crew upkeep schedule for character "${input.characterId}" in organization "${input.organizationId}" was not found.`,
+      organizationId: input.organizationId,
+      characterId: input.characterId,
+    });
+  }
+
+  if (matchingSchedules.length > 1) {
+    return failure({
+      code: DomainErrorCode.CrewUpkeepRuntimeScheduleConflict,
+      message: `Expected one crew upkeep schedule for character "${input.characterId}" in organization "${input.organizationId}", found ${matchingSchedules.length}.`,
+      organizationId: input.organizationId,
+      characterId: input.characterId,
+      matchingScheduleCount: matchingSchedules.length,
+    });
+  }
+
+  const schedule = matchingSchedules[0];
+  if (schedule === undefined) {
+    return failure({
+      code: DomainErrorCode.CrewUpkeepRuntimeScheduleNotFound,
+      message: `Crew upkeep schedule for character "${input.characterId}" in organization "${input.organizationId}" was not found.`,
+      organizationId: input.organizationId,
+      characterId: input.characterId,
+    });
+  }
+
+  return executeRecurringEconomyRuntime({
+    currentTick: input.currentTick,
+    transactionId: input.transactionId,
+    scheduleId: schedule.scheduleId,
+    organizations: input.organizations,
+    transactions: input.transactions,
+    processingRecords: input.processingRecords,
+    schedules: input.schedules,
+  });
 }

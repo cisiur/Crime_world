@@ -71,3 +71,4 @@ export * from "./operationOutcomeClassification";
 export * from "./operationConsequences";
 export * from "./moneyLedger";
 export * from "./recurringEconomy";
+export * from "./crewUpkeepSchedules";

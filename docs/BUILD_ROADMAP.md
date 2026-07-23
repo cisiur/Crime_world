@@ -1,6 +1,6 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02A has added the standalone domain money-ledger foundation, E5-02B has migrated Local Collection start cost and non-zero gross rewards to that ledger, E5-02C has added the standalone recurring economy scheduler foundation, and E5-02D has added the first application/runtime recurring economy orchestration layer. Recurring gameplay is not connected to the simulation update loop yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02A has added the standalone domain money-ledger foundation, E5-02B has migrated Local Collection start cost and non-zero gross rewards to that ledger, E5-02C has added the standalone recurring economy scheduler foundation, E5-02D has added the first application/runtime recurring economy orchestration layer, and E5-02E has added the first bounded crew-upkeep flow. Recurring gameplay is not connected to the simulation update loop yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
 > **Current phase:** EPIC 5 in progress. E5-02 is being delivered through bounded increments; the next increment requires PM review and acceptance before implementation.
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. E5-02B has migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C has implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D has added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. Recurring gameplay is still not connected to the simulation update loop, and no business-control, recruitment, or production UI implementation exists yet.
+Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. E5-02B has migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C has implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D has added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E has added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. Recurring gameplay is still not connected to the simulation update loop, recurring income is not implemented, and no business-control, recruitment, or production UI implementation exists yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -698,6 +698,19 @@ E5-02D is the fourth bounded implementation increment of E5-02. It adds only the
 - deterministic event ordering preserved exactly as emitted by the domain scheduler.
 
 E5-02D does not add new gameplay rules, generate schedules, process every due schedule, catch up multiple overdue periods, integrate with the global simulation tick pipeline, modify Local Collection, attach recurring economy to root `GameState`, implement save/load, add UI, or introduce business income or upkeep values. E5-02 remains in progress, and the next bounded task requires PM review and acceptance.
+
+### E5-02E implementation status
+
+E5-02E is the fifth bounded implementation increment of E5-02. It adds the first actual recurring cost flow for crew upkeep:
+
+- `packages/content` now exports one canonical provisional MVP crew-upkeep definition: `5` money per character every `144` simulation ticks,
+- `packages/domain` can deterministically generate one active `crew-upkeep` recurring economy schedule per resolved organization member, including the leader when listed in `memberCharacterIds`,
+- generation preserves member order, preserves existing schedule order, appends only genuinely new schedules, reuses matching existing schedules, and returns typed conflict failures instead of silently choosing between inconsistent schedules,
+- `packages/application` can execute exactly one explicit crew-upkeep period for one explicit character by delegating to the recurring economy runtime.
+
+Paid crew upkeep creates one negative ledger transaction, reduces the organization balance through the ledger, appends one applied processing record, advances the schedule by one period, and emits `OrganizationMoneyTransactionRecorded` followed by `RecurringEconomyPeriodProcessed`. Unpaid crew upkeep creates no ledger transaction, leaves money unchanged, appends one unpaid processing record, advances the schedule by one period, and emits only `RecurringEconomyPeriodProcessed`.
+
+E5-02E does not implement recurring income, business income, business upkeep, hideout upkeep, automatic schedule generation during campaign creation, membership-change synchronization, global simulation tick-loop integration, processing every due schedule, multiple due periods per invocation, root `GameState` integration, save/load, UI, debt, arrears, morale, loyalty, desertion, bankruptcy consequences, or E5-03 business archetypes. E5-02 remains in progress, E5-03 has not started, and the next bounded task requires PM review and acceptance.
 
 ### Current balance
 

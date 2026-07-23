@@ -52,6 +52,19 @@ export const DomainErrorCode = {
   RecurringEconomyScheduleInactive: "RECURRING_ECONOMY_SCHEDULE_INACTIVE",
   RecurringEconomyScheduleInvalid: "RECURRING_ECONOMY_SCHEDULE_INVALID",
   RecurringEconomyScheduleNotFound: "RECURRING_ECONOMY_SCHEDULE_NOT_FOUND",
+  CrewUpkeepRuntimeScheduleConflict: "CREW_UPKEEP_RUNTIME_SCHEDULE_CONFLICT",
+  CrewUpkeepRuntimeScheduleNotFound: "CREW_UPKEEP_RUNTIME_SCHEDULE_NOT_FOUND",
+  CrewUpkeepScheduleGenerationDuplicateMember: "CREW_UPKEEP_SCHEDULE_GENERATION_DUPLICATE_MEMBER",
+  CrewUpkeepScheduleGenerationInvalidDefinition:
+    "CREW_UPKEEP_SCHEDULE_GENERATION_INVALID_DEFINITION",
+  CrewUpkeepScheduleGenerationInvalidFirstDueTick:
+    "CREW_UPKEEP_SCHEDULE_GENERATION_INVALID_FIRST_DUE_TICK",
+  CrewUpkeepScheduleGenerationInvalidScheduleId:
+    "CREW_UPKEEP_SCHEDULE_GENERATION_INVALID_SCHEDULE_ID",
+  CrewUpkeepScheduleGenerationMissingCharacter: "CREW_UPKEEP_SCHEDULE_GENERATION_MISSING_CHARACTER",
+  CrewUpkeepScheduleGenerationMissingOrganization:
+    "CREW_UPKEEP_SCHEDULE_GENERATION_MISSING_ORGANIZATION",
+  CrewUpkeepScheduleGenerationScheduleConflict: "CREW_UPKEEP_SCHEDULE_GENERATION_SCHEDULE_CONFLICT",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:
