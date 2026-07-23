@@ -70,27 +70,34 @@ For active implementation work, begin with:
 
 ## Current project status
 
-The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, and characters-and-organizations foundation are complete.
+The high-level game design, MVP definition, implementation architecture, repository foundation, deterministic domain kernel, controlled city shell, characters-and-organizations foundation, and first Local Collection operation vertical slice are complete.
 
-The project has moved through EPIC 4 planning, lifecycle, seeded resolution, and outcome-classification work and is now preparing consequence application.
+The project has completed EPIC 4 and is now preparing EPIC 5 / E5-01 planning.
 
-E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. E4-04 is complete as deterministic domain planning and resource reservation for Local Collection. E4-05 is complete as deterministic operation lifecycle timing for `planned -> running -> resolved`. E4-06 is complete as seeded weighted operation outcome rolling. E4-07 is complete as typed Local Collection outcome classification. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`.
+E4-01 is complete as documentation only. E4-02 is complete as a schema-only implementation. E4-03 is complete as availability/prerequisite evaluation. E4-04 is complete as deterministic domain planning and resource reservation for Local Collection. E4-05 is complete as deterministic operation lifecycle timing for `planned -> running -> resolved`. E4-06 is complete as seeded weighted operation outcome rolling. E4-07 is complete as typed Local Collection outcome classification. E4-08 is complete as bounded Local Collection consequence application. E4-09 is complete as deterministic full vertical-slice integration coverage. E4-10 is complete as a developer playtest UI runnable in the desktop/browser shell. The accepted first operation is **Local Collection**, and its authoritative detailed specification is recorded under EPIC 4 in `BUILD_ROADMAP.md`.
 
-Deterministic planning now creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Lifecycle timing now advances operations through the existing `planned`, `running`, and `resolved` statuses. Seeded weighted rolling now uses the central resolver and existing deterministic random service. Typed outcome classification now maps Local Collection rolls to `success`, `partial-success`, `failure`, or `critical-failure`, with canonical authored probabilities `45/30/20/5` in `packages/content`. Consequence application, reward payment, exposure changes, injuries, campaign creation, save/load, AI operation execution, and UI operation flow remain unimplemented.
+Local Collection now has a canonical authored template, validated availability, planning, lifecycle, deterministic outcome classification, immediate consequences, deterministic integration coverage, and a developer playtest UI. Deterministic planning creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Lifecycle timing advances operations through the existing `planned`, `running`, and `resolved` statuses. Seeded weighted rolling uses the central resolver and existing deterministic random service. Typed outcome classification maps Local Collection rolls to `success`, `partial-success`, `failure`, or `critical-failure`, with canonical authored probabilities `45/30/20/5` in `packages/content`. Consequence application applies the accepted gross reward, exposure delta, critical-failure injury, assignment release, capacity release, and applied-consequence record without consuming RNG. Accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`; fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`.
 
-Accepted implementation baseline after E4-07:
+This is an implemented developer vertical slice, not final balance, a complete economy, a reusable operation catalogue, a full campaign loop, final UI, or player-facing production readiness. Campaign creation, root `GameState` operation integration, transaction ledger, save/load, recruitment, pressure/investigation systems, rival AI, and reusable operation catalogue expansion remain unimplemented.
+
+Previous documentation synchronization baseline after E4-05 through E4-07:
 
 ```text
-ba640c7a8da900ee3d2470f93331cb4cb5baee4a
+718307042f58bf86528a5235a758d558f75f260d
+```
+
+Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
+
+```text
+9769a6ba3a9ba06559a3c81bc6536b054e519ab1
 ```
 
 Current priority:
 
-1. implement E4-08 consequence application for Local Collection outcomes,
-2. build on the accepted Local Collection specification, E4-02 schemas, E4-03 availability evaluator, E4-04 planning result, E4-05 lifecycle transitions, E4-06 resolver, and E4-07 classification result as the source of truth,
+1. plan E5-01 money flow, upkeep, and transaction ledger,
+2. build on the accepted Local Collection vertical slice and its temporary direct money changes,
 3. preserve the existing package boundaries, including no `packages/content` dependency from `packages/domain`,
-4. keep consequence application bounded to the accepted E4-01 table and do not introduce probability formulas,
-5. avoid expanding into the full operation catalogue, economy simulation, recruitment, pressure systems, rival AI, save/load, campaign creation, or full UI before their accepted tasks.
+4. keep recurring income, business control, recruitment, pressure systems, rival AI, save/load, campaign creation, and final UI pending until their accepted tasks.
 
 Do not add another large design system unless implementation reveals a real design gap.
 

@@ -115,29 +115,35 @@ The broad design phase is closed.
 
 The project is now in:
 
-> **EPIC 4 - First End-to-End Operation Vertical Slice consequence-application planning**
+> **EPIC 5 / E5-01 planning**
 
 The current next task is:
 
-> **E4-08 - Apply money, exposure, injury, and event consequences.**
+> **E5-01 - Define money flow, upkeep, and transaction ledger.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
-E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. E4-05 is complete as bounded deterministic lifecycle transitions. E4-06 is complete as a centralized seeded percentile resolver. E4-07 is complete as typed Local Collection outcome classification with canonical authored weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`. The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. Planning, lifecycle timing, seeded weighted rolling, and typed classification exist, but consequence application and campaign orchestration do not yet exist. Documentation was intentionally synchronized as one batch after E4-05 through E4-07.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. E4-05 is complete as bounded deterministic lifecycle transitions. E4-06 is complete as a centralized seeded percentile resolver. E4-07 is complete as typed Local Collection outcome classification with canonical authored weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`. E4-08 is complete as bounded Local Collection consequence application. E4-09 is complete as deterministic integration coverage for the full Local Collection flow. E4-10 is complete as a developer playtest runnable in the desktop/browser shell.
 
-Accepted implementation baseline after E4-07:
+The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. The implemented slice covers setup, planning, character and capacity reservation, start-cost deduction, lifecycle advance to running and resolved, seeded roll and typed classification, consequence application, assignment and capacity release, and ordered semantic events. The accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`. Fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`. It passed automated integration coverage and the manual developer playtest was run and accepted. Documentation is now synchronized after the E4-08 through E4-10 batch.
+
+Previous documentation synchronization baseline after E4-05 through E4-07:
 
 ```text
-ba640c7a8da900ee3d2470f93331cb4cb5baee4a
+718307042f58bf86528a5235a758d558f75f260d
+```
+
+Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
+
+```text
+9769a6ba3a9ba06559a3c81bc6536b054e519ab1
 ```
 
 The immediate sequence is:
 
-1. planning and crew/resource reservation are complete,
-2. lifecycle transitions are complete,
-3. seeded weighted outcome resolution is complete,
-4. typed Local Collection outcome classification is complete,
-5. apply accepted Local Collection consequences next,
-6. continue to avoid premature full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, and broad orchestration work.
+1. EPIC 4 Local Collection vertical slice is complete,
+2. preserve the domain/content/application/presentation boundaries proven by the slice,
+3. begin E5-01 planning for money flow, upkeep, and transaction ledger,
+4. continue to avoid premature full campaign creation, recurring economy simulation, pressure systems, rival AI, save/load, recruitment, and broad orchestration work.
 
 ---
 
@@ -338,12 +344,13 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E4-08 - Apply money, exposure, injury, and event consequences.**
+> **E5-01 - Define money flow, upkeep, and transaction ledger.**
 
-The task should build on accepted E4-04 planning/reservation, E4-05 lifecycle transitions, E4-06 seeded resolver diagnostics, E4-07 typed Local Collection classification, and the accepted E4-01 consequence table.
+The task should define the minimal EPIC 5 money-flow, upkeep, and transaction-ledger scope needed after the accepted Local Collection vertical slice.
 
-- minimal consequence application for classified Local Collection outcomes,
+- preserve the PM workflow of analysis -> proposed scope -> user acceptance -> Codex prompt -> implementation -> review,
+- build on the accepted E4-04 start-cost and E4-08 gross-reward behavior without treating the temporary direct money mutation as the final economy model,
 - preservation of clear package ownership and dependency boundaries,
-- explicit exclusions for full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, operation catalogue expansion, recruitment, and broad orchestration.
+- explicit exclusions for full campaign creation, recurring economy simulation, pressure systems, rival AI, save/load, operation catalogue expansion, recruitment, and broad orchestration.
 
-E4-08 must not expand into full campaign creation, economy simulation, pressure systems, rival AI, UI, save/load, or broader operation catalogue work beyond the accepted Local Collection consequence-application scope.
+Do not begin E5-01 implementation or create a Codex prompt before the project owner accepts the E5-01 planning scope.

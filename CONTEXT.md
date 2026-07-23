@@ -243,14 +243,28 @@ Completed document groups:
 - Pure deterministic `classifyOperationOutcome(...)` exists in the domain package for Local Collection outcome classification. It validates supplied Local Collection bands, delegates seeded weighted resolution to E4-06, maps the selected band to a typed category, preserves resolver diagnostics, returns the advanced random state, and emits `OperationOutcomeRolled` followed by `OperationOutcomeClassified`.
 - The canonical immutable Local Collection outcome band definition exists in `packages/content/src/localCollectionOutcomeDefinition.ts` with the accepted ordered weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`.
 - Generic classification-band validation remains reusable for other valid 100-total distributions, while canonical Local Collection validation additionally enforces all four categories, their accepted order, and exact `45/30/20/5` weights.
+- Pure deterministic `applyLocalCollectionConsequences(...)` exists in the domain package for bounded Local Collection money, personal exposure, critical-failure injury, assignment-release, operational-capacity release, and applied-consequence record updates.
+- Local Collection consequence application uses caller-supplied authored consequence definitions, does not consume RNG, rejects duplicate application through immutable applied-consequences records, emits semantic consequence events, and leaves `OperationState.status` as `resolved`.
+- Accepted Local Collection consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`.
+- The canonical immutable Local Collection consequence definition exists in `packages/content/src/localCollectionConsequenceDefinition.ts` with accepted rewards, exposure deltas, health consequence, and one capacity release for all four outcome categories.
+- A deterministic repository-level Local Collection vertical-slice integration test exists at `tests/integration/localCollectionVerticalSlice.integration.test.ts`. It composes availability, planning, lifecycle, seeded classification, and consequence application using the real public APIs and fixed seeds `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`.
+- The application package now owns a Local Collection developer playtest harness in `packages/application/src/localCollectionPlaytest.ts`. It imports domain and content, composes authored definitions with explicit runtime state, exposes setup/planned/running/resolved/classified/settled playtest phases, and is not a general campaign service.
+- The presentation package renders the developer Local Collection playtest in `packages/presentation/src/AppShell.tsx`, including setup controls, seed presets, step-by-step and full-run actions, consequence diagnostics, RNG state, and an event timeline built from real domain events.
+- The first end-to-end Local Collection vertical slice is manually runnable through the desktop/browser developer UI with `npm.cmd run dev` or `npm.cmd run desktop:dev`.
 - No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
-- No Local Collection consequence application, reward payment, exposure change, injury application, character assignment release, operational-capacity release, classified-outcome persistence, operation `GameState` integration, event bus, scheduler, save/load, AI, economy, pressure, recruitment, ownership transfer, campaign orchestration, or operation UI systems exist yet.
+- No operation `GameState` integration, event bus, scheduler, save/load, AI, transaction ledger, recurring economy, pressure, investigations, recruitment, ownership transfer, rival behavior, generic campaign orchestration, reusable operation catalogue, or player-facing production UI exists yet.
 - The root `GameState` still contains only the current domain-kernel fields and is not yet a complete campaign aggregate.
 
-Accepted project baseline after E4-07:
+Previous documentation synchronization baseline after E4-05 through E4-07:
 
 ```text
-ba640c7a8da900ee3d2470f93331cb4cb5baee4a
+718307042f58bf86528a5235a758d558f75f260d
+```
+
+Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
+
+```text
+9769a6ba3a9ba06559a3c81bc6536b054e519ab1
 ```
 
 Final accepted EPIC 1 commit:
@@ -273,13 +287,13 @@ e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 
 Current roadmap phase:
 
-> **EPIC 4 - First End-to-End Operation Vertical Slice consequence-application planning**
+> **EPIC 5 / E5-01 planning**
 
 Current next task:
 
-> **E4-08 - Apply money, exposure, injury, and event consequences.**
+> **E5-01 - Define money flow, upkeep, and transaction ledger.**
 
-EPIC 3 is complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, E4-04 is complete as a bounded domain planning and reservation implementation, E4-05 is complete as bounded lifecycle transitions, E4-06 is complete as a centralized seeded percentile resolver, and E4-07 is complete as typed Local Collection outcome classification. The First Operation Slice can evaluate prerequisites, create planned operations, advance lifecycle timing, roll a seeded weighted outcome, and classify Local Collection results, but consequence application and campaign orchestration are not implemented. The authoritative detailed Local Collection specification lives under EPIC 4 in `docs/BUILD_ROADMAP.md`.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. The slice proves one complete Local Collection operation from setup through settlement, but it is still not integrated into a full campaign aggregate, save/load, transaction ledger, pressure system, recruitment system, rival AI, or final player-facing UI.
 
 ---
 
@@ -693,7 +707,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the E4-02 runtime `OperationState` schema, the E4-03 pure operation availability evaluator with typed rejection reasons, the E4-04 bounded deterministic planning function for Local Collection, the E4-05 bounded lifecycle transition function, the E4-06 seeded weighted outcome resolver, and the E4-07 typed Local Collection outcome classifier. Authored city data, rival organization seeds, the E4-02 authored `OperationTemplateDefinition` schema, and the E4-07 canonical Local Collection outcome bands remain in `packages/content`. The repository still does not contain consequence application, campaign creation, classified-outcome persistence in campaign state, or playable operation UI. The E4-01 Local Collection specification remains the authoritative operation design reference.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, and the complete EPIC 4 Local Collection domain slice: runtime `OperationState`, availability, planning, lifecycle, seeded weighted outcome resolution, typed outcome classification, bounded consequence application, applied-consequence records, semantic domain events, and invariants. Authored city data, rival organization seeds, the Local Collection operation template, canonical outcome bands, and canonical consequence definition remain in `packages/content`. The application package now contains the Local Collection developer playtest/session harness, and presentation renders that playtest in the desktop/browser shell. The repository still does not contain campaign creation, operation persistence in root `GameState`, save/load, a transaction ledger, pressure or investigation systems, recruitment, rival AI, a reusable operation catalogue, or a final player-facing UI.
 
 ---
 
@@ -720,17 +734,20 @@ Completed:
 - E4-04 planning and crew/resource reservation command,
 - E4-05 operation lifecycle transitions,
 - E4-06 centralized seeded operation outcome resolver,
-- E4-07 Local Collection outcome classification.
+- E4-07 Local Collection outcome classification,
+- E4-08 Local Collection consequence application,
+- E4-09 deterministic Local Collection vertical-slice integration tests,
+- E4-10 developer Local Collection playtest UI.
 
 Next:
 
-> **E4-08 - Apply money, exposure, injury, and event consequences.**
+> **E5-01 - Define money flow, upkeep, and transaction ledger.**
 
 Required PM output before implementation:
 
-- define the minimal consequence-application scope for classified Local Collection outcomes,
-- preserve the accepted E4-04 planning/reservation, E4-05 lifecycle, E4-06 resolver, and E4-07 classification behavior,
-- keep campaign creation, full orchestration, UI, operation catalogue expansion, economy simulation, recruitment gameplay, pressure systems, rival AI, save/load, and full UI out of scope until explicitly accepted.
+- define the minimal EPIC 5 money-flow, upkeep, and transaction-ledger scope,
+- preserve the accepted EPIC 4 Local Collection start-cost and gross-reward behavior while preparing a proper ledger model,
+- keep recurring income, business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
 
 ---
 

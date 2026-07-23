@@ -182,9 +182,12 @@ Current implementation:
 - The canonical MVP city contains four districts, 29 strategic locations, and five routes.
 - The content package owns immutable rival organization seed definitions for the current MVP rivals.
 - The content package owns the minimal authored `OperationTemplateDefinition` schema for operation templates.
+- The content package exports the canonical Local Collection operation template as `localCollectionOperationTemplateDefinition`, with id `operation-template:local_collection`, target `location:corner_store`, target kind `shop-or-service`, duration `60` minutes, start cost `20`, and operational capacity cost `1`.
 - The content package owns the immutable canonical Local Collection outcome-band definition in `localCollectionOutcomeDefinition.ts`, with ordered category weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`.
+- The content package exports the canonical Local Collection consequence definition as `localCollectionConsequenceDefinition`, with gross rewards `80/40/0/0`, exposure deltas `4/10/14/25`, critical-failure health consequence `injured`, and one operational-capacity release for each category.
+- The content package exports the canonical MVP city definition as `canonicalMvpCityDefinition`.
 - City validation is structural and headless; it checks schema version, required collections, duplicate IDs, route validity, orphan locations, and district graph connectivity.
-- The content package may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state. This dependency direction is allowed; `packages/domain` must not import `packages/content`.
+- The content package owns authored immutable definitions, not runtime operation instances or already-applied consequences. It may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state. This dependency direction is allowed; `packages/domain` must not import `packages/content`.
 
 ### 2. Domain layer
 
@@ -207,7 +210,7 @@ Primary domain modules:
 Domain code should not depend on UI frameworks, storage implementations, or external map formats.
 
 Current implementation:
-- `packages/domain` owns stable entity IDs, deterministic simulation time, seeded randomness, root `GameState`, command/result/event foundations, the ordered tick pipeline, invariant helpers, runtime city state, district property derivation, runtime character state, runtime organization state, runtime business state, and derived character availability.
+- `packages/domain` owns stable entity IDs, deterministic simulation time, seeded randomness, root `GameState`, command/result/event foundations, the ordered tick pipeline, invariant helpers, runtime city state, district property derivation, runtime character state, runtime organization state, runtime business state, derived character availability, operation availability, planning, lifecycle, seeded outcome resolution, typed Local Collection classification, bounded consequence application, applied-consequence records, semantic operation events, and event invariants.
 - Runtime city state stores IDs and mutable shell values only. Authored city names, tags, location kinds, route endpoints, and baseline profiles remain content definitions.
 - `LocationState` and `BusinessState` contain explicit nullable ownership references. `OrganizationState` does not store derived owned-location or owned-business collections.
 - `CharacterState` stores assignment state, health, legal state, competence, loyalty, and personal exposure. Availability is derived and not cached.
@@ -216,8 +219,10 @@ Current implementation:
 - The domain package now owns bounded operation lifecycle transitions through `advanceOperationLifecycles(...)`. The function accepts an explicit current simulation tick and immutable operation collection, advances `planned -> running -> resolved` timing deterministically, preserves collection order, handles overdue planned operations in one evaluation, recreates changed operation states through the operation-state validation path, and emits lifecycle events.
 - The domain package now owns generic seeded weighted outcome resolution through `resolveOperationOutcome(...)`. The resolver accepts one lifecycle-resolved operation, immutable `RandomState`, ordered weighted bands totaling exactly 100, and explicit modifier diagnostics. It uses the existing seeded PCG32 random service, advances and returns `RandomState`, emits `OperationOutcomeRolled`, and does not apply consequences.
 - The domain package now owns typed runtime outcome categories and Local Collection outcome classification through `classifyOperationOutcome(...)`. The classifier validates supplied Local Collection bands, delegates RNG and weighted selection to the centralized E4-06 resolver, maps the selected band to `success`, `partial-success`, `failure`, or `critical-failure`, preserves resolver diagnostics, and emits `OperationOutcomeClassified` after the roll event.
+- The domain package now owns bounded Local Collection consequence application through `applyLocalCollectionConsequences(...)`. Consequence application accepts caller-supplied authored consequence definitions, explicit runtime organization and character collections, a resolved operation, the actual classified outcome, and immutable applied-consequence records. It applies gross reward only during consequence application, clamps personal exposure to `0..100`, changes health only for `critical-failure` `healthy -> injured`, releases the assigned character to `idle`, restores exactly one operational-capacity point, appends one applied-consequence record, rejects duplicate application, and does not consume RNG.
+- Consequence events include `OrganizationMoneyChanged`, `CharacterPersonalExposureChanged`, `CharacterHealthChanged`, `CharacterAssignmentReleased`, `OrganizationOperationalCapacityReleased`, and `OperationConsequencesApplied`. The gross-reward money event is emitted only when reward is greater than zero. Event invariants enforce requested versus actual exposure deltas, clamp semantics, injury only for critical failure, and category-consistent completion health consequence.
 - Modifier diagnostics for base, competence, capability, district, and exposure are currently supplied explicitly to the resolver/classifier. No formula calculates them yet, and they do not alter probabilities.
-- Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. Future application-layer orchestration remains responsible for locating content definitions, assembling runtime state, selecting eligible resolved operations, invoking domain planning/lifecycle/classification, storing RNG state, applying later consequences, and eventually connecting results to a campaign-level command path.
+- Planning, lifecycle, resolver, classification, and consequence application are not integrated with root `GameState` or the global command dispatcher. Application-layer orchestration currently exists only for the developer playtest; a general campaign service remains future work.
 - `createPlayerOrganization` delegates to the base organization factory and creates the leader as the only initial member.
 - Domain currently has no dependency on React, Konva, Tauri, filesystem APIs, browser APIs, application, presentation, infrastructure, or content packages.
 
@@ -247,6 +252,12 @@ Examples of queries:
 The application layer validates access and orchestration.
 Core outcome rules remain in the domain layer.
 
+Current implementation:
+- `packages/application` imports domain and content for the Local Collection developer playtest/session harness in `localCollectionPlaytest.ts`.
+- The playtest composes canonical authored content with explicit runtime state, exposes application-only phases `setup`, `planned`, `running`, `resolved`, `classified`, and `settled`, and provides actions for selecting character/target, setting seed and initial exposure, planning, advancing time, rolling/classifying, applying consequences, running the full operation, and reset.
+- The full-run action uses the same public application actions as manual step-by-step play.
+- This harness is not a general campaign service, does not calculate authoritative outcomes or consequences itself, and does not introduce a backend, filesystem, network, database, save/load, or root campaign aggregate.
+
 ### 4. Presentation layer
 
 Contains:
@@ -261,6 +272,11 @@ Contains:
 The presentation layer may request projections and send commands.
 It must not directly mutate domain state.
 
+Current implementation:
+- `packages/presentation/src/AppShell.tsx` renders the developer Local Collection playtest.
+- It displays application read models, setup controls, seed presets, operation status, outcome previews, RNG diagnostics, consequence records, errors, and a timeline built from real domain events.
+- React submits application actions only. It does not calculate authoritative availability, outcomes, rewards, exposure, health, assignment release, or capacity release.
+
 ### 5. Infrastructure layer
 
 Contains replaceable technical concerns:
@@ -272,6 +288,10 @@ Contains replaceable technical concerns:
 - and future map import adapters.
 
 Infrastructure implements interfaces owned by the inner layers.
+
+### 6. Desktop shell
+
+The desktop/browser shell hosts the React playtest. The current Local Collection playtest requires no Rust command backend; Tauri remains the desktop shell and future platform boundary for persistence and native integration.
 
 ## Runtime modules and ownership
 
@@ -480,10 +500,14 @@ Current EPIC 4 specification status:
 - E4-05 adds bounded deterministic operation lifecycle transitions in `packages/domain`. `advanceOperationLifecycles(...)` accepts the current tick and immutable operation collection, preserves collection order, advances `planned -> running -> resolved` timing, emits `OperationStarted` and `OperationLifecycleCompleted`, and treats `resolved` as ready for outcome resolution rather than consequence completion.
 - E4-06 adds centralized seeded weighted outcome resolution in `packages/domain`. `resolveOperationOutcome(...)` validates lifecycle-resolved operation input, ordered opaque weighted bands, and explicit modifier diagnostics before consuming RNG, uses one `nextInt(randomState, 1, 100)` call per success, returns roll/range/band/RNG diagnostics, and emits `OperationOutcomeRolled`.
 - E4-07 adds typed Local Collection outcome classification in `packages/domain` and the canonical immutable Local Collection outcome-band definition in `packages/content`. `classifyOperationOutcome(...)` delegates weighted selection to E4-06 and returns one of `success`, `partial-success`, `failure`, or `critical-failure` with diagnostics and `OperationOutcomeClassified`.
-- Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. The root `GameState` still contains only the current domain-kernel fields and is not the complete campaign aggregate.
-- No operation consequence application, reward payment, exposure change, injury application, assignment release, capacity release, forecast, UI, campaign creation, save/load, AI operation execution, or full outcome persistence flow exists yet.
+- E4-08 adds bounded Local Collection consequence application in `packages/domain` and the canonical immutable Local Collection consequence definition in `packages/content`. `applyLocalCollectionConsequences(...)` applies the accepted reward, exposure, critical injury, assignment release, capacity release, and applied-record updates without consuming RNG or importing content into domain.
+- E4-09 adds deterministic repository-level integration coverage at `tests/integration/localCollectionVerticalSlice.integration.test.ts`, composing availability, planning, lifecycle, seeded classification, and consequence application.
+- E4-10 adds an application-owned Local Collection developer playtest in `packages/application/src/localCollectionPlaytest.ts` and renders it through `packages/presentation/src/AppShell.tsx`.
+- Accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`. Fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`.
+- Planning, lifecycle, resolver, classification, and consequence application are not integrated with root `GameState` or the global command dispatcher. The root `GameState` still contains only the current domain-kernel fields and is not the complete campaign aggregate.
+- No campaign creation, save/load, transaction ledger, pressure system, recruitment system, rival AI, reusable operation catalogue, or final player-facing UI exists yet.
 - For the first EPIC 4 money consequence only, domain operation planning currently updates `OrganizationState.money` directly with an explicit semantic event. The EPIC 5 transaction ledger remains pending and must not be preempted by a competing economy system.
-- EPIC 4 may update `CharacterState.personalExposure` during later resolution work, but organization-wide exposure, district tension changes, police pressure, investigations, evidence, decay, and law-enforcement reactions remain EPIC 6 scope unless later accepted scope changes the roadmap.
+- EPIC 4 updates `CharacterState.personalExposure` during Local Collection consequence application, but organization-wide exposure, district tension changes, police pressure, investigations, evidence, decay, and law-enforcement reactions remain EPIC 6 scope unless later accepted scope changes the roadmap.
 
 ## Save architecture
 
@@ -730,26 +754,34 @@ The MVP should not use:
 
 ## Current architecture status
 
-EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, E4-04 is complete as a bounded domain planning and reservation implementation, E4-05 is complete as operation lifecycle transitions, E4-06 is complete as centralized seeded weighted resolution, and E4-07 is complete as typed Local Collection outcome classification.
+EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 are complete. E4-01 is complete as a documentation/specification task, E4-02 is complete as a schema-only implementation task, E4-03 is complete as an availability/prerequisite evaluation task, E4-04 is complete as a bounded domain planning and reservation implementation, E4-05 is complete as operation lifecycle transitions, E4-06 is complete as centralized seeded weighted resolution, E4-07 is complete as typed Local Collection outcome classification, E4-08 is complete as bounded Local Collection consequence application, E4-09 is complete as deterministic vertical-slice integration coverage, and E4-10 is complete as the developer Local Collection playtest.
 
-Accepted implementation baseline after E4-07:
+Previous documentation synchronization baseline after E4-05 through E4-07:
 
 ```text
-ba640c7a8da900ee3d2470f93331cb4cb5baee4a
+718307042f58bf86528a5235a758d558f75f260d
 ```
 
-The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, and the minimal characters-and-organizations foundation.
+Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
 
-The architecture review after EPIC 3 found the package boundaries intact:
+```text
+9769a6ba3a9ba06559a3c81bc6536b054e519ab1
+```
+
+The repository now contains the selected TypeScript / React / Tauri / Vite scaffold, the headless deterministic domain foundation, the controlled city shell, the minimal characters-and-organizations foundation, and the first end-to-end Local Collection vertical slice.
+
+The architecture review after EPIC 4 found the package boundaries intact:
 - domain remains pure and renderer/platform independent,
-- content owns immutable authored city data, rival organization seeds, and structural validation,
-- application, infrastructure, and presentation remain thin scaffolds,
+- content owns immutable authored city data, rival organization seeds, operation template, outcome bands, consequence definition, and structural validation,
+- application owns the developer playtest/session orchestration and imports both domain and content,
+- presentation owns the React playtest shell and displays application read models,
+- infrastructure remains a thin scaffold,
 - Konva remains confined to presentation dependencies,
-- and no operation gameplay, recruitment gameplay, economy simulation, ownership transfer, AI, or playable UI was added during the character-and-organization foundation work.
+- and no recruitment gameplay, transaction ledger, recurring economy simulation, ownership transfer, pressure system, rival AI, save/load, root campaign aggregate, or final player-facing UI was added.
 
-The E4-03 availability evaluator, E4-04 planning function, E4-05 lifecycle function, E4-06 resolver, and E4-07 classifier preserve the domain/content boundary: authored operation templates and canonical Local Collection outcome bands remain in `packages/content`, while `packages/domain` owns pure prerequisite, planning, lifecycle, seeded resolution, and classification rules over explicit runtime state and structural authored inputs. Application, presentation, and infrastructure remain unchanged.
+The E4-03 availability evaluator, E4-04 planning function, E4-05 lifecycle function, E4-06 resolver, E4-07 classifier, and E4-08 consequence application preserve the domain/content boundary: authored operation templates, canonical Local Collection outcome bands, and canonical consequence definitions remain in `packages/content`, while `packages/domain` owns pure prerequisite, planning, lifecycle, seeded resolution, classification, and consequence rules over explicit runtime state and structural authored inputs. The E4-10 application harness is an external composition layer, not a domain dependency.
 
-The next architecture-sensitive task is E4-08, applying the accepted Local Collection money, personal exposure, injury, assignment-release, capacity-release, and event consequences without yet adding campaign creation, broad economy systems, pressure systems, save/load, AI operation execution, operation UI, or full campaign orchestration.
+The next architecture-sensitive task is E5-01 planning for money flow, upkeep, and transaction ledger. It must build on the temporary EPIC 4 direct money changes without claiming that a complete economy, ledger, recurring income, save/load, pressure system, recruitment system, rival AI, or full campaign service already exists.
 
 ## Technical debt and postponed work
 

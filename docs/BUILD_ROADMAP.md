@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, and EPIC 3 complete; EPIC 4 now has specification, schemas, prerequisite evaluation, bounded planning/reservation, lifecycle transitions, seeded weighted resolution, and typed Local Collection outcome classification. Consequence application remains pending.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. The first end-to-end Local Collection vertical slice is implemented, deterministically tested, and available in the developer playtest.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** First Operation Slice outcome-classification milestone complete; next accepted scope is E4-08 consequence application.
+> **Current phase:** EPIC 5 / E5-01 planning. Next accepted planning scope is money flow, upkeep, and transaction ledger definition.
 
 ---
 
@@ -104,11 +104,11 @@ Repository Foundation        ██████████ 100%
 Headless Simulation          ██████████ 100%
 Controlled City Shell        ██████████ 100%
 Characters & Organizations   ██████████ 100%
-First Operation Slice        in progress; E4-01 specification, E4-02 schemas, E4-03 availability evaluation, E4-04 planning/reservation, E4-05 lifecycle transitions, E4-06 seeded resolver, and E4-07 outcome classification complete; consequence application pending
+First Operation Slice        complete; Local Collection has authored content, availability, planning, lifecycle, seeded classification, bounded consequences, deterministic integration coverage, and a developer playtest UI
 Economy & Recruitment        ░░░░░░░░░░   0%
 Pressure & Investigations    ░░░░░░░░░░   0%
 Rival AI                     ░░░░░░░░░░   0%
-Playable UI                  ░░░░░░░░░░   0%
+Player-facing UI             ░░░░░░░░░░   0%
 Save / Load                  ░░░░░░░░░░   0%
 MVP Content & Balance        ░░░░░░░░░░   0%
 ```
@@ -290,21 +290,21 @@ Recommended first slice: a small income operation against a local target, select
 | E4-05 | Implement operation lifecycle: planned -> running -> resolved | `[CODEX]` | Done |
 | E4-06 | Implement centralized outcome resolver with seeded randomness | `[CODEX]` | Done |
 | E4-07 | Implement success, partial success, failure, and critical failure | `[CODEX]` | Done |
-| E4-08 | Apply money, exposure, injury, and event consequences | `[CODEX]` | Pending |
-| E4-09 | Add full vertical-slice integration tests | `[CODEX]` | Pending |
-| E4-10 | Add minimal developer UI or debug harness to run the slice | `[CODEX]` | Pending |
+| E4-08 | Apply money, exposure, injury, and event consequences | `[CODEX]` | Done |
+| E4-09 | Add full vertical-slice integration tests | `[CODEX]` | Done |
+| E4-10 | Add minimal developer UI or debug harness to run the slice | `[CODEX]` | Done |
 
 ### Acceptance criteria
 
 - The player can identify an opportunity, plan an operation, assign a character, advance time, and receive a result.
 - Outcome probabilities are explainable from state and modifiers.
 - Partial success is materially different from both success and failure.
-- Consequences persist in `GameState`.
+- Consequences persist in explicit runtime state collections used by the slice.
 - The entire loop is covered by deterministic tests.
 
 ### Current EPIC 4 implementation status
 
-E4-07 is complete. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation, bounded deterministic operation planning, lifecycle transitions, centralized seeded outcome resolution, and typed Local Collection outcome classification.
+EPIC 4 is complete as the first end-to-end Local Collection vertical slice. Minimal operation schemas now exist: `packages/domain` owns immutable runtime `OperationState`, and `packages/content` owns immutable authored `OperationTemplateDefinition`. `packages/domain` also owns deterministic, pure operation availability and prerequisite evaluation, bounded deterministic operation planning, lifecycle transitions, centralized seeded outcome resolution, typed Local Collection outcome classification, bounded consequence application, applied-consequence records, semantic operation events, and event invariants.
 
 The availability evaluator returns typed rejection reasons rather than only a boolean, accumulates multiple independent failures deterministically, reuses existing derived character availability, and enforces the accepted Local Collection rule that exactly one character is assigned. It evaluates money, operational capacity, organization membership, character availability, target validity, target restrictions, and ownership prerequisites without mutating state.
 
@@ -316,12 +316,69 @@ Accepted E4-06 behavior adds pure `resolveOperationOutcome(...)` in `packages/do
 
 Accepted E4-07 behavior adds runtime outcome categories `success`, `partial-success`, `failure`, and `critical-failure` plus pure `classifyOperationOutcome(...)` in `packages/domain`. The classifier validates supplied Local Collection classification bands, delegates seeded weighted selection to E4-06, maps the selected band to a typed category, preserves resolver diagnostics, returns the advanced random state, and emits `OperationOutcomeRolled` followed by `OperationOutcomeClassified`. The immutable canonical Local Collection authored distribution lives in `packages/content/src/localCollectionOutcomeDefinition.ts` as `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`, in that order. Generic classification-band validation remains reusable for other valid 100-total distributions, while canonical Local Collection validation additionally enforces all four categories, the accepted order, and exact `45/30/20/5` weights.
 
-Planning, lifecycle, resolver, and classification are not integrated with root `GameState` or the global command dispatcher. The root `GameState` is still not a complete campaign aggregate, and no campaign creation or operation UI flow exists. Local Collection consequence application, reward payment, exposure changes, injuries, assignment release, capacity release, classified-outcome persistence, forecasts, save/load, AI operation execution, full operation orchestration, and gameplay resolution remain pending.
+Accepted E4-08 behavior adds pure `applyLocalCollectionConsequences(...)` in `packages/domain`. It accepts a resolved operation, the actual classified outcome, caller-supplied authored consequence definitions, explicit organization and character collections, and an immutable applied-consequences record collection. It applies gross reward during consequence application only, clamps personal exposure to `0..100`, injures only `healthy` characters on `critical-failure`, releases the assigned character to `idle`, restores exactly one operational-capacity point, appends exactly one applied-consequence record, rejects duplicate application with a typed error, and does not consume RNG. The domain receives authored consequence definitions from the caller and still does not import content.
 
-Accepted implementation baseline after E4-07:
+Accepted Local Collection consequence values:
+
+| Outcome | Gross reward | Exposure delta | Health consequence |
+|---|---:|---:|---|
+| success | +80 | +4 | none |
+| partial-success | +40 | +10 | none |
+| failure | 0 | +14 | none |
+| critical-failure | 0 | +25 | `healthy -> injured` |
+
+Start cost is paid during E4-04 planning and is not deducted again. Local Collection consequences do not cause critical health, death, detention, or imprisonment. The gross-reward `OrganizationMoneyChanged` event is emitted only when reward is greater than zero. Consequence event invariants enforce consistent requested versus actual exposure deltas, correct clamp semantics, injury only for critical failure, and category-consistent completion health consequences.
+
+Accepted E4-09 behavior adds the repository-level deterministic integration test at `tests/integration/localCollectionVerticalSlice.integration.test.ts`. The test composes the actual public APIs for availability, planning, lifecycle, seeded classification, and consequence application. It proves this flow:
 
 ```text
-ba640c7a8da900ee3d2470f93331cb4cb5baee4a
+setup -> plan -> character/capacity reservation -> start cost deduction -> planned -> running -> resolved -> seeded roll and typed classification -> consequences -> assignment/capacity release
+```
+
+Fixed deterministic E4-09 seeds:
+
+| Seed | Roll | Outcome |
+|---:|---:|---|
+| 32 | 1 | success |
+| 153 | 46 | partial-success |
+| 20 | 76 | failure |
+| 64 | 96 | critical-failure |
+
+E4-09 proves all four categories, complete replay determinism from identical inputs, exactly-once start cost/reward/exposure/resource release, exposure clamping, critical-failure injury, non-critical health preservation, duplicate consequence rejection, deterministic event chronology, and separation between canonical authored content and mutable runtime state.
+
+Accepted E4-10 behavior adds the developer Local Collection playtest harness in `packages/application/src/localCollectionPlaytest.ts` and renders it through `packages/presentation/src/AppShell.tsx`. The application imports domain and content, owns playtest session phases and orchestration actions, and is not a general campaign service. React renders application read models, submits application actions, and displays outcome diagnostics, RNG state, and an event timeline built from real domain events. The desktop/browser shell hosts the same playtest and currently requires no Rust command backend.
+
+Developer playtest phases are application phases, not new domain `OperationStatus` values:
+
+```text
+setup
+planned
+running
+resolved
+classified
+settled
+```
+
+Manual developer workflow commands:
+
+```text
+npm.cmd run dev
+npm.cmd run desktop:dev
+npm.cmd run desktop:build
+```
+
+Planning, lifecycle, resolver, classification, and consequence application are not integrated with root `GameState` or the global command dispatcher. The root `GameState` is still not a complete campaign aggregate. Campaign creation, save/load, transaction ledger, recurring economy, pressure systems, recruitment, rival AI, reusable operation catalogue, and final player-facing UI remain pending.
+
+Previous documentation synchronization baseline after E4-05 through E4-07:
+
+```text
+718307042f58bf86528a5235a758d558f75f260d
+```
+
+Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
+
+```text
+9769a6ba3a9ba06559a3c81bc6536b054e519ab1
 ```
 
 ### E4-01 accepted first operation specification
@@ -346,6 +403,19 @@ The accepted first operation is **Local Collection**: a small one-off income ope
 | Main reward | one-time organization money change |
 | Main risks | personal exposure and injury |
 | Outcomes | `success`, `partial-success`, `failure`, `critical-failure` |
+
+The canonical authored template is exported from content as `localCollectionOperationTemplateDefinition` with:
+
+```text
+id: operation-template:local_collection
+target: location:corner_store
+target kind: shop-or-service
+duration: 60 minutes
+start cost: 20
+operational capacity cost: 1
+```
+
+This is the first accepted operation template, not a generic operation catalogue.
 
 This operation must not create recurring income, business ownership, location ownership, territory control, rival relationship changes, investigations, arrests, imprisonment, death, or new recruits.
 
@@ -420,7 +490,7 @@ E4-01 does not finalize a generic mathematical framework. Later E4 implementatio
 Additional rules:
 
 - Start cost is paid exactly once.
-- Gross reward is applied only during resolution.
+- Gross reward is applied only during consequence application.
 - Personal exposure remains clamped to the existing valid `0-100` range.
 - This operation cannot kill a character.
 - This operation cannot move a character to `critical`.
@@ -471,13 +541,13 @@ The resolver must ultimately be reusable by both player and rival AI operations.
 
 The application layer must not independently calculate operation outcomes or directly own authoritative money, exposure, health, or assignment rules.
 
-`packages/presentation` has no implementation in E4-01. Future presentation or developer harness work may display forecasts, submit commands, display operation status, display result explanations, and display changed state. It must not own operation rules or directly mutate authoritative state.
+`packages/presentation` now renders the E4-10 developer Local Collection playtest. It displays application read models, submits application actions, shows diagnostics and event chronology, and does not own operation rules or directly mutate authoritative state.
 
 #### Root `GameState` dependency
 
 The current EPIC 2 and EPIC 3 standalone runtime models are not yet attached to one complete campaign state. E4-01 must not implement that integration.
 
-The following EPIC 4 implementation tasks depend on a minimal root campaign state that can hold the active city state, runtime locations, characters, organizations, businesses when needed, operation instances, and deterministic random state. Do not prematurely decide a broad final campaign aggregate beyond what the first operation slice needs.
+EPIC 4 deliberately remained outside the root campaign aggregate. The vertical-slice tests and developer playtest pass explicit runtime collections and random state through the public APIs. Root `GameState`, campaign creation, save/load, and broad campaign orchestration remain future work.
 
 #### Temporary EPIC 4 money rule
 
@@ -496,22 +566,25 @@ EPIC 4 may update existing `CharacterState.personalExposure`.
 
 EPIC 4 must not introduce organization-wide exposure, district tension updates, police pressure, investigation state, evidence state, exposure decay, or law-enforcement reactions. Those belong to EPIC 6 unless a later accepted scope explicitly changes the roadmap.
 
-#### Expected future domain events
+#### Accepted domain events
 
-Future implementation should document or emit semantic events for:
+The EPIC 4 implementation emits semantic events for:
 
 - operation planned or started,
-- operation resolved,
+- lifecycle completion,
+- operation outcome rolled and classified,
 - organization money changed because of the operation,
 - character personal exposure changed,
 - character injured when applicable,
-- character assignment released after resolution.
+- character assignment released after resolution,
+- operational capacity reserved and released,
+- consequences applied.
 
 Events must describe facts that occurred, not commands or player intent.
 
-#### Deterministic test expectations for later E4 tasks
+#### Deterministic test coverage
 
-Future implementation must cover at minimum:
+E4-09 covers at minimum:
 
 - identical initial state, seed, commands, and content produce identical outcomes,
 - all four outcome bands can be reached through controlled deterministic tests,
@@ -529,12 +602,12 @@ Future implementation must cover at minimum:
 - already assigned characters are rejected,
 - valid planning reserves the character and capacity,
 - resolved operations release the assignment and capacity,
-- consequences persist in authoritative game state,
+- consequences persist in explicit runtime collections and applied-consequence records,
 - result diagnostics explain the final outcome,
 - authored content and runtime state remain separate,
 - domain code does not import the content package.
 
-Do not add production tests during E4-01 because no production behavior is being implemented.
+Unit tests remain responsible for exhaustive rejection and boundary cases outside the composed vertical slice.
 
 #### Explicit exclusions
 
@@ -834,6 +907,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E4-08 - Apply money, exposure, injury, and event consequences**.
+The next task is **E5-01 - Define money flow, upkeep, and transaction ledger**.
 
-E4-08 should build on accepted E4-04 planning and reservation, E4-05 lifecycle transitions, E4-06 seeded resolver diagnostics, E4-07 typed Local Collection classification, and the E4-01 consequence table. It should apply only the accepted Local Collection money, personal exposure, injury, assignment-release, capacity-release, and event consequences while keeping full campaign creation, economy systems, pressure systems, rival AI, save/load, operation UI, and broader operation orchestration pending.
+E5-01 is a `[BOTH]` planning task before implementation. It should define the minimal money-flow, upkeep, and transaction-ledger model needed to build on the accepted Local Collection vertical slice without claiming that a complete economy already exists. It must preserve the temporary EPIC 4 start-cost and gross-reward behavior while keeping recurring income, business control, recruitment gameplay, pressure systems, rival AI, save/load, and broad campaign orchestration pending until explicitly accepted.
