@@ -22,6 +22,7 @@ import {
   parseOrganizationId,
   parseRandomSeed,
   parseSimulationTick,
+  parseTransactionId,
   planOperation,
   advanceOperationLifecycles,
   type AppliedOperationConsequences,
@@ -32,6 +33,7 @@ import {
   type DomainEvent,
   type LocationId,
   type LocationState,
+  type MoneyTransaction,
   type OperationAvailabilityReason,
   type OperationAvailabilityResult,
   type OperationOutcomeCategory,
@@ -109,6 +111,7 @@ export interface LocalCollectionPlaytestSession {
   readonly locations: readonly LocationState[];
   readonly businesses: readonly BusinessState[];
   readonly operations: readonly OperationState[];
+  readonly transactions: readonly MoneyTransaction[];
   readonly randomState: RandomState;
   readonly classifiedOutcome: ClassifiedOperationOutcome | null;
   readonly appliedConsequences: readonly AppliedOperationConsequences[];
@@ -206,6 +209,12 @@ const ORGANIZATION_ID = parseOrganizationId("organization:starter_crew");
 const CHARACTER_ID = parseCharacterId("character:boss_001");
 const BUSINESS_ID = parseBusinessId("business:corner_store");
 const OPERATION_ID = parseOperationId("operation:local_collection_playtest");
+const START_COST_TRANSACTION_ID = parseTransactionId(
+  "transaction:local_collection_playtest:start_cost",
+);
+const GROSS_REWARD_TRANSACTION_ID = parseTransactionId(
+  "transaction:local_collection_playtest:gross_reward",
+);
 const NEUTRAL_MODIFIERS: OperationOutcomeModifierContributions = Object.freeze({
   base: 0,
   competence: 0,
@@ -304,6 +313,7 @@ export function createLocalCollectionPlaytestSession(
       locations: Object.freeze(locationStates),
       businesses,
       operations: Object.freeze([]),
+      transactions: Object.freeze([]),
       randomState,
       classifiedOutcome: null,
       appliedConsequences: Object.freeze([]),
@@ -457,6 +467,7 @@ export function planLocalCollectionPlaytestOperation(
       organizationId: ORGANIZATION_ID,
       targetLocationId: session.selectedTargetLocationId,
       assignedCharacterId: session.selectedCharacterId,
+      startCostTransactionId: START_COST_TRANSACTION_ID,
     }),
     currentTick: session.currentTick,
     operationTemplates: [localCollectionOperationTemplateDefinition],
@@ -466,6 +477,7 @@ export function planLocalCollectionPlaytestOperation(
     locationDefinitions: getAvailabilityLocationDefinitions(),
     businessStates: session.businesses,
     operations: session.operations,
+    transactions: session.transactions,
   });
 
   if (!result.ok) {
@@ -486,6 +498,7 @@ export function planLocalCollectionPlaytestOperation(
       organizations: result.value.organizations,
       characterStates: result.value.characters,
       operations: result.value.operations,
+      transactions: result.value.transactions,
       events: appendEvents(session.events, result.value.events),
       lastError: null,
     }),
@@ -591,6 +604,7 @@ export function applyLocalCollectionPlaytestConsequences(
     });
   }
 
+  const grossRewardTransactionId = getGrossRewardTransactionId(session.classifiedOutcome.category);
   const result = applyLocalCollectionConsequences({
     operation,
     classifiedOutcome: session.classifiedOutcome,
@@ -598,6 +612,9 @@ export function applyLocalCollectionPlaytestConsequences(
     organizations: session.organizations,
     characters: session.characterStates,
     appliedConsequences: session.appliedConsequences,
+    transactions: session.transactions,
+    recordedAtTick: session.currentTick,
+    ...(grossRewardTransactionId === undefined ? {} : { grossRewardTransactionId }),
   });
 
   if (!result.ok) {
@@ -614,6 +631,7 @@ export function applyLocalCollectionPlaytestConsequences(
       organizations: result.value.organizations,
       characterStates: result.value.characters,
       appliedConsequences: result.value.appliedConsequences,
+      transactions: result.value.transactions,
       events: appendEvents(session.events, result.value.events),
       lastError: null,
     }),
@@ -815,6 +833,19 @@ function createOutcomePreview(): readonly LocalCollectionOutcomePreview[] {
 function createGrossRewardRange(): string {
   const rewards = localCollectionConsequenceDefinition.map((entry) => entry.grossReward);
   return `${Math.min(...rewards)}-${Math.max(...rewards)}`;
+}
+
+function getGrossRewardTransactionId(
+  category: OperationOutcomeCategory,
+): typeof GROSS_REWARD_TRANSACTION_ID | undefined {
+  const consequence = localCollectionConsequenceDefinition.find(
+    (entry) => entry.category === category,
+  );
+  if (consequence === undefined || consequence.grossReward === 0) {
+    return undefined;
+  }
+
+  return GROSS_REWARD_TRANSACTION_ID;
 }
 
 function createDisabledReason(

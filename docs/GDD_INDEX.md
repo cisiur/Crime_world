@@ -78,9 +78,9 @@ E4-01 is complete as documentation only. E4-02 is complete as a schema-only impl
 
 Local Collection now has a canonical authored template, validated availability, planning, lifecycle, deterministic outcome classification, immediate consequences, deterministic integration coverage, and a developer playtest UI. Deterministic planning creates planned operations, reserves the assigned character, reserves operational capacity, deducts the start cost, and emits semantic planning events. Lifecycle timing advances operations through the existing `planned`, `running`, and `resolved` statuses. Seeded weighted rolling uses the central resolver and existing deterministic random service. Typed outcome classification maps Local Collection rolls to `success`, `partial-success`, `failure`, or `critical-failure`, with canonical authored probabilities `45/30/20/5` in `packages/content`. Consequence application applies the accepted gross reward, exposure delta, critical-failure injury, assignment release, capacity release, and applied-consequence record without consuming RNG. Accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`; fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`.
 
-E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. E5-02A is complete as the first bounded E5-02 implementation increment and adds the standalone domain money-ledger foundation; it does not migrate Local Collection, recurring economy, or UI.
+E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. E5-02A is complete as the first bounded E5-02 implementation increment and adds the standalone domain money-ledger foundation. E5-02B is complete as the Local Collection ledger migration: start cost and non-zero gross rewards now use the domain ledger, while failure and critical-failure outcomes create no zero-value reward transaction. Recurring economy and production UI remain unimplemented.
 
-This is an implemented developer vertical slice plus an accepted EPIC 5 financial specification and ledger foundation, not final balance, a complete economy, a reusable operation catalogue, a full campaign loop, final UI, or player-facing production readiness. Campaign creation, root `GameState` operation integration, Local Collection ledger migration, recurring economy execution, save/load, recruitment, pressure/investigation systems, rival AI, and reusable operation catalogue expansion remain unimplemented.
+This is an implemented developer vertical slice plus an accepted EPIC 5 financial specification, ledger foundation, and Local Collection ledger migration, not final balance, a complete economy, a reusable operation catalogue, a full campaign loop, final UI, or player-facing production readiness. Campaign creation, root `GameState` operation integration, recurring economy execution, save/load, recruitment, pressure/investigation systems, rival AI, and reusable operation catalogue expansion remain unimplemented.
 
 Previous documentation synchronization baseline after E4-05 through E4-07:
 
@@ -97,7 +97,7 @@ Accepted gameplay implementation baseline through E4-08, E4-09, and E4-10:
 Current priority:
 
 1. review and accept the next bounded E5-02 increment before implementation,
-2. build on the accepted E5-01 money-flow, upkeep, and transaction-ledger contract plus the E5-02A foundation,
+2. build on the accepted E5-01 money-flow, upkeep, and transaction-ledger contract plus the E5-02A/E5-02B foundation,
 3. preserve the existing package boundaries, including no `packages/content` dependency from `packages/domain`,
 4. keep recurring income, business control, recruitment, pressure systems, rival AI, save/load, campaign creation, and final UI pending until their accepted tasks.
 

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   DomainErrorCode,
   DomainEventType,
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
   OperationOutcomeCategory,
   OperationStatus,
   assertDomainEventInvariant,
@@ -21,10 +23,12 @@ import {
   parseOrganizationId,
   parseRandomSeed,
   parseSimulationTick,
+  parseTransactionId,
   type AppliedOperationConsequences,
   type CharacterState,
   type ClassifiedOperationOutcome,
   type LocalCollectionConsequenceDefinitionEntry,
+  type MoneyTransaction,
   type OperationState,
   type OrganizationState,
 } from "./index";
@@ -298,7 +302,7 @@ describe("local collection consequence application", () => {
         expectedMoney: 160,
         expectedExposure: 14,
         expectedEvents: [
-          DomainEventType.OrganizationMoneyChanged,
+          DomainEventType.OrganizationMoneyTransactionRecorded,
           DomainEventType.CharacterPersonalExposureChanged,
           DomainEventType.CharacterAssignmentReleased,
           DomainEventType.OrganizationOperationalCapacityReleased,
@@ -310,7 +314,7 @@ describe("local collection consequence application", () => {
         expectedMoney: 120,
         expectedExposure: 20,
         expectedEvents: [
-          DomainEventType.OrganizationMoneyChanged,
+          DomainEventType.OrganizationMoneyTransactionRecorded,
           DomainEventType.CharacterPersonalExposureChanged,
           DomainEventType.CharacterAssignmentReleased,
           DomainEventType.OrganizationOperationalCapacityReleased,
@@ -329,14 +333,39 @@ describe("local collection consequence application", () => {
       expect(result.assignedCharacter.assignmentState).toBe("idle");
       expect(result.organization.operationalCapacity).toBe(1);
       expect(result.appliedConsequences).toHaveLength(1);
+      expect(result.transactions).toHaveLength(1);
+      expect(result.grossRewardTransaction).toEqual({
+        transactionId: GROSS_REWARD_TRANSACTION_ID,
+        organizationId: STARTER_ORGANIZATION_ID,
+        recordedAtTick: COMPLETION_TICK,
+        amount: expectedMoney - 80,
+        balanceBefore: 80,
+        balanceAfter: expectedMoney,
+        category: MoneyTransactionCategory.OperationReward,
+        source: {
+          type: MoneyTransactionSourceType.OperationGrossReward,
+          operationId: LOCAL_COLLECTION_OPERATION_ID,
+        },
+      });
+      expect(result.transactions[0]).toBe(result.grossRewardTransaction);
+      expect(result.appliedConsequence.grossRewardTransactionId).toBe(GROSS_REWARD_TRANSACTION_ID);
       expect(result.events.map((event) => event.type)).toEqual(expectedEvents);
       expect(result.events[0]).toMatchObject({
-        type: DomainEventType.OrganizationMoneyChanged,
-        reason: "operation-gross-reward-paid",
+        type: DomainEventType.OrganizationMoneyTransactionRecorded,
+        transactionId: GROSS_REWARD_TRANSACTION_ID,
+        category: MoneyTransactionCategory.OperationReward,
+        source: {
+          type: MoneyTransactionSourceType.OperationGrossReward,
+          operationId: LOCAL_COLLECTION_OPERATION_ID,
+        },
+        amount: expectedMoney - 80,
         previousMoney: 80,
         currentMoney: expectedMoney,
-        delta: expectedMoney - 80,
+        recordedAtTick: COMPLETION_TICK,
       });
+      expect(
+        result.events.some((event) => event.type === DomainEventType.OrganizationMoneyChanged),
+      ).toBe(false);
     }
   });
 
@@ -355,6 +384,14 @@ describe("local collection consequence application", () => {
       DomainEventType.OperationConsequencesApplied,
     ]);
     expect(result.appliedConsequence.grossReward).toBe(0);
+    expect(result.transactions).toEqual([]);
+    expect(Object.isFrozen(result.transactions)).toBe(true);
+    expect(result.grossRewardTransaction).toBeUndefined();
+    expect(
+      result.events.some(
+        (event) => event.type === DomainEventType.OrganizationMoneyTransactionRecorded,
+      ),
+    ).toBe(false);
   });
 
   it("applies critical failure as recoverable injury without legal-state changes", () => {
@@ -375,6 +412,9 @@ describe("local collection consequence application", () => {
       DomainEventType.OrganizationOperationalCapacityReleased,
       DomainEventType.OperationConsequencesApplied,
     ]);
+    expect(result.transactions).toEqual([]);
+    expect(Object.isFrozen(result.transactions)).toBe(true);
+    expect(result.grossRewardTransaction).toBeUndefined();
   });
 
   it("clamps exposure while retaining requested and actual deltas", () => {
@@ -417,6 +457,7 @@ describe("local collection consequence application", () => {
         organizations: first.value.organizations,
         characters: first.value.characters,
         appliedConsequences: first.value.appliedConsequences,
+        transactions: first.value.transactions,
       }),
     );
 
@@ -431,6 +472,56 @@ describe("local collection consequence application", () => {
     expect(first.value.characters[0]?.personalExposure).toBe(14);
     expect(first.value.organizations[0]?.operationalCapacity).toBe(1);
     expect("events" in second.error).toBe(false);
+  });
+
+  it("rejects missing or duplicate gross-reward transaction IDs atomically", () => {
+    const missingIdInput = omitGrossRewardTransactionId(createApplicationInput());
+    const missingIdSnapshot = JSON.stringify(missingIdInput);
+    const missingIdResult = applyLocalCollectionConsequences(missingIdInput);
+
+    expect(missingIdResult.ok).toBe(false);
+    if (!missingIdResult.ok) {
+      expect(missingIdResult.error).toMatchObject({
+        code: DomainErrorCode.LocalCollectionConsequenceApplicationMissingRewardTransactionId,
+        operationId: LOCAL_COLLECTION_OPERATION_ID,
+        grossReward: 80,
+      });
+      expect("events" in missingIdResult.error).toBe(false);
+    }
+    expect(JSON.stringify(missingIdInput)).toBe(missingIdSnapshot);
+    expect(missingIdInput.organizations[0]?.money).toBe(80);
+    expect(missingIdInput.characters[0]?.assignmentState).toBe("assigned");
+    expect(missingIdInput.appliedConsequences).toEqual([]);
+    expect(missingIdInput.transactions).toEqual([]);
+
+    const first = applyLocalCollectionConsequences(createApplicationInput());
+    expect(first.ok).toBe(true);
+    if (!first.ok) {
+      throw new Error("expected first application to succeed");
+    }
+
+    const duplicateOperationId = parseOperationId("operation:duplicate_reward_transaction");
+    const duplicateInput = createApplicationInput({
+      operation: createTestOperation({ operationId: duplicateOperationId }),
+      classifiedOutcome: createClassifiedOutcome({ operationId: duplicateOperationId }),
+      transactions: first.value.transactions,
+    });
+    const duplicateSnapshot = JSON.stringify(duplicateInput);
+    const duplicateResult = applyLocalCollectionConsequences(duplicateInput);
+
+    expect(duplicateResult.ok).toBe(false);
+    if (!duplicateResult.ok) {
+      expect(duplicateResult.error.code).toBe(
+        DomainErrorCode.MoneyTransactionDuplicateTransactionId,
+      );
+      expect("events" in duplicateResult.error).toBe(false);
+    }
+    expect(JSON.stringify(duplicateInput)).toBe(duplicateSnapshot);
+    expect(duplicateInput.organizations[0]?.money).toBe(80);
+    expect(duplicateInput.characters[0]?.personalExposure).toBe(10);
+    expect(duplicateInput.characters[0]?.assignmentState).toBe("assigned");
+    expect(duplicateInput.appliedConsequences).toEqual([]);
+    expect(duplicateInput.transactions).toHaveLength(1);
   });
 
   it("rejects unsafe money, capacity, and current health before events", () => {
@@ -449,8 +540,8 @@ describe("local collection consequence application", () => {
             }),
           ],
         },
-        DomainErrorCode.LocalCollectionConsequenceApplicationArithmeticInvalid,
-        { field: "money", previousValue: Number.MAX_SAFE_INTEGER, delta: 80 },
+        DomainErrorCode.MoneyTransactionArithmeticInvalid,
+        { balanceBefore: Number.MAX_SAFE_INTEGER, amount: 80, reason: "overflow" },
       ],
       [
         "capacity overflow",
@@ -533,6 +624,9 @@ describe("local collection consequence application", () => {
     expect(Object.isFrozen(result.value.appliedConsequence)).toBe(true);
     expect(Object.isFrozen(result.value.appliedConsequence.releasedCharacterIds)).toBe(true);
     expect(Object.isFrozen(result.value.appliedConsequences)).toBe(true);
+    expect(Object.isFrozen(result.value.transactions)).toBe(true);
+    expect(Object.isFrozen(result.value.grossRewardTransaction)).toBe(true);
+    expect(Object.isFrozen(result.value.grossRewardTransaction?.source)).toBe(true);
     expect(Object.isFrozen(result.value.events)).toBe(true);
     expect("gameState" in result.value).toBe(false);
     expect("operations" in result.value).toBe(false);
@@ -733,6 +827,8 @@ interface ApplyOverrides {
   readonly organizations: readonly OrganizationState[];
   readonly characters: readonly CharacterState[];
   readonly appliedConsequences: readonly AppliedOperationConsequences[];
+  readonly transactions: readonly MoneyTransaction[];
+  readonly grossRewardTransactionId?: ReturnType<typeof parseTransactionId>;
 }
 
 const STARTER_ORGANIZATION_ID = parseOrganizationId("organization:starter_crew");
@@ -743,6 +839,9 @@ const LOCAL_COLLECTION_TEMPLATE_ID = parseOperationTemplateId(
   "operation-template:local_collection",
 );
 const LOCAL_COLLECTION_OPERATION_ID = parseOperationId("operation:local_collection_001");
+const GROSS_REWARD_TRANSACTION_ID = parseTransactionId(
+  "transaction:local_collection_001:gross_reward",
+);
 const PLANNED_AT_TICK = parseSimulationTick(4);
 const COMPLETION_TICK = parseSimulationTick(10);
 
@@ -811,11 +910,25 @@ function createApplicationInput(
     organizations: [createTestOrganization()],
     characters: [createTestCharacter()],
     appliedConsequences: [],
+    transactions: [],
+    recordedAtTick: COMPLETION_TICK,
+    grossRewardTransactionId: GROSS_REWARD_TRANSACTION_ID,
     ...overrides,
   };
 }
 
 type ApplyLocalCollectionConsequencesInput = Parameters<typeof applyLocalCollectionConsequences>[0];
+
+function omitGrossRewardTransactionId(
+  input: ApplyLocalCollectionConsequencesInput,
+): Omit<ApplyLocalCollectionConsequencesInput, "grossRewardTransactionId"> {
+  const copy: {
+    grossRewardTransactionId?: ApplyLocalCollectionConsequencesInput["grossRewardTransactionId"];
+  } & Omit<ApplyLocalCollectionConsequencesInput, "grossRewardTransactionId"> = { ...input };
+
+  delete copy.grossRewardTransactionId;
+  return copy;
+}
 
 interface ApplySuccessOverrides extends Partial<ApplyOverrides> {
   readonly category?: OperationOutcomeCategory;

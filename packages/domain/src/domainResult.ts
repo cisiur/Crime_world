@@ -16,6 +16,8 @@ export const DomainErrorCode = {
     "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_MISSING_ASSIGNED_CHARACTER",
   LocalCollectionConsequenceApplicationMissingOrganization:
     "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_MISSING_ORGANIZATION",
+  LocalCollectionConsequenceApplicationMissingRewardTransactionId:
+    "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_MISSING_REWARD_TRANSACTION_ID",
   LocalCollectionConsequenceApplicationOperationNotResolved:
     "LOCAL_COLLECTION_CONSEQUENCE_APPLICATION_OPERATION_NOT_RESOLVED",
   LocalCollectionConsequenceApplicationOutcomeCategoryUnsupported:

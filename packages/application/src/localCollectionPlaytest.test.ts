@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   DomainEventType,
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
   OperationOutcomeCategory,
   OperationStatus,
   parseSimulationTick,
@@ -72,6 +74,7 @@ describe("Local Collection playtest application harness", () => {
       45, 30, 20, 5,
     ]);
     expect(session.availability.available).toBe(true);
+    expect(session.transactions).toEqual([]);
   });
 
   it("rejects invalid seed and initial exposure without changing setup state", () => {
@@ -109,16 +112,29 @@ describe("Local Collection playtest application harness", () => {
     expect(planned.organization.money).toBe(80);
     expect(planned.organization.operationalCapacity).toBe(0);
     expect(planned.characters[0]?.assignmentState).toBe("assigned");
+    expect(planned.transactions).toHaveLength(1);
+    expect(planned.transactions[0]).toMatchObject({
+      transactionId: "transaction:local_collection_playtest:start_cost",
+      amount: -20,
+      balanceBefore: 100,
+      balanceAfter: 80,
+      category: MoneyTransactionCategory.OperationCost,
+      source: {
+        type: MoneyTransactionSourceType.OperationStartCost,
+        operationId: "operation:local_collection_playtest",
+      },
+    });
     expect(planned.eventTimeline.map((event) => event.type)).toEqual([
       DomainEventType.OperationPlanned,
       DomainEventType.CharacterAssignedToOperation,
       DomainEventType.OrganizationOperationalCapacityReserved,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
     ]);
 
     const rejected = planLocalCollectionPlaytestOperation(planned);
     expect(rejected.ok).toBe(false);
     expect(rejected.session.organization.money).toBe(80);
+    expect(rejected.session.transactions).toHaveLength(1);
     expect(rejected.session.events).toHaveLength(4);
   });
 
@@ -148,7 +164,7 @@ describe("Local Collection playtest application harness", () => {
       DomainEventType.OperationPlanned,
       DomainEventType.CharacterAssignedToOperation,
       DomainEventType.OrganizationOperationalCapacityReserved,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
       DomainEventType.OperationStarted,
       DomainEventType.OperationLifecycleCompleted,
     ]);
@@ -165,6 +181,7 @@ describe("Local Collection playtest application harness", () => {
         category: OperationOutcomeCategory.Success,
         roll: 1,
         finalMoney: 160,
+        transactionCount: 2,
         exposure: 4,
         health: "healthy",
       },
@@ -173,6 +190,7 @@ describe("Local Collection playtest application harness", () => {
         category: OperationOutcomeCategory.PartialSuccess,
         roll: 46,
         finalMoney: 120,
+        transactionCount: 2,
         exposure: 10,
         health: "healthy",
       },
@@ -181,6 +199,7 @@ describe("Local Collection playtest application harness", () => {
         category: OperationOutcomeCategory.Failure,
         roll: 76,
         finalMoney: 80,
+        transactionCount: 1,
         exposure: 14,
         health: "healthy",
       },
@@ -189,6 +208,7 @@ describe("Local Collection playtest application harness", () => {
         category: OperationOutcomeCategory.CriticalFailure,
         roll: 96,
         finalMoney: 80,
+        transactionCount: 1,
         exposure: 25,
         health: "injured",
       },
@@ -210,6 +230,10 @@ describe("Local Collection playtest application harness", () => {
       });
       expect(result.session.randomState).toEqual(result.session.classifiedOutcome?.nextRandomState);
       expect(result.session.organization.money).toBe(testCase.finalMoney);
+      expect(result.session.transactions).toHaveLength(testCase.transactionCount);
+      expect(
+        100 + result.session.transactions.reduce((sum, transaction) => sum + transaction.amount, 0),
+      ).toBe(testCase.finalMoney);
       expect(result.session.organization.operationalCapacity).toBe(1);
       expect(result.session.characters[0]?.assignmentState).toBe("idle");
       expect(result.session.characters[0]?.personalExposure).toBe(testCase.exposure);
@@ -279,6 +303,7 @@ describe("Local Collection playtest application harness", () => {
     expect(reset.session.characters[0]?.personalExposure).toBe(0);
     expect(reset.session.events).toEqual([]);
     expect(reset.session.appliedConsequences).toEqual([]);
+    expect(reset.session.transactions).toEqual([]);
   });
 
   it("matches manual step-by-step and full-run convenience observable results", () => {
@@ -290,12 +315,12 @@ describe("Local Collection playtest application harness", () => {
       DomainEventType.OperationPlanned,
       DomainEventType.CharacterAssignedToOperation,
       DomainEventType.OrganizationOperationalCapacityReserved,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
       DomainEventType.OperationStarted,
       DomainEventType.OperationLifecycleCompleted,
       DomainEventType.OperationOutcomeRolled,
       DomainEventType.OperationOutcomeClassified,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
       DomainEventType.CharacterPersonalExposureChanged,
       DomainEventType.CharacterAssignmentReleased,
       DomainEventType.OrganizationOperationalCapacityReleased,
@@ -409,6 +434,7 @@ function toObservable(session: LocalCollectionPlaytestSession) {
     operation: session.operations[0],
     classifiedOutcome: session.classifiedOutcome,
     appliedConsequences: session.appliedConsequences,
+    transactions: session.transactions,
     eventTypes: session.eventTimeline.map((event) => event.type),
     eventSummaries: session.eventTimeline.map((event) => event.summary),
   };

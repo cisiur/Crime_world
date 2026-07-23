@@ -3,7 +3,6 @@ import {
   createCharacterHealthChangedEvent,
   createCharacterPersonalExposureChangedEvent,
   createOperationConsequencesAppliedEvent,
-  createOrganizationMoneyChangedEvent,
   createOrganizationOperationalCapacityReleasedEvent,
   type DomainEvent,
 } from "./domainEvents";
@@ -14,7 +13,14 @@ import {
   type DomainError,
   type DomainResult,
 } from "./domainResult";
-import type { CharacterId } from "./entityIds";
+import type { CharacterId, TransactionId } from "./entityIds";
+import {
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
+  recordMoneyTransaction,
+  type MoneyTransaction,
+  type MoneyTransactionError,
+} from "./moneyLedger";
 import {
   OperationOutcomeCategory,
   isOperationOutcomeCategory,
@@ -28,6 +34,7 @@ import {
   type CharacterState,
 } from "./characterState";
 import { createOrganizationState, type OrganizationState } from "./organizationState";
+import type { SimulationTick } from "./simulationClock";
 
 export type LocalCollectionHealthConsequence = "none" | "injured";
 
@@ -47,6 +54,7 @@ export interface AppliedOperationConsequences {
   readonly releasedCharacterIds: readonly CharacterId[];
   readonly category: OperationOutcomeCategory;
   readonly grossReward: number;
+  readonly grossRewardTransactionId?: TransactionId;
   readonly previousOrganizationMoney: number;
   readonly currentOrganizationMoney: number;
   readonly moneyDelta: number;
@@ -72,6 +80,9 @@ export interface ApplyLocalCollectionConsequencesInput {
   readonly organizations: readonly OrganizationState[];
   readonly characters: readonly CharacterState[];
   readonly appliedConsequences: readonly AppliedOperationConsequences[];
+  readonly transactions: readonly MoneyTransaction[];
+  readonly recordedAtTick: SimulationTick;
+  readonly grossRewardTransactionId?: TransactionId;
 }
 
 export interface ApplyLocalCollectionConsequencesSuccess {
@@ -81,6 +92,8 @@ export interface ApplyLocalCollectionConsequencesSuccess {
   readonly characters: readonly CharacterState[];
   readonly appliedConsequence: AppliedOperationConsequences;
   readonly appliedConsequences: readonly AppliedOperationConsequences[];
+  readonly grossRewardTransaction?: MoneyTransaction;
+  readonly transactions: readonly MoneyTransaction[];
   readonly events: readonly DomainEvent[];
 }
 
@@ -196,6 +209,13 @@ export interface LocalCollectionConsequenceApplicationArithmeticInvalidError ext
   readonly delta: number;
 }
 
+export interface LocalCollectionConsequenceApplicationMissingRewardTransactionIdError
+  extends DomainError {
+  readonly code: typeof DomainErrorCode.LocalCollectionConsequenceApplicationMissingRewardTransactionId;
+  readonly operationId: OperationState["operationId"];
+  readonly grossReward: number;
+}
+
 export type LocalCollectionConsequenceApplicationError =
   | LocalCollectionConsequenceApplicationAlreadyRecordedError
   | LocalCollectionConsequenceApplicationArithmeticInvalidError
@@ -205,6 +225,7 @@ export type LocalCollectionConsequenceApplicationError =
   | LocalCollectionConsequenceApplicationInvalidHealthError
   | LocalCollectionConsequenceApplicationMissingAssignedCharacterError
   | LocalCollectionConsequenceApplicationMissingOrganizationError
+  | LocalCollectionConsequenceApplicationMissingRewardTransactionIdError
   | LocalCollectionConsequenceApplicationOutcomeCategoryUnsupportedError
   | LocalCollectionConsequenceApplicationOperationNotResolvedError
   | LocalCollectionConsequenceApplicationOutcomeMismatchError
@@ -213,7 +234,8 @@ export type LocalCollectionConsequenceApplicationError =
   | LocalCollectionConsequenceDefinitionCategoryUnsupportedError
   | LocalCollectionConsequenceDefinitionEmptyError
   | LocalCollectionConsequenceDefinitionHealthInvalidError
-  | LocalCollectionConsequenceDefinitionValueInvalidError;
+  | LocalCollectionConsequenceDefinitionValueInvalidError
+  | MoneyTransactionError;
 
 export type ApplyLocalCollectionConsequencesResult = DomainResult<
   ApplyLocalCollectionConsequencesSuccess,
@@ -393,17 +415,6 @@ export function applyLocalCollectionConsequences(
     });
   }
 
-  const nextMoney = organization.money + consequence.grossReward;
-  if (!Number.isSafeInteger(nextMoney)) {
-    return failure({
-      code: DomainErrorCode.LocalCollectionConsequenceApplicationArithmeticInvalid,
-      message: "Organization money consequence would exceed safe integer bounds.",
-      field: "money",
-      previousValue: organization.money,
-      delta: consequence.grossReward,
-    });
-  }
-
   const nextOperationalCapacity =
     organization.operationalCapacity + consequence.operationalCapacityRelease;
   if (!Number.isSafeInteger(nextOperationalCapacity)) {
@@ -431,6 +442,19 @@ export function applyLocalCollectionConsequences(
   const actualPersonalExposureDelta = nextPersonalExposure - assignedCharacter.personalExposure;
   const nextHealthState =
     consequence.healthConsequence === "injured" ? "injured" : assignedCharacter.healthState;
+  const rewardTransactionResult =
+    consequence.grossReward > 0
+      ? recordGrossRewardTransaction({
+          input,
+          consequence,
+          organization,
+        })
+      : success(undefined);
+  if (!rewardTransactionResult.ok) {
+    return rewardTransactionResult;
+  }
+
+  const moneyUpdatedOrganization = rewardTransactionResult.value?.organization ?? organization;
   const nextAssignedCharacter = createCharacterState({
     ...assignedCharacter,
     healthState: nextHealthState,
@@ -438,8 +462,7 @@ export function applyLocalCollectionConsequences(
     personalExposure: nextPersonalExposure,
   });
   const nextOrganization = createOrganizationState({
-    ...organization,
-    money: nextMoney,
+    ...moneyUpdatedOrganization,
     operationalCapacity: nextOperationalCapacity,
   });
   const appliedConsequence = createAppliedOperationConsequences({
@@ -447,6 +470,9 @@ export function applyLocalCollectionConsequences(
     assignedCharacterId,
     category: input.classifiedOutcome.category,
     consequence,
+    ...(rewardTransactionResult.value === undefined
+      ? {}
+      : { grossRewardTransaction: rewardTransactionResult.value.transaction }),
     organization,
     nextOrganization,
     assignedCharacter,
@@ -464,7 +490,10 @@ export function applyLocalCollectionConsequences(
     nextAssignedCharacter,
     actualPersonalExposureDelta,
     clamped: nextPersonalExposure !== unclampedExposure,
+    moneyEvents: rewardTransactionResult.value?.events ?? [],
   });
+  const nextTransactions =
+    rewardTransactionResult.value?.transactions ?? freezeTransactionCollection(input.transactions);
 
   return success(
     Object.freeze({
@@ -484,6 +513,10 @@ export function applyLocalCollectionConsequences(
       ),
       appliedConsequence,
       appliedConsequences: Object.freeze([...input.appliedConsequences, appliedConsequence]),
+      ...(rewardTransactionResult.value === undefined
+        ? {}
+        : { grossRewardTransaction: rewardTransactionResult.value.transaction }),
+      transactions: nextTransactions,
       events,
     }),
   );
@@ -560,6 +593,57 @@ export function validateLocalCollectionConsequenceDefinition(
   }
 
   return success(Object.freeze(definition.map((entry) => Object.freeze({ ...entry }))));
+}
+
+function recordGrossRewardTransaction(input: {
+  readonly input: ApplyLocalCollectionConsequencesInput;
+  readonly consequence: LocalCollectionConsequenceDefinitionEntry;
+  readonly organization: OrganizationState;
+}): DomainResult<
+  {
+    readonly organization: OrganizationState;
+    readonly transaction: MoneyTransaction;
+    readonly transactions: readonly MoneyTransaction[];
+    readonly events: readonly DomainEvent[];
+  },
+  LocalCollectionConsequenceApplicationError
+> {
+  const transactionId = input.input.grossRewardTransactionId;
+  if (transactionId === undefined) {
+    return failure({
+      code: DomainErrorCode.LocalCollectionConsequenceApplicationMissingRewardTransactionId,
+      message: `Gross reward transaction ID is required for operation "${input.input.operation.operationId}" because the Local Collection reward is non-zero.`,
+      operationId: input.input.operation.operationId,
+      grossReward: input.consequence.grossReward,
+    });
+  }
+
+  const result = recordMoneyTransaction({
+    transactionId,
+    organizationId: input.organization.organizationId,
+    recordedAtTick: input.input.recordedAtTick,
+    amount: input.consequence.grossReward,
+    category: MoneyTransactionCategory.OperationReward,
+    source: Object.freeze({
+      type: MoneyTransactionSourceType.OperationGrossReward,
+      operationId: input.input.operation.operationId,
+    }),
+    organizations: input.input.organizations,
+    transactions: input.input.transactions,
+  });
+
+  if (!result.ok) {
+    return result;
+  }
+
+  return success(
+    Object.freeze({
+      organization: result.value.organization,
+      transaction: result.value.transaction,
+      transactions: result.value.transactions,
+      events: result.value.events,
+    }),
+  );
 }
 
 function validateConsequenceEntryValues(
@@ -658,6 +742,7 @@ function createAppliedOperationConsequences(input: {
   readonly assignedCharacterId: CharacterId;
   readonly category: OperationOutcomeCategory;
   readonly consequence: LocalCollectionConsequenceDefinitionEntry;
+  readonly grossRewardTransaction?: MoneyTransaction;
   readonly organization: OrganizationState;
   readonly nextOrganization: OrganizationState;
   readonly assignedCharacter: CharacterState;
@@ -672,6 +757,9 @@ function createAppliedOperationConsequences(input: {
     releasedCharacterIds: Object.freeze([input.assignedCharacterId]),
     category: input.category,
     grossReward: input.consequence.grossReward,
+    ...(input.grossRewardTransaction === undefined
+      ? {}
+      : { grossRewardTransactionId: input.grossRewardTransaction.transactionId }),
     previousOrganizationMoney: input.organization.money,
     currentOrganizationMoney: input.nextOrganization.money,
     moneyDelta: input.consequence.grossReward,
@@ -703,21 +791,9 @@ function createConsequenceEvents(input: {
   readonly nextAssignedCharacter: CharacterState;
   readonly actualPersonalExposureDelta: number;
   readonly clamped: boolean;
+  readonly moneyEvents: readonly DomainEvent[];
 }): readonly DomainEvent[] {
-  const events: DomainEvent[] = [];
-
-  if (input.consequence.grossReward > 0) {
-    events.push(
-      createOrganizationMoneyChangedEvent({
-        organizationId: input.organization.organizationId,
-        operationId: input.operation.operationId,
-        reason: "operation-gross-reward-paid",
-        previousMoney: input.organization.money,
-        currentMoney: input.nextOrganization.money,
-        delta: input.consequence.grossReward,
-      }),
-    );
-  }
+  const events: DomainEvent[] = [...input.moneyEvents];
 
   events.push(
     createCharacterPersonalExposureChangedEvent({
@@ -783,4 +859,10 @@ function replaceById<TItem, TKey extends keyof TItem>(
   replacement: TItem,
 ): readonly TItem[] {
   return Object.freeze(items.map((item) => (item[key] === id ? replacement : item)));
+}
+
+function freezeTransactionCollection(
+  transactions: readonly MoneyTransaction[],
+): readonly MoneyTransaction[] {
+  return Object.isFrozen(transactions) ? transactions : Object.freeze([...transactions]);
 }

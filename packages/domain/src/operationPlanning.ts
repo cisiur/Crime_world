@@ -4,7 +4,6 @@ import type { LocationState } from "./cityState";
 import {
   createCharacterAssignedToOperationEvent,
   createOperationPlannedEvent,
-  createOrganizationMoneyChangedEvent,
   createOrganizationOperationalCapacityReservedEvent,
   type DomainEvent,
 } from "./domainEvents";
@@ -21,7 +20,15 @@ import type {
   OperationId,
   OperationTemplateId,
   OrganizationId,
+  TransactionId,
 } from "./entityIds";
+import {
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
+  recordMoneyTransaction,
+  type MoneyTransaction,
+  type MoneyTransactionError,
+} from "./moneyLedger";
 import { createOperationState, OperationStatus, type OperationState } from "./operationState";
 import {
   evaluateOperationAvailability,
@@ -48,6 +55,7 @@ export interface PlanOperationCommand {
   readonly organizationId: OrganizationId;
   readonly targetLocationId: LocationId;
   readonly assignedCharacterId: CharacterId;
+  readonly startCostTransactionId: TransactionId;
   readonly [planOperationCommandBrand]: "PlanOperationCommand";
 }
 
@@ -57,6 +65,7 @@ export interface CreatePlanOperationCommandInput {
   readonly organizationId: OrganizationId;
   readonly targetLocationId: LocationId;
   readonly assignedCharacterId: CharacterId;
+  readonly startCostTransactionId: TransactionId;
 }
 
 export interface OperationPlanningTemplateInput extends OperationAvailabilityTemplateInput {
@@ -73,6 +82,7 @@ export interface PlanOperationInput {
   readonly locationDefinitions: readonly OperationAvailabilityLocationDefinitionInput[];
   readonly businessStates: readonly BusinessState[];
   readonly operations: readonly OperationState[];
+  readonly transactions: readonly MoneyTransaction[];
 }
 
 export interface PlanOperationSuccess {
@@ -82,6 +92,8 @@ export interface PlanOperationSuccess {
   readonly characters: readonly CharacterState[];
   readonly operation: OperationState;
   readonly operations: readonly OperationState[];
+  readonly startCostTransaction: MoneyTransaction;
+  readonly transactions: readonly MoneyTransaction[];
   readonly events: readonly DomainEvent[];
 }
 
@@ -103,7 +115,8 @@ export interface OperationPlanningInvalidDataError extends DomainError {
 export type OperationPlanningError =
   | OperationPlanningAvailabilityRejectedError
   | OperationPlanningDuplicateOperationIdError
-  | OperationPlanningInvalidDataError;
+  | OperationPlanningInvalidDataError
+  | MoneyTransactionError;
 
 export type PlanOperationResult = DomainResult<PlanOperationSuccess, OperationPlanningError>;
 
@@ -117,6 +130,7 @@ export function createPlanOperationCommand(
     organizationId: input.organizationId,
     targetLocationId: input.targetLocationId,
     assignedCharacterId: input.assignedCharacterId,
+    startCostTransactionId: input.startCostTransactionId,
   }) as PlanOperationCommand;
 }
 
@@ -187,10 +201,27 @@ export function planOperation(input: PlanOperationInput): PlanOperationResult {
     ...assignedCharacter,
     assignmentState: "assigned",
   });
+  const startCostResult = recordMoneyTransaction({
+    transactionId: input.command.startCostTransactionId,
+    organizationId: organization.organizationId,
+    recordedAtTick: input.currentTick,
+    amount: -template.startCost,
+    category: MoneyTransactionCategory.OperationCost,
+    source: Object.freeze({
+      type: MoneyTransactionSourceType.OperationStartCost,
+      operationId: operation.operationId,
+    }),
+    organizations: input.organizations,
+    transactions: input.transactions,
+  });
+  if (!startCostResult.ok) {
+    return startCostResult;
+  }
+
+  const moneyUpdatedOrganization = startCostResult.value.organization;
   const nextOrganization = createOrganizationState({
-    ...organization,
+    ...moneyUpdatedOrganization,
     operationalCapacity: organization.operationalCapacity - template.operationalCapacityCost,
-    money: organization.money - template.startCost,
   });
   const nextCharacters = replaceById(
     input.characters,
@@ -199,7 +230,7 @@ export function planOperation(input: PlanOperationInput): PlanOperationResult {
     nextAssignedCharacter,
   );
   const nextOrganizations = replaceById(
-    input.organizations,
+    startCostResult.value.organizations,
     "organizationId",
     nextOrganization.organizationId,
     nextOrganization,
@@ -228,14 +259,7 @@ export function planOperation(input: PlanOperationInput): PlanOperationResult {
       currentOperationalCapacity: nextOrganization.operationalCapacity,
       delta: -template.operationalCapacityCost,
     }),
-    createOrganizationMoneyChangedEvent({
-      organizationId: nextOrganization.organizationId,
-      operationId: operation.operationId,
-      reason: "operation-start-cost-paid",
-      previousMoney: organization.money,
-      currentMoney: nextOrganization.money,
-      delta: -template.startCost,
-    }),
+    ...startCostResult.value.events,
   ]);
 
   return success(
@@ -246,6 +270,8 @@ export function planOperation(input: PlanOperationInput): PlanOperationResult {
       characters: nextCharacters,
       operation,
       operations: nextOperations,
+      startCostTransaction: startCostResult.value.transaction,
+      transactions: startCostResult.value.transactions,
       events,
     }),
   );

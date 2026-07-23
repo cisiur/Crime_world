@@ -13,6 +13,7 @@ import {
   type OperationPlannedEvent,
   type OperationStartedEvent,
   type OrganizationMoneyChangedEvent,
+  type OrganizationMoneyTransactionRecordedEvent,
   type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type SimulationResumedEvent,
@@ -21,12 +22,21 @@ import {
 import type { GameState } from "./gameState";
 import {
   parseCampaignId,
+  parseBusinessId,
   parseCharacterId,
   parseLocationId,
   parseOperationId,
   parseOperationTemplateId,
+  parseOpportunityId,
   parseOrganizationId,
+  parseTransactionId,
 } from "./entityIds";
+import {
+  isMoneyTransactionCategory,
+  MoneyTransactionSourceType,
+  parseMoneySourceId,
+  type MoneyTransactionSource,
+} from "./moneyLedger";
 import { parseSchemaVersion } from "./gameState";
 import {
   OperationOutcomeCategory,
@@ -198,6 +208,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     case DomainEventType.OrganizationMoneyChanged:
       assertOrganizationMoneyChangedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationMoneyTransactionRecorded:
+      assertOrganizationMoneyTransactionRecordedEventInvariant(event);
       return;
     case DomainEventType.OrganizationOperationalCapacityReleased:
       assertOrganizationOperationalCapacityReleasedEventInvariant(event);
@@ -754,6 +767,126 @@ function assertOrganizationMoneyChangedEventInvariant(event: OrganizationMoneyCh
       "currentMoney must equal previousMoney + delta",
       event,
     );
+  }
+}
+
+function assertOrganizationMoneyTransactionRecordedEventInvariant(
+  event: OrganizationMoneyTransactionRecordedEvent,
+): void {
+  assertInvariant(
+    "OrganizationMoneyTransactionRecorded.transactionId",
+    () => parseTransactionId(event.transactionId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationMoneyTransactionRecorded.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationMoneyTransactionRecorded.recordedAtTick",
+    () => parseSimulationTick(event.recordedAtTick),
+    event,
+  );
+
+  if (!isMoneyTransactionCategory(event.category)) {
+    throw new InvariantViolationError(
+      "OrganizationMoneyTransactionRecorded.category",
+      "category must be a supported money transaction category",
+      event,
+    );
+  }
+
+  assertMoneyTransactionSourceInvariant(event.source, event);
+  assertFiniteInteger("OrganizationMoneyTransactionRecorded.amount", event.amount, event);
+  assertFiniteInteger(
+    "OrganizationMoneyTransactionRecorded.previousMoney",
+    event.previousMoney,
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationMoneyTransactionRecorded.currentMoney",
+    event.currentMoney,
+    event,
+  );
+
+  if (event.amount === 0) {
+    throw new InvariantViolationError(
+      "OrganizationMoneyTransactionRecorded.amount",
+      "amount must be non-zero",
+      event,
+    );
+  }
+
+  if (event.currentMoney !== event.previousMoney + event.amount) {
+    throw new InvariantViolationError(
+      "OrganizationMoneyTransactionRecorded.amount",
+      "currentMoney must equal previousMoney plus amount",
+      event,
+    );
+  }
+}
+
+function assertMoneyTransactionSourceInvariant(
+  source: MoneyTransactionSource,
+  event: OrganizationMoneyTransactionRecordedEvent,
+): void {
+  assertObject("OrganizationMoneyTransactionRecorded.source", source);
+
+  switch (source.type) {
+    case MoneyTransactionSourceType.OperationStartCost:
+    case MoneyTransactionSourceType.OperationGrossReward:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.operationId",
+        () => parseOperationId(source.operationId),
+        event,
+      );
+      return;
+    case MoneyTransactionSourceType.CrewUpkeep:
+    case MoneyTransactionSourceType.RecruitmentCharacterCost:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.characterId",
+        () => parseCharacterId(source.characterId),
+        event,
+      );
+      return;
+    case MoneyTransactionSourceType.BusinessUpkeep:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.businessId",
+        () => parseBusinessId(source.businessId),
+        event,
+      );
+      return;
+    case MoneyTransactionSourceType.HideoutUpkeep:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.locationId",
+        () => parseLocationId(source.locationId),
+        event,
+      );
+      return;
+    case MoneyTransactionSourceType.RecruitmentOpportunityCost:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.opportunityId",
+        () => parseOpportunityId(source.opportunityId),
+        event,
+      );
+      return;
+    case MoneyTransactionSourceType.RecurringIncome:
+    case MoneyTransactionSourceType.PressureManagement:
+    case MoneyTransactionSourceType.Recovery:
+    case MoneyTransactionSourceType.Generic:
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.sourceId",
+        () => parseMoneySourceId(source.sourceId),
+        event,
+      );
+      return;
+    default:
+      throw new InvariantViolationError(
+        "OrganizationMoneyTransactionRecorded.source.type",
+        "source type must be a supported money transaction source type",
+        event,
+      );
   }
 }
 

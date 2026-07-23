@@ -4,6 +4,8 @@ import {
   DomainErrorCode,
   DomainEventType,
   MINUTES_PER_TICK,
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
   OperationAvailabilityReason,
   OperationStatus,
   createBusinessState,
@@ -18,6 +20,7 @@ import {
   parseOperationTemplateId,
   parseOrganizationId,
   parseSimulationTick,
+  parseTransactionId,
   planOperation,
   type BusinessState,
   type CharacterId,
@@ -70,6 +73,21 @@ describe("operation planning", () => {
     expect(result.value.organization.money).toBe(80);
     expect(result.value.organization.money).toBe(input.organizations[0]!.money - 20);
     expect(result.value.organizations).toEqual([result.value.organization]);
+    expect(result.value.transactions).toHaveLength(1);
+    expect(result.value.startCostTransaction).toEqual({
+      transactionId: START_COST_TRANSACTION_ID,
+      organizationId: STARTER_ORGANIZATION_ID,
+      recordedAtTick: CURRENT_TICK,
+      amount: -20,
+      balanceBefore: 100,
+      balanceAfter: 80,
+      category: MoneyTransactionCategory.OperationCost,
+      source: {
+        type: MoneyTransactionSourceType.OperationStartCost,
+        operationId: LOCAL_COLLECTION_OPERATION_ID,
+      },
+    });
+    expect(result.value.transactions[0]).toBe(result.value.startCostTransaction);
   });
 
   it("emits deterministic semantic planning events with resource-change payloads", () => {
@@ -84,7 +102,7 @@ describe("operation planning", () => {
       DomainEventType.OperationPlanned,
       DomainEventType.CharacterAssignedToOperation,
       DomainEventType.OrganizationOperationalCapacityReserved,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
     ]);
     expect(result.value.events).toEqual([
       {
@@ -113,15 +131,23 @@ describe("operation planning", () => {
         delta: -1,
       },
       {
-        type: DomainEventType.OrganizationMoneyChanged,
+        type: DomainEventType.OrganizationMoneyTransactionRecorded,
+        transactionId: START_COST_TRANSACTION_ID,
         organizationId: STARTER_ORGANIZATION_ID,
-        operationId: LOCAL_COLLECTION_OPERATION_ID,
-        reason: "operation-start-cost-paid",
+        category: MoneyTransactionCategory.OperationCost,
+        source: {
+          type: MoneyTransactionSourceType.OperationStartCost,
+          operationId: LOCAL_COLLECTION_OPERATION_ID,
+        },
+        amount: -20,
         previousMoney: 100,
         currentMoney: 80,
-        delta: -20,
+        recordedAtTick: CURRENT_TICK,
       },
     ]);
+    expect(
+      result.value.events.some((event) => event.type === DomainEventType.OrganizationMoneyChanged),
+    ).toBe(false);
   });
 
   it("returns identical results for repeated execution with structurally identical input", () => {
@@ -255,6 +281,7 @@ describe("operation planning", () => {
     expect(input.organizations[0]!.money).toBe(19);
     expect(input.characters[0]!.assignmentState).toBe("idle");
     expect(input.operations).toEqual([]);
+    expect(input.transactions).toEqual([]);
     if (!result.ok) {
       expect("events" in result.error).toBe(false);
     }
@@ -274,6 +301,7 @@ describe("operation planning", () => {
         organizations: firstResult.value.organizations,
         characters: firstResult.value.characters,
         operations: firstResult.value.operations,
+        transactions: firstResult.value.transactions,
       }),
     );
 
@@ -299,6 +327,7 @@ describe("operation planning", () => {
       throw new Error("expected first planning attempt to succeed");
     }
     expect(firstResult.value.organization.money).toBe(0);
+    expect(firstResult.value.transactions).toHaveLength(1);
 
     const secondResult = planOperation(
       createValidPlanningInput({
@@ -309,6 +338,7 @@ describe("operation planning", () => {
         organizations: firstResult.value.organizations,
         characters: firstResult.value.characters,
         operations: firstResult.value.operations,
+        transactions: firstResult.value.transactions,
       }),
     );
 
@@ -319,6 +349,34 @@ describe("operation planning", () => {
         OperationAvailabilityReason.InsufficientMoney,
       ]);
     }
+  });
+
+  it("rejects duplicate start-cost transaction IDs atomically", () => {
+    const firstResult = planOperation(createValidPlanningInput());
+
+    expect(firstResult.ok).toBe(true);
+    if (!firstResult.ok) {
+      throw new Error("expected first planning attempt to succeed");
+    }
+
+    const input = createValidPlanningInput({
+      command: createCommand({
+        operationId: parseOperationId("operation:local_collection_duplicate_transaction"),
+      }),
+      transactions: firstResult.value.transactions,
+    });
+    const snapshot = JSON.stringify(input);
+    const result = planOperation(input);
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error.code).toBe(DomainErrorCode.MoneyTransactionDuplicateTransactionId);
+    }
+    expect(JSON.stringify(input)).toBe(snapshot);
+    expect(input.organizations[0]?.money).toBe(100);
+    expect(input.characters[0]?.assignmentState).toBe("idle");
+    expect(input.operations).toEqual([]);
+    expect(input.transactions).toHaveLength(1);
   });
 
   it("rejects planning data with a duration that cannot map to whole ticks", () => {
@@ -349,6 +407,7 @@ const LOCAL_COLLECTION_TEMPLATE_ID = parseOperationTemplateId(
   "operation-template:local_collection",
 );
 const LOCAL_COLLECTION_OPERATION_ID = parseOperationId("operation:local_collection_001");
+const START_COST_TRANSACTION_ID = parseTransactionId("transaction:local_collection_001:start_cost");
 const CURRENT_TICK = parseSimulationTick(4);
 const LOCAL_COLLECTION_DURATION_MINUTES = 60;
 
@@ -363,6 +422,7 @@ function createValidPlanningInput(overrides: Partial<PlanOperationInput> = {}): 
     locationDefinitions: [createLocationDefinition()],
     businessStates: [createCornerStoreBusiness()],
     operations: [],
+    transactions: [],
     ...overrides,
   };
 }
@@ -374,6 +434,7 @@ function createCommand(overrides: Partial<Parameters<typeof createPlanOperationC
     organizationId: STARTER_ORGANIZATION_ID,
     targetLocationId: CORNER_STORE_LOCATION_ID,
     assignedCharacterId: BOSS_ID,
+    startCostTransactionId: START_COST_TRANSACTION_ID,
     ...overrides,
   });
 }

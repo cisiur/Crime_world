@@ -9,6 +9,8 @@ import {
 import {
   DomainErrorCode,
   DomainEventType,
+  MoneyTransactionCategory,
+  MoneyTransactionSourceType,
   OperationOutcomeCategory,
   OperationStatus,
   applyLocalCollectionConsequences,
@@ -28,6 +30,7 @@ import {
   parseOrganizationId,
   parseRandomSeed,
   parseSimulationTick,
+  parseTransactionId,
   planOperation,
   advanceOperationLifecycles,
   type AppliedOperationConsequences,
@@ -38,6 +41,7 @@ import {
   type DomainEvent,
   type DomainResult,
   type LocationState,
+  type MoneyTransaction,
   type OperationState,
   type OperationOutcomeModifierContributions,
   type OrganizationState,
@@ -66,17 +70,29 @@ describe("Local Collection vertical-slice integration", () => {
     expect(result.planning.assignedCharacter.assignmentState).toBe("assigned");
     expect(result.planning.organization.operationalCapacity).toBe(0);
     expect(result.planning.organization.money).toBe(80);
+    expect(result.planning.transactions).toHaveLength(1);
+    expect(result.planning.startCostTransaction).toMatchObject({
+      transactionId: START_COST_TRANSACTION_ID,
+      amount: -20,
+      balanceBefore: 100,
+      balanceAfter: 80,
+      category: MoneyTransactionCategory.OperationCost,
+      source: {
+        type: MoneyTransactionSourceType.OperationStartCost,
+        operationId: LOCAL_COLLECTION_OPERATION_ID,
+      },
+    });
     expect(result.planning.events.map((event) => event.type)).toEqual([
       DomainEventType.OperationPlanned,
       DomainEventType.CharacterAssignedToOperation,
       DomainEventType.OrganizationOperationalCapacityReserved,
-      DomainEventType.OrganizationMoneyChanged,
+      DomainEventType.OrganizationMoneyTransactionRecorded,
     ]);
     expect(result.planning.events.at(-1)).toMatchObject({
-      reason: "operation-start-cost-paid",
+      transactionId: START_COST_TRANSACTION_ID,
+      amount: -20,
       previousMoney: 100,
       currentMoney: 80,
-      delta: -20,
     });
     expect(result.initial.locationStates).toEqual(result.locationStatesAfterFlow);
     expect(result.initial.businessStates).toEqual(result.businessStatesAfterFlow);
@@ -124,6 +140,18 @@ describe("Local Collection vertical-slice integration", () => {
     expect(result.consequences.appliedConsequence.category).toBe(result.classification.category);
     expect(result.finalRandomState).toEqual(result.classification.nextRandomState);
     expect(result.consequences.organization.money).toBe(160);
+    expect(result.consequences.transactions).toHaveLength(2);
+    expect(result.consequences.grossRewardTransaction).toMatchObject({
+      transactionId: GROSS_REWARD_TRANSACTION_ID,
+      amount: 80,
+      balanceBefore: 80,
+      balanceAfter: 160,
+      category: MoneyTransactionCategory.OperationReward,
+      source: {
+        type: MoneyTransactionSourceType.OperationGrossReward,
+        operationId: LOCAL_COLLECTION_OPERATION_ID,
+      },
+    });
     expect(result.consequences.organization.operationalCapacity).toBe(1);
     expect(result.consequences.assignedCharacter.personalExposure).toBe(4);
     expect(result.consequences.assignedCharacter.healthState).toBe("healthy");
@@ -132,10 +160,10 @@ describe("Local Collection vertical-slice integration", () => {
     expect(result.consequences.appliedConsequences).toHaveLength(1);
     expect(result.lifecycle.resolvedOperation.status).toBe(OperationStatus.Resolved);
     expect(result.combinedEvents.map((event) => event.type)).toEqual(SUCCESS_EVENT_SEQUENCE);
-    expect(result.combinedEvents.filter(isMoneyEvent).map((event) => event.reason)).toEqual([
-      "operation-start-cost-paid",
-      "operation-gross-reward-paid",
-    ]);
+    expect(result.combinedEvents.filter(isLegacyMoneyEvent)).toEqual([]);
+    expect(
+      result.combinedEvents.filter(isMoneyTransactionEvent).map((event) => event.amount),
+    ).toEqual([-20, 80]);
     for (const event of result.combinedEvents) {
       expect(() => assertDomainEventInvariant(event)).not.toThrow();
     }
@@ -195,6 +223,19 @@ describe("Local Collection vertical-slice integration", () => {
       expect(result.classification.percentileRoll).toBe(testCase.roll);
       expect(result.consequences.appliedConsequence.grossReward).toBe(testCase.grossReward);
       expect(result.consequences.organization.money).toBe(testCase.finalMoney);
+      expect(result.consequences.transactions).toHaveLength(testCase.grossReward > 0 ? 2 : 1);
+      expect(
+        testCase.grossReward > 0
+          ? result.consequences.grossRewardTransaction?.transactionId
+          : result.consequences.grossRewardTransaction,
+      ).toBe(testCase.grossReward > 0 ? result.expectedRewardTransactionId : undefined);
+      expect(
+        100 +
+          result.consequences.transactions.reduce(
+            (sum, transaction) => sum + transaction.amount,
+            0,
+          ),
+      ).toBe(testCase.finalMoney);
       expect(result.consequences.organization.operationalCapacity).toBe(1);
       expect(result.consequences.assignedCharacter.assignmentState).toBe("idle");
       expect(result.consequences.assignedCharacter.personalExposure).toBe(testCase.exposureDelta);
@@ -304,6 +345,9 @@ describe("Local Collection vertical-slice integration", () => {
       organizations,
       characters,
       appliedConsequences,
+      transactions: result.consequences.transactions,
+      recordedAtTick: result.lifecycle.resolvedOperation.plannedCompletionTick,
+      grossRewardTransactionId: result.expectedRewardTransactionId,
     });
 
     expect(second.ok).toBe(false);
@@ -319,6 +363,7 @@ describe("Local Collection vertical-slice integration", () => {
     expect(characters[0]?.healthState).toBe("healthy");
     expect(characters[0]?.assignmentState).toBe("idle");
     expect(appliedConsequences).toHaveLength(1);
+    expect(result.consequences.transactions).toHaveLength(2);
     expect("events" in second.error).toBe(false);
     expect("appliedConsequences" in second.error).toBe(false);
   });
@@ -340,9 +385,11 @@ describe("Local Collection vertical-slice integration", () => {
       DomainEventType.OrganizationOperationalCapacityReleased,
       DomainEventType.OperationConsequencesApplied,
     ]);
-    expect(failure.combinedEvents.filter(isMoneyEvent).map((event) => event.reason)).toEqual([
-      "operation-start-cost-paid",
-    ]);
+    expect(failure.combinedEvents.filter(isLegacyMoneyEvent)).toEqual([]);
+    expect(
+      failure.combinedEvents.filter(isMoneyTransactionEvent).map((event) => event.amount),
+    ).toEqual([-20]);
+    expect(failure.consequences.transactions).toHaveLength(1);
   });
 });
 
@@ -363,6 +410,7 @@ interface LocalCollectionInitialRuntimeState {
   readonly businessStates: readonly ReturnType<typeof createBusinessState>[];
   readonly operations: readonly OperationState[];
   readonly appliedConsequences: readonly AppliedOperationConsequences[];
+  readonly transactions: readonly MoneyTransaction[];
   readonly randomState: RandomState;
 }
 
@@ -396,6 +444,7 @@ interface LocalCollectionVerticalSliceResult {
   readonly combinedEvents: readonly DomainEvent[];
   readonly locationStatesAfterFlow: readonly LocationState[];
   readonly businessStatesAfterFlow: readonly ReturnType<typeof createBusinessState>[];
+  readonly expectedRewardTransactionId: ReturnType<typeof parseTransactionId>;
   readonly observable: unknown;
 }
 
@@ -403,6 +452,10 @@ const STARTER_ORGANIZATION_ID = parseOrganizationId("organization:starter_crew")
 const BOSS_ID = parseCharacterId("character:boss_001");
 const CORNER_STORE_BUSINESS_ID = parseBusinessId("business:corner_store");
 const LOCAL_COLLECTION_OPERATION_ID = parseOperationId("operation:local_collection_001");
+const START_COST_TRANSACTION_ID = parseTransactionId("operation:local_collection_001:start_cost");
+const GROSS_REWARD_TRANSACTION_ID = parseTransactionId(
+  "operation:local_collection_001:gross_reward",
+);
 const ZERO_MODIFIERS: OperationOutcomeModifierContributions = Object.freeze({
   base: 0,
   competence: 0,
@@ -414,12 +467,12 @@ const SUCCESS_EVENT_SEQUENCE = [
   DomainEventType.OperationPlanned,
   DomainEventType.CharacterAssignedToOperation,
   DomainEventType.OrganizationOperationalCapacityReserved,
-  DomainEventType.OrganizationMoneyChanged,
+  DomainEventType.OrganizationMoneyTransactionRecorded,
   DomainEventType.OperationStarted,
   DomainEventType.OperationLifecycleCompleted,
   DomainEventType.OperationOutcomeRolled,
   DomainEventType.OperationOutcomeClassified,
-  DomainEventType.OrganizationMoneyChanged,
+  DomainEventType.OrganizationMoneyTransactionRecorded,
   DomainEventType.CharacterPersonalExposureChanged,
   DomainEventType.CharacterAssignmentReleased,
   DomainEventType.OrganizationOperationalCapacityReleased,
@@ -445,7 +498,9 @@ function runLocalCollectionVerticalSlice(
     organizationId: STARTER_ORGANIZATION_ID,
     targetLocationId,
     assignedCharacterId: BOSS_ID,
+    startCostTransactionId: parseTransactionId(`${input.operationId}:start_cost`),
   });
+  const rewardTransactionId = parseTransactionId(`${input.operationId}:gross_reward`);
   const planningTemplates = [localCollectionOperationTemplateDefinition];
   const locationDefinitions = canonicalMvpCityDefinition.locations.map((location) => ({
     id: location.id,
@@ -477,6 +532,7 @@ function runLocalCollectionVerticalSlice(
       locationDefinitions,
       businessStates: initial.businessStates,
       operations: initial.operations,
+      transactions: initial.transactions,
     }),
   );
   const atPlanningTick = advanceOperationLifecycles({
@@ -523,6 +579,12 @@ function runLocalCollectionVerticalSlice(
       organizations: planning.organizations,
       characters: planning.characters,
       appliedConsequences: initial.appliedConsequences,
+      transactions: planning.transactions,
+      recordedAtTick: completionTick,
+      grossRewardTransactionId: getRewardTransactionId(
+        classification.category,
+        rewardTransactionId,
+      ),
     }),
   );
   const combinedEvents = Object.freeze([
@@ -551,6 +613,7 @@ function runLocalCollectionVerticalSlice(
     combinedEvents,
     locationStatesAfterFlow: initial.locationStates,
     businessStatesAfterFlow: initial.businessStates,
+    expectedRewardTransactionId: rewardTransactionId,
     observable: Object.freeze({
       plannedState: planning.operation,
       lifecycleStates: [
@@ -567,6 +630,7 @@ function runLocalCollectionVerticalSlice(
       finalOrganizationState: consequences.organization,
       finalCharacterState: consequences.assignedCharacter,
       appliedConsequence: consequences.appliedConsequence,
+      transactions: consequences.transactions,
       combinedEvents,
     }),
   });
@@ -620,6 +684,7 @@ function createInitialRuntimeState(input: {
     ]),
     operations: Object.freeze([]),
     appliedConsequences: Object.freeze([]),
+    transactions: Object.freeze([]),
     randomState: createRandomState(parseRandomSeed(input.seed)),
   });
 }
@@ -645,6 +710,16 @@ function getTargetLocationDefinition() {
   return targetLocationDefinition;
 }
 
+function getRewardTransactionId(
+  category: OperationOutcomeCategory,
+  transactionId: ReturnType<typeof parseTransactionId>,
+) {
+  const consequence = localCollectionConsequenceDefinition.find(
+    (entry) => entry.category === category,
+  );
+  return consequence === undefined || consequence.grossReward === 0 ? undefined : transactionId;
+}
+
 function getOnlyOperation(operations: readonly OperationState[]): OperationState {
   expect(operations).toHaveLength(1);
   const operation = operations[0];
@@ -666,11 +741,20 @@ function assertOk<TValue, TError extends DomainError>(
   return result.value;
 }
 
-function isMoneyEvent(
+function isLegacyMoneyEvent(
   event: DomainEvent,
 ): event is Extract<
   DomainEvent,
   { readonly type: typeof DomainEventType.OrganizationMoneyChanged }
 > {
   return event.type === DomainEventType.OrganizationMoneyChanged;
+}
+
+function isMoneyTransactionEvent(
+  event: DomainEvent,
+): event is Extract<
+  DomainEvent,
+  { readonly type: typeof DomainEventType.OrganizationMoneyTransactionRecorded }
+> {
+  return event.type === DomainEventType.OrganizationMoneyTransactionRecorded;
 }

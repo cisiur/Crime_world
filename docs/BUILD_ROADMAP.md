@@ -1,6 +1,6 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, and E5-02A has added the standalone domain money-ledger foundation. Local Collection has not been migrated, and no recurring economy implementation exists yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02A has added the standalone domain money-ledger foundation, and E5-02B has migrated Local Collection start cost and non-zero gross rewards to that ledger. No recurring economy implementation exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
 > **Current phase:** EPIC 5 in progress. E5-02 is being delivered through bounded increments; the next increment requires PM review and acceptance before implementation.
@@ -549,16 +549,16 @@ The current EPIC 2 and EPIC 3 standalone runtime models are not yet attached to 
 
 EPIC 4 deliberately remained outside the root campaign aggregate. The vertical-slice tests and developer playtest pass explicit runtime collections and random state through the public APIs. Root `GameState`, campaign creation, save/load, and broad campaign orchestration remain future work.
 
-#### Temporary EPIC 4 money rule
+#### EPIC 4 money migration note
 
-EPIC 5 will introduce the explicit transaction ledger. For the first operation slice, it is acceptable for the domain operation consequence to update `OrganizationState.money` directly, provided that:
+EPIC 4 originally allowed the first operation slice to update `OrganizationState.money` directly as a temporary vertical-slice boundary, provided that:
 
 - the change is deterministic,
 - the reason and delta are represented by an explicit domain event or equivalent traceable result,
 - the implementation does not create a competing generic economy system,
-- the future ledger migration remains straightforward.
+- the later ledger migration remains straightforward.
 
-This is an intentional temporary vertical-slice boundary.
+E5-02A introduced the standalone money-ledger foundation, and E5-02B migrated the Local Collection start cost and non-zero gross reward paths to that ledger. This note remains only as historical context for why EPIC 4 was initially accepted before the ledger existed.
 
 #### Exposure boundary
 
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. No Local Collection ledger migration, recurring economy, business-control, recruitment, or UI implementation exists yet.
+Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. E5-02B has migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. No recurring economy, business-control, recruitment, or production UI implementation exists yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -660,15 +660,23 @@ E5-02A is the first bounded implementation increment of E5-02. It adds only the 
 - focused typed validation failures,
 - `OrganizationMoneyTransactionRecorded` as the future generic money event.
 
-E5-02A does not migrate `planOperation(...)` or `applyLocalCollectionConsequences(...)`; EPIC 4 direct `OrganizationState.money` mutation and `OrganizationMoneyChangedEvent` remain temporarily present. E5-02A also does not implement recurring income generation, recurring upkeep processing, schedules, unpaid obligations, tick-pipeline integration, campaign creation, save/load, UI, businesses, recruitment, pressure systems, or rival AI.
+E5-02A did not migrate `planOperation(...)` or `applyLocalCollectionConsequences(...)`. E5-02B now migrates only the accepted Local Collection start cost and non-zero gross reward paths to `recordMoneyTransaction(...)`.
 
-The expected next bounded task is Local Collection ledger migration, subject to PM review and acceptance. It must preserve the accepted EPIC 4 money values, deterministic seeds, and exactly-once start-cost/reward behavior.
+### E5-02B implementation status
+
+E5-02B is the second bounded implementation increment of E5-02. Local Collection planning now records the accepted `-20` start cost through one `operation-cost` transaction with an `operation-start-cost` source. Local Collection consequence application now records success `+80` and partial-success `+40` gross rewards through one `operation-reward` transaction with an `operation-gross-reward` source.
+
+Failure and critical-failure outcomes create no zero-value reward transaction. The accepted EPIC 4 final money outcomes, deterministic seeds, lifecycle timing, exposure values, injury behavior, assignment release, capacity release, and exactly-once guards are preserved. Direct Local Collection money mutation has been removed for the migrated start-cost and reward paths; the legacy `OrganizationMoneyChangedEvent` contract remains available but is no longer emitted by these Local Collection money changes.
+
+E5-02B does not implement recurring income generation, recurring upkeep processing, schedules, unpaid obligations, tick-pipeline integration, campaign creation, root `GameState` ledger integration, save/load, production UI, businesses, recruitment, pressure systems, or rival AI.
+
+The next bounded E5-02 task requires PM review and acceptance. E5-02 remains in progress; if recurring economy work is pursued next, it may need to be delivered in bounded reviewed increments.
 
 ### Current balance
 
 `OrganizationState.money` remains the authoritative current organization balance. It remains a non-negative safe integer and must not be removed or replaced by recalculating balance through replay of the complete ledger.
 
-After the ledger exists, future money changes must not mutate `OrganizationState.money` independently. The current EPIC 4 Local Collection direct balance mutation is a temporary vertical-slice boundary that must be migrated to the ledger without changing accepted EPIC 4 outcomes.
+After the ledger exists, future money changes must not mutate `OrganizationState.money` independently. E5-02B has migrated the Local Collection start cost and non-zero gross reward balance changes to the ledger without changing accepted EPIC 4 outcomes.
 
 ### Ledger rule
 
@@ -1179,6 +1187,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next expected bounded increment is **Local Collection ledger migration**, subject to PM review and acceptance.
+The next expected bounded E5-02 increment requires PM review and acceptance.
 
 E5-02 must not begin automatically from this document. It requires a new PM scope decision before implementation, and may need to be delivered in bounded reviewed increments. Until that scope is accepted, do not implement recurring economy execution, recurring income generation, concrete upkeep schedules, business-control behavior, recruitment, pressure systems, rival AI, save/load, or broad campaign orchestration.
