@@ -233,7 +233,7 @@ Completed document groups:
 - Operation prerequisite evaluation is deterministic and side-effect free.
 - Bounded immutable `PlanOperationCommand` and pure deterministic `planOperation(...)` exist in the domain package.
 - Operation planning accepts explicit runtime collections and narrow authored template/location inputs rather than expanding root `GameState` or importing content definitions.
-- Valid planning creates exactly one immutable planned `OperationState`, reserves exactly one assigned character by changing `assignmentState` from `idle` to `assigned`, reserves operational capacity, deducts the start cost immediately and exactly once, and emits ordered semantic planning events.
+- Valid planning creates exactly one immutable planned `OperationState`, reserves exactly one assigned character by changing `assignmentState` from `idle` to `assigned`, reserves operational capacity, records the start cost immediately and exactly once through the money ledger, and emits ordered semantic planning events.
 - Operation planning rejects duplicate `OperationId` values explicitly and preserves typed `OperationAvailabilityReason` values in availability failures.
 - Pure deterministic `advanceOperationLifecycles(...)` exists in the domain package for bounded `planned -> running -> resolved` operation lifecycle transitions over explicit immutable operation collections.
 - Lifecycle evaluation preserves collection order, emits `OperationStarted` and `OperationLifecycleCompleted` events, handles overdue planned operations in one evaluation, and treats `resolved` as "ready for outcome resolution" rather than "consequences applied".
@@ -292,9 +292,9 @@ Current roadmap phase:
 
 Current next task:
 
-> **Next bounded E5-02 increment, subject to PM review and acceptance.**
+> **E5-03 - Define six MVP business / location archetypes**
 
-EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. E5-02A through E5-02F are complete as bounded E5-02 increments: the standalone money ledger exists, Local Collection start cost and non-zero gross rewards use it, the recurring economy scheduler foundation exists, the first application recurring runtime exists, the first crew-upkeep cost flow can generate schedules and execute one due period for one explicit character, and the MVP recurring-income flow can generate one schedule per organization and execute one due period. E5-02 remains in progress until PM review confirms roadmap completion. Business and hideout upkeep, global tick integration, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, and final player-facing UI are not implemented yet. The next bounded task requires PM review and acceptance.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. E5-02 is complete after accepted bounded increments E5-02A through E5-02F: money ledger -> recurring schedule domain -> due-period processing -> application runtime -> crew upkeep and MVP recurring-income flows. Business and hideout upkeep, business-derived income, global tick integration, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, and final player-facing UI are not implemented yet. E5-03 is Pending and has not started.
 
 ---
 
@@ -746,16 +746,17 @@ Completed:
 - E5-02D recurring economy runtime orchestration.
 - E5-02E crew upkeep schedule generation and one-period runtime execution.
 - E5-02F MVP recurring income generation and one-period runtime execution.
+- E5-02 recurring income and recurring costs.
 
 Next:
 
-> **Next bounded E5-02 increment, subject to PM review and acceptance.**
+> **E5-03 - Define six MVP business / location archetypes**
 
 Required PM output before implementation:
 
-- review and accept the next bounded E5-02 increment,
+- review and accept the E5-03 scope,
 - preserve the accepted E5-01/E5-02A through E5-02F contract and EPIC 4 Local Collection money outcomes,
-- keep any further economy work out of scope until its explicit accepted task,
+- keep any further economy integration out of scope until its explicit accepted task,
 - keep business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
 
 ---
