@@ -1,6 +1,6 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02A has added the standalone domain money-ledger foundation, E5-02B has migrated Local Collection start cost and non-zero gross rewards to that ledger, and E5-02C has added the standalone recurring economy scheduler foundation. Recurring gameplay is not connected to runtime execution yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02A has added the standalone domain money-ledger foundation, E5-02B has migrated Local Collection start cost and non-zero gross rewards to that ledger, E5-02C has added the standalone recurring economy scheduler foundation, and E5-02D has added the first application/runtime recurring economy orchestration layer. Recurring gameplay is not connected to the simulation update loop yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
 > **Current phase:** EPIC 5 in progress. E5-02 is being delivered through bounded increments; the next increment requires PM review and acceptance before implementation.
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. E5-02B has migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C has implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. Recurring gameplay is still not connected to the runtime tick pipeline, and no business-control, recruitment, or production UI implementation exists yet.
+Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. E5-02B has migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C has implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D has added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. Recurring gameplay is still not connected to the simulation update loop, and no business-control, recruitment, or production UI implementation exists yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -686,6 +686,18 @@ E5-02C is the third bounded implementation increment of E5-02. It adds only the 
 The foundation advances exactly one due period per invocation and never directly mutates `OrganizationState.money`; applied payments use `recordMoneyTransaction(...)`. Insufficient recurring expenses do not create ledger transactions or money events, but they do append an unpaid processing record, advance the schedule by one period, and emit one recurring processing event.
 
 E5-02C does not implement tick-pipeline integration, automatic overdue catch-up, schedule generation, business income behavior, authored upkeep values, root `GameState` ledger integration, save/load, production economy orchestration, or UI. E5-02 remains in progress, and the next bounded task requires PM review and acceptance.
+
+### E5-02D implementation status
+
+E5-02D is the fourth bounded implementation increment of E5-02. It adds only the first `packages/application` runtime orchestration layer for recurring economy processing:
+
+- explicit immutable runtime inputs for one schedule, one transaction ID, current tick, organizations, ledger transactions, processing records, and schedules,
+- `executeRecurringEconomyRuntime(...)` as a thin application wrapper around `processRecurringEconomyDuePeriod(...)`,
+- immutable runtime success results containing updated schedules, processing records, organizations, transactions, emitted events, and processing status,
+- failure propagation without partial runtime state or event aggregation,
+- deterministic event ordering preserved exactly as emitted by the domain scheduler.
+
+E5-02D does not add new gameplay rules, generate schedules, process every due schedule, catch up multiple overdue periods, integrate with the global simulation tick pipeline, modify Local Collection, attach recurring economy to root `GameState`, implement save/load, add UI, or introduce business income or upkeep values. E5-02 remains in progress, and the next bounded task requires PM review and acceptance.
 
 ### Current balance
 
