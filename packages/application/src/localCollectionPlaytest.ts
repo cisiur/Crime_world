@@ -865,6 +865,10 @@ function summarizeDomainEvent(event: DomainEvent): string {
         : `Gross reward paid: ${event.previousMoney} -> ${event.currentMoney} (${formatSigned(
             event.delta,
           )})`;
+    case DomainEventType.OrganizationMoneyTransactionRecorded:
+      return `Money transaction recorded: ${event.previousMoney} -> ${event.currentMoney} (${formatSigned(
+        event.amount,
+      )})`;
     case DomainEventType.OperationStarted:
       return `Operation started at tick ${event.transitionTick}`;
     case DomainEventType.OperationLifecycleCompleted:

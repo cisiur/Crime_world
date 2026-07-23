@@ -119,12 +119,12 @@ The project is now in:
 
 The current next task is:
 
-> **E5-02 - Implement recurring income and recurring costs.**
+> **Local Collection ledger migration, subject to PM review and acceptance.**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
 EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. E4-05 is complete as bounded deterministic lifecycle transitions. E4-06 is complete as a centralized seeded percentile resolver. E4-07 is complete as typed Local Collection outcome classification with canonical authored weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`. E4-08 is complete as bounded Local Collection consequence application. E4-09 is complete as deterministic integration coverage for the full Local Collection flow. E4-10 is complete as a developer playtest runnable in the desktop/browser shell.
 
-E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. No transaction ledger runtime, recurring economy execution, recurring income generation, concrete upkeep schedule, business control, recruitment, pressure system, rival AI, save/load, or campaign aggregate integration has been implemented.
+E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. E5-02A is complete as the first bounded E5-02 implementation increment and adds the standalone domain money-ledger foundation. Local Collection still uses the temporary EPIC 4 direct money mutation. No recurring economy execution, recurring income generation, concrete upkeep schedule, business control, recruitment, pressure system, rival AI, save/load, or campaign aggregate integration has been implemented.
 
 The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. The implemented slice covers setup, planning, character and capacity reservation, start-cost deduction, lifecycle advance to running and resolved, seeded roll and typed classification, consequence application, assignment and capacity release, and ordered semantic events. The accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`. Fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`. It passed automated integration coverage and the manual developer playtest was run and accepted. Documentation is now synchronized after the E4-08 through E4-10 batch.
 
@@ -144,9 +144,10 @@ The immediate sequence is:
 
 1. EPIC 4 Local Collection vertical slice is complete,
 2. E5-01 money-flow, upkeep, and transaction-ledger specification is complete,
-3. preserve the domain/content/application/presentation boundaries proven by the slice and recorded by E5-01,
-4. make a new PM scope decision before E5-02 implementation,
-5. continue to avoid premature full campaign creation, recurring economy simulation beyond the accepted E5-02 scope, pressure systems, rival AI, save/load, recruitment, and broad orchestration work.
+3. E5-02A standalone money-ledger foundation is complete,
+4. preserve the domain/content/application/presentation boundaries proven by the slice and recorded by E5-01/E5-02A,
+5. review and accept the next bounded E5-02 increment before implementation,
+6. continue to avoid premature full campaign creation, recurring economy simulation beyond the accepted E5-02 scope, pressure systems, rival AI, save/load, recruitment, and broad orchestration work.
 
 ---
 
@@ -347,14 +348,15 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E5-02 - Implement recurring income and recurring costs.**
+> **Local Collection ledger migration, subject to PM review and acceptance.**
 
-E5-02 requires a new PM scope decision before implementation. It may need to be split into bounded reviewed increments rather than attempted as one broad economy task.
+E5-02 has been split into bounded reviewed increments. E5-02A is complete as the standalone money-ledger foundation. The next increment should be reviewed and accepted before implementation.
 
 - preserve the PM workflow of analysis -> proposed scope -> user acceptance -> Codex prompt -> implementation -> review,
-- build on the accepted E5-01 contract without claiming that a transaction ledger or recurring economy already exists,
+- build on the accepted E5-01 contract and E5-02A foundation without claiming that recurring economy already exists,
 - preserve the accepted E4-04 start-cost and E4-08 gross-reward behavior during any later migration,
+- keep direct EPIC 4 money mutation temporary until a specific migration task changes it,
 - preserve clear package ownership and dependency boundaries,
 - explicitly exclude full campaign creation, pressure systems, rival AI, save/load, operation catalogue expansion, recruitment, and broad orchestration unless a new accepted scope says otherwise.
 
-Do not begin E5-02 implementation or create a Codex prompt before the project owner accepts the E5-02 scope.
+Do not begin the next E5-02 increment or create a Codex prompt before the project owner accepts that scope.

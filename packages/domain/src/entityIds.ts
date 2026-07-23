@@ -12,6 +12,7 @@ type EntityIdTypeName =
   | "CharacterId"
   | "OrganizationId"
   | "BusinessId"
+  | "TransactionId"
   | "OperationId"
   | "OperationTemplateId"
   | "InvestigationId"
@@ -26,6 +27,7 @@ export type LocationId = EntityId<"LocationId">;
 export type CharacterId = EntityId<"CharacterId">;
 export type OrganizationId = EntityId<"OrganizationId">;
 export type BusinessId = EntityId<"BusinessId">;
+export type TransactionId = EntityId<"TransactionId">;
 export type OperationId = EntityId<"OperationId">;
 export type OperationTemplateId = EntityId<"OperationTemplateId">;
 export type InvestigationId = EntityId<"InvestigationId">;
@@ -75,6 +77,10 @@ export function parseOrganizationId(value: unknown): OrganizationId {
 
 export function parseBusinessId(value: unknown): BusinessId {
   return parseEntityId("BusinessId", value);
+}
+
+export function parseTransactionId(value: unknown): TransactionId {
+  return parseEntityId("TransactionId", value);
 }
 
 export function parseOperationId(value: unknown): OperationId {

@@ -6,7 +6,9 @@ import type {
   OperationId,
   OperationTemplateId,
   OrganizationId,
+  TransactionId,
 } from "./entityIds";
+import type { MoneyTransactionCategory, MoneyTransactionSource } from "./moneyLedger";
 import type { OperationOutcomeCategory } from "./operationOutcomeClassification";
 import type { OperationOutcomeModifierContributions } from "./operationOutcomeResolver";
 import type { OperationStatus } from "./operationState";
@@ -28,6 +30,7 @@ export const DomainEventType = {
   OperationPlanned: "OperationPlanned",
   OperationStarted: "OperationStarted",
   OrganizationMoneyChanged: "OrganizationMoneyChanged",
+  OrganizationMoneyTransactionRecorded: "OrganizationMoneyTransactionRecorded",
   OrganizationOperationalCapacityReleased: "OrganizationOperationalCapacityReleased",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
   SimulationResumed: "SimulationResumed",
@@ -198,6 +201,19 @@ export interface OrganizationMoneyChangedEvent {
   readonly [domainEventBrand]: "OrganizationMoneyChangedEvent";
 }
 
+export interface OrganizationMoneyTransactionRecordedEvent {
+  readonly type: typeof DomainEventType.OrganizationMoneyTransactionRecorded;
+  readonly transactionId: TransactionId;
+  readonly organizationId: OrganizationId;
+  readonly category: MoneyTransactionCategory;
+  readonly source: MoneyTransactionSource;
+  readonly amount: number;
+  readonly previousMoney: number;
+  readonly currentMoney: number;
+  readonly recordedAtTick: SimulationTick;
+  readonly [domainEventBrand]: "OrganizationMoneyTransactionRecordedEvent";
+}
+
 export interface OperationConsequencesAppliedEvent {
   readonly type: typeof DomainEventType.OperationConsequencesApplied;
   readonly operationId: OperationId;
@@ -226,6 +242,7 @@ export type DomainEvent =
   | OperationPlannedEvent
   | OperationStartedEvent
   | OrganizationMoneyChangedEvent
+  | OrganizationMoneyTransactionRecordedEvent
   | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
   | SimulationResumedEvent
@@ -355,6 +372,17 @@ export interface CreateOrganizationMoneyChangedEventInput {
   readonly previousMoney: number;
   readonly currentMoney: number;
   readonly delta: number;
+}
+
+export interface CreateOrganizationMoneyTransactionRecordedEventInput {
+  readonly transactionId: TransactionId;
+  readonly organizationId: OrganizationId;
+  readonly category: MoneyTransactionCategory;
+  readonly source: MoneyTransactionSource;
+  readonly amount: number;
+  readonly previousMoney: number;
+  readonly currentMoney: number;
+  readonly recordedAtTick: SimulationTick;
 }
 
 export interface CreateOperationConsequencesAppliedEventInput {
@@ -586,6 +614,22 @@ export function createOrganizationMoneyChangedEvent(
     currentMoney: input.currentMoney,
     delta: input.delta,
   }) as OrganizationMoneyChangedEvent;
+}
+
+export function createOrganizationMoneyTransactionRecordedEvent(
+  input: CreateOrganizationMoneyTransactionRecordedEventInput,
+): OrganizationMoneyTransactionRecordedEvent {
+  return Object.freeze({
+    type: DomainEventType.OrganizationMoneyTransactionRecorded,
+    transactionId: input.transactionId,
+    organizationId: input.organizationId,
+    category: input.category,
+    source: Object.freeze({ ...input.source }) as MoneyTransactionSource,
+    amount: input.amount,
+    previousMoney: input.previousMoney,
+    currentMoney: input.currentMoney,
+    recordedAtTick: input.recordedAtTick,
+  }) as OrganizationMoneyTransactionRecordedEvent;
 }
 
 export function createOperationConsequencesAppliedEvent(

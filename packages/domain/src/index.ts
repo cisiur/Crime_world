@@ -26,6 +26,7 @@ export {
   parseOpportunityId,
   parseOrganizationId,
   parseRouteId,
+  parseTransactionId,
   parseWorldEventId,
 } from "./entityIds";
 
@@ -41,6 +42,7 @@ export type {
   OpportunityId,
   OrganizationId,
   RouteId,
+  TransactionId,
   WorldEventId,
   CampaignId,
 } from "./entityIds";
@@ -65,3 +67,4 @@ export * from "./operationLifecycle";
 export * from "./operationOutcomeResolver";
 export * from "./operationOutcomeClassification";
 export * from "./operationConsequences";
+export * from "./moneyLedger";

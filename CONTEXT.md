@@ -201,7 +201,7 @@ Completed document groups:
 - GitHub Actions CI verifies pushes and pull requests targeting `main`.
 - Deterministic test seed infrastructure exists for tests through `CRIMEWORLD_TEST_SEED`.
 - Root-level `AGENTS.md` records repository workflow and package-boundary rules for coding agents.
-- Stable branded IDs exist in the domain package.
+- Stable branded IDs exist in the domain package, including `TransactionId`.
 - Deterministic simulation clock, pause/resume, speed, and fixed tick duration exist.
 - Deterministic PCG32 seeded random service and immutable serializable `RandomState` exist.
 - Versioned immutable root `GameState` exists.
@@ -252,7 +252,8 @@ Completed document groups:
 - The presentation package renders the developer Local Collection playtest in `packages/presentation/src/AppShell.tsx`, including setup controls, seed presets, step-by-step and full-run actions, consequence diagnostics, RNG state, and an event timeline built from real domain events.
 - The first end-to-end Local Collection vertical slice is manually runnable through the desktop/browser developer UI with `npm.cmd run dev` or `npm.cmd run desktop:dev`.
 - No campaign creation flow loads the canonical city, characters, organizations, businesses, or rival seeds yet.
-- No operation `GameState` integration, event bus, scheduler, save/load, AI, transaction ledger, recurring economy, pressure, investigations, recruitment, ownership transfer, rival behavior, generic campaign orchestration, reusable operation catalogue, or player-facing production UI exists yet.
+- A standalone domain money-ledger foundation exists with immutable money transactions, typed categories and sources, atomic `recordMoneyTransaction(...)`, typed failures, and `OrganizationMoneyTransactionRecorded` events.
+- No Local Collection ledger migration, operation `GameState` integration, event bus, scheduler, save/load, AI, recurring economy, pressure, investigations, recruitment, ownership transfer, rival behavior, generic campaign orchestration, reusable operation catalogue, or player-facing production UI exists yet.
 - The root `GameState` still contains only the current domain-kernel fields and is not yet a complete campaign aggregate.
 
 Previous documentation synchronization baseline after E4-05 through E4-07:
@@ -291,9 +292,9 @@ Current roadmap phase:
 
 Current next task:
 
-> **E5-02 - Implement recurring income and recurring costs.**
+> **Local Collection ledger migration, subject to PM review and acceptance.**
 
-EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. No transaction ledger, recurring economy, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, or final player-facing UI is implemented yet. E5-02 requires a new PM scope decision before implementation.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. E5-02A is complete as the first bounded E5-02 implementation increment: the standalone domain money-ledger foundation exists, but Local Collection still uses the temporary EPIC 4 direct money mutation. No recurring economy, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, or final player-facing UI is implemented yet. The next bounded task requires PM review and acceptance.
 
 ---
 
@@ -707,7 +708,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, and the complete EPIC 4 Local Collection domain slice: runtime `OperationState`, availability, planning, lifecycle, seeded weighted outcome resolution, typed outcome classification, bounded consequence application, applied-consequence records, semantic domain events, and invariants. Authored city data, rival organization seeds, the Local Collection operation template, canonical outcome bands, and canonical consequence definition remain in `packages/content`. The application package now contains the Local Collection developer playtest/session harness, and presentation renders that playtest in the desktop/browser shell. The repository still does not contain campaign creation, operation persistence in root `GameState`, save/load, a transaction ledger, pressure or investigation systems, recruitment, rival AI, a reusable operation catalogue, or a final player-facing UI.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the complete EPIC 4 Local Collection domain slice, and the E5-02A standalone money-ledger foundation: runtime `OperationState`, availability, planning, lifecycle, seeded weighted outcome resolution, typed outcome classification, bounded consequence application, applied-consequence records, immutable money transactions, typed transaction categories and sources, atomic transaction recording, semantic domain events, and invariants. Authored city data, rival organization seeds, the Local Collection operation template, canonical outcome bands, and canonical consequence definition remain in `packages/content`. The application package now contains the Local Collection developer playtest/session harness, and presentation renders that playtest in the desktop/browser shell. The repository still does not contain campaign creation, operation persistence in root `GameState`, save/load, Local Collection ledger migration, pressure or investigation systems, recruitment, rival AI, a reusable operation catalogue, or a final player-facing UI.
 
 ---
 
@@ -739,16 +740,17 @@ Completed:
 - E4-09 deterministic Local Collection vertical-slice integration tests,
 - E4-10 developer Local Collection playtest UI.
 - E5-01 money flow, upkeep, and transaction ledger specification.
+- E5-02A money ledger foundation.
 
 Next:
 
-> **E5-02 - Implement recurring income and recurring costs.**
+> **Local Collection ledger migration, subject to PM review and acceptance.**
 
 Required PM output before implementation:
 
-- make a new bounded scope decision for E5-02,
-- decide whether E5-02 should be split into smaller reviewed implementation increments,
-- preserve the accepted E5-01 contract and EPIC 4 Local Collection money outcomes,
+- review and accept the next bounded E5-02 increment,
+- preserve the accepted E5-01/E5-02A contract and EPIC 4 Local Collection money outcomes,
+- keep direct EPIC 4 money mutation temporary until its explicit migration task,
 - keep business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
 
 ---

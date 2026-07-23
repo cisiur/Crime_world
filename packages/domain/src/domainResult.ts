@@ -33,6 +33,16 @@ export const DomainErrorCode = {
     "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_HEALTH_INVALID",
   LocalCollectionConsequenceDefinitionValueInvalid:
     "LOCAL_COLLECTION_CONSEQUENCE_DEFINITION_VALUE_INVALID",
+  MoneyTransactionArithmeticInvalid: "MONEY_TRANSACTION_ARITHMETIC_INVALID",
+  MoneyTransactionCategoryAmountMismatch: "MONEY_TRANSACTION_CATEGORY_AMOUNT_MISMATCH",
+  MoneyTransactionCategorySourceMismatch: "MONEY_TRANSACTION_CATEGORY_SOURCE_MISMATCH",
+  MoneyTransactionDuplicateTransactionId: "MONEY_TRANSACTION_DUPLICATE_TRANSACTION_ID",
+  MoneyTransactionInsufficientFunds: "MONEY_TRANSACTION_INSUFFICIENT_FUNDS",
+  MoneyTransactionInvalidAmount: "MONEY_TRANSACTION_INVALID_AMOUNT",
+  MoneyTransactionInvalidSource: "MONEY_TRANSACTION_INVALID_SOURCE",
+  MoneyTransactionMissingOrganization: "MONEY_TRANSACTION_MISSING_ORGANIZATION",
+  MoneyTransactionUnsupportedCategory: "MONEY_TRANSACTION_UNSUPPORTED_CATEGORY",
+  MoneyTransactionUnsupportedSource: "MONEY_TRANSACTION_UNSUPPORTED_SOURCE",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:

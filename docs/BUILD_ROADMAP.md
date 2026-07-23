@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task; no transaction ledger or recurring economy implementation exists yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, and E5-02A has added the standalone domain money-ledger foundation. Local Collection has not been migrated, and no recurring economy implementation exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** EPIC 5 in progress. E5-02 remains pending and requires a new PM scope decision before implementation.
+> **Current phase:** EPIC 5 in progress. E5-02 is being delivered through bounded increments; the next increment requires PM review and acceptance before implementation.
 
 ---
 
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract as documentation only. No ledger runtime, recurring economy, business-control, recruitment, or UI implementation exists yet.
+Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A has implemented the standalone `packages/domain` money-ledger foundation. No Local Collection ledger migration, recurring economy, business-control, recruitment, or UI implementation exists yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -647,6 +647,22 @@ Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, 
 E5-01 is complete as a documentation/specification task only. It records the minimal future contract for organization money flow, upkeep, and the transaction ledger before any ledger implementation begins. It does not add TypeScript code, tests, runtime schemas, recurring economy execution, UI, save/load, or campaign orchestration.
 
 EPIC 5 remains in progress. E5-02 remains the next roadmap item, but its implementation may need to be delivered in bounded reviewed increments after a new PM scope decision.
+
+### E5-02A implementation status
+
+E5-02A is the first bounded implementation increment of E5-02. It adds only the standalone domain foundation for organization-money transactions:
+
+- stable `TransactionId` parsing,
+- typed money transaction categories,
+- typed serializable transaction sources,
+- immutable `MoneyTransaction` records,
+- `recordMoneyTransaction(...)` for atomic balance update, ledger append, and one semantic money event,
+- focused typed validation failures,
+- `OrganizationMoneyTransactionRecorded` as the future generic money event.
+
+E5-02A does not migrate `planOperation(...)` or `applyLocalCollectionConsequences(...)`; EPIC 4 direct `OrganizationState.money` mutation and `OrganizationMoneyChangedEvent` remain temporarily present. E5-02A also does not implement recurring income generation, recurring upkeep processing, schedules, unpaid obligations, tick-pipeline integration, campaign creation, save/load, UI, businesses, recruitment, pressure systems, or rival AI.
+
+The expected next bounded task is Local Collection ledger migration, subject to PM review and acceptance. It must preserve the accepted EPIC 4 money values, deterministic seeds, and exactly-once start-cost/reward behavior.
 
 ### Current balance
 
@@ -1163,6 +1179,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next roadmap item remains **E5-02 - Implement recurring income and recurring costs**.
+The next expected bounded increment is **Local Collection ledger migration**, subject to PM review and acceptance.
 
 E5-02 must not begin automatically from this document. It requires a new PM scope decision before implementation, and may need to be delivered in bounded reviewed increments. Until that scope is accepted, do not implement recurring economy execution, recurring income generation, concrete upkeep schedules, business-control behavior, recruitment, pressure systems, rival AI, save/load, or broad campaign orchestration.
