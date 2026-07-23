@@ -78,6 +78,37 @@ export type ExecuteCrewUpkeepPeriodResult = DomainResult<
   ExecuteCrewUpkeepPeriodError
 >;
 
+export interface ExecuteRecurringIncomePeriodInput {
+  readonly currentTick: SimulationTick;
+  readonly transactionId: TransactionId;
+  readonly organizationId: OrganizationState["organizationId"];
+  readonly organizations: readonly OrganizationState[];
+  readonly transactions: readonly MoneyTransaction[];
+  readonly processingRecords: readonly RecurringEconomyProcessingRecord[];
+  readonly schedules: readonly RecurringEconomySchedule[];
+}
+
+export interface RecurringIncomeRuntimeScheduleNotFoundError extends DomainError {
+  readonly code: typeof DomainErrorCode.RecurringIncomeRuntimeScheduleNotFound;
+  readonly organizationId: OrganizationState["organizationId"];
+}
+
+export interface RecurringIncomeRuntimeScheduleConflictError extends DomainError {
+  readonly code: typeof DomainErrorCode.RecurringIncomeRuntimeScheduleConflict;
+  readonly organizationId: OrganizationState["organizationId"];
+  readonly matchingScheduleCount: number;
+}
+
+export type ExecuteRecurringIncomePeriodError =
+  | RecurringEconomyError
+  | RecurringIncomeRuntimeScheduleConflictError
+  | RecurringIncomeRuntimeScheduleNotFoundError;
+
+export type ExecuteRecurringIncomePeriodResult = DomainResult<
+  ExecuteRecurringEconomyRuntimeSuccess,
+  ExecuteRecurringIncomePeriodError
+>;
+
 export function executeRecurringEconomyRuntime(
   input: ExecuteRecurringEconomyRuntimeInput,
 ): ExecuteRecurringEconomyRuntimeResult {
@@ -144,6 +175,53 @@ export function executeCrewUpkeepPeriod(
       message: `Crew upkeep schedule for character "${input.characterId}" in organization "${input.organizationId}" was not found.`,
       organizationId: input.organizationId,
       characterId: input.characterId,
+    });
+  }
+
+  return executeRecurringEconomyRuntime({
+    currentTick: input.currentTick,
+    transactionId: input.transactionId,
+    scheduleId: schedule.scheduleId,
+    organizations: input.organizations,
+    transactions: input.transactions,
+    processingRecords: input.processingRecords,
+    schedules: input.schedules,
+  });
+}
+
+export function executeRecurringIncomePeriod(
+  input: ExecuteRecurringIncomePeriodInput,
+): ExecuteRecurringIncomePeriodResult {
+  const matchingSchedules = input.schedules.filter(
+    (schedule) =>
+      schedule.organizationId === input.organizationId &&
+      schedule.category === MoneyTransactionCategory.RecurringIncome &&
+      schedule.source.type === MoneyTransactionSourceType.RecurringIncome,
+  );
+
+  if (matchingSchedules.length === 0) {
+    return failure({
+      code: DomainErrorCode.RecurringIncomeRuntimeScheduleNotFound,
+      message: `Recurring income schedule for organization "${input.organizationId}" was not found.`,
+      organizationId: input.organizationId,
+    });
+  }
+
+  if (matchingSchedules.length > 1) {
+    return failure({
+      code: DomainErrorCode.RecurringIncomeRuntimeScheduleConflict,
+      message: `Expected one recurring income schedule for organization "${input.organizationId}", found ${matchingSchedules.length}.`,
+      organizationId: input.organizationId,
+      matchingScheduleCount: matchingSchedules.length,
+    });
+  }
+
+  const schedule = matchingSchedules[0];
+  if (schedule === undefined) {
+    return failure({
+      code: DomainErrorCode.RecurringIncomeRuntimeScheduleNotFound,
+      message: `Recurring income schedule for organization "${input.organizationId}" was not found.`,
+      organizationId: input.organizationId,
     });
   }
 

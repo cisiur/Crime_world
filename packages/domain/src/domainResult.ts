@@ -65,6 +65,16 @@ export const DomainErrorCode = {
   CrewUpkeepScheduleGenerationMissingOrganization:
     "CREW_UPKEEP_SCHEDULE_GENERATION_MISSING_ORGANIZATION",
   CrewUpkeepScheduleGenerationScheduleConflict: "CREW_UPKEEP_SCHEDULE_GENERATION_SCHEDULE_CONFLICT",
+  RecurringIncomeRuntimeScheduleConflict: "RECURRING_INCOME_RUNTIME_SCHEDULE_CONFLICT",
+  RecurringIncomeRuntimeScheduleNotFound: "RECURRING_INCOME_RUNTIME_SCHEDULE_NOT_FOUND",
+  RecurringIncomeScheduleGenerationInvalidDefinition:
+    "RECURRING_INCOME_SCHEDULE_GENERATION_INVALID_DEFINITION",
+  RecurringIncomeScheduleGenerationInvalidFirstDueTick:
+    "RECURRING_INCOME_SCHEDULE_GENERATION_INVALID_FIRST_DUE_TICK",
+  RecurringIncomeScheduleGenerationInvalidScheduleId:
+    "RECURRING_INCOME_SCHEDULE_GENERATION_INVALID_SCHEDULE_ID",
+  RecurringIncomeScheduleGenerationScheduleConflict:
+    "RECURRING_INCOME_SCHEDULE_GENERATION_SCHEDULE_CONFLICT",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:
