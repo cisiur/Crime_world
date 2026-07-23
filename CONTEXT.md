@@ -287,13 +287,13 @@ e9974fc9fbf00cf91f21bb5729b48241de2dad5d
 
 Current roadmap phase:
 
-> **EPIC 5 / E5-01 planning**
+> **EPIC 5 in progress**
 
 Current next task:
 
-> **E5-01 - Define money flow, upkeep, and transaction ledger.**
+> **E5-02 - Implement recurring income and recurring costs.**
 
-EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. The slice proves one complete Local Collection operation from setup through settlement, but it is still not integrated into a full campaign aggregate, save/load, transaction ledger, pressure system, recruitment system, rival AI, or final player-facing UI.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. No transaction ledger, recurring economy, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, or final player-facing UI is implemented yet. E5-02 requires a new PM scope decision before implementation.
 
 ---
 
@@ -738,16 +738,18 @@ Completed:
 - E4-08 Local Collection consequence application,
 - E4-09 deterministic Local Collection vertical-slice integration tests,
 - E4-10 developer Local Collection playtest UI.
+- E5-01 money flow, upkeep, and transaction ledger specification.
 
 Next:
 
-> **E5-01 - Define money flow, upkeep, and transaction ledger.**
+> **E5-02 - Implement recurring income and recurring costs.**
 
 Required PM output before implementation:
 
-- define the minimal EPIC 5 money-flow, upkeep, and transaction-ledger scope,
-- preserve the accepted EPIC 4 Local Collection start-cost and gross-reward behavior while preparing a proper ledger model,
-- keep recurring income, business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
+- make a new bounded scope decision for E5-02,
+- decide whether E5-02 should be split into smaller reviewed implementation increments,
+- preserve the accepted E5-01 contract and EPIC 4 Local Collection money outcomes,
+- keep business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
 
 ---
 

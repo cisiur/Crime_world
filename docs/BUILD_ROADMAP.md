@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. The first end-to-end Local Collection vertical slice is implemented, deterministically tested, and available in the developer playtest.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task; no transaction ledger or recurring economy implementation exists yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** EPIC 5 / E5-01 planning. Next accepted planning scope is money flow, upkeep, and transaction ledger definition.
+> **Current phase:** EPIC 5 in progress. E5-02 remains pending and requires a new PM scope decision before implementation.
 
 ---
 
@@ -621,9 +621,11 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
+Current status: in progress. E5-01 has defined the accepted money-flow, upkeep, and transaction-ledger contract as documentation only. No ledger runtime, recurring economy, business-control, recruitment, or UI implementation exists yet.
+
 | ID | Task | Who | Status |
 |---|---|---|---|
-| E5-01 | Define money flow, upkeep, and transaction ledger | `[BOTH]` | Pending |
+| E5-01 | Define money flow, upkeep, and transaction ledger | `[BOTH]` | Done |
 | E5-02 | Implement recurring income and recurring costs | `[CODEX]` | Pending |
 | E5-03 | Define six MVP business / location archetypes | `[BOTH]` | Pending |
 | E5-04 | Implement basic business control and income generation | `[CODEX]` | Pending |
@@ -639,6 +641,260 @@ Turn the first operation into a repeatable growth loop with recurring costs, rec
 - Businesses create benefits and liabilities rather than passive free profit.
 - Recruiting creates opportunity cost and capacity growth.
 - The player can recover from an early financial setback.
+
+### E5-01 accepted specification status
+
+E5-01 is complete as a documentation/specification task only. It records the minimal future contract for organization money flow, upkeep, and the transaction ledger before any ledger implementation begins. It does not add TypeScript code, tests, runtime schemas, recurring economy execution, UI, save/load, or campaign orchestration.
+
+EPIC 5 remains in progress. E5-02 remains the next roadmap item, but its implementation may need to be delivered in bounded reviewed increments after a new PM scope decision.
+
+### Current balance
+
+`OrganizationState.money` remains the authoritative current organization balance. It remains a non-negative safe integer and must not be removed or replaced by recalculating balance through replay of the complete ledger.
+
+After the ledger exists, future money changes must not mutate `OrganizationState.money` independently. The current EPIC 4 Local Collection direct balance mutation is a temporary vertical-slice boundary that must be migrated to the ledger without changing accepted EPIC 4 outcomes.
+
+### Ledger rule
+
+Every successful future organization-money change must be one atomic domain result that:
+
+- updates `OrganizationState.money`,
+- creates exactly one immutable ledger entry,
+- emits exactly one semantic money domain event.
+
+Failed validation must produce no balance mutation, no ledger entry, and no money event.
+
+The ledger is durable authoritative financial state. Domain events describe facts from the current execution and do not replace the ledger.
+
+### Minimal transaction entry contract
+
+A future immutable transaction entry must contain at least:
+
+- stable transaction ID,
+- organization ID,
+- simulation tick when recorded,
+- signed integer amount,
+- balance before,
+- balance after,
+- typed transaction category,
+- typed source reference.
+
+Rules:
+
+- positive amount means income,
+- negative amount means expense,
+- zero amount is invalid,
+- `balanceAfter` must equal `balanceBefore + amount`,
+- balances and amounts must use finite safe integers,
+- a successful expense must not produce a negative balance,
+- duplicate transaction IDs are rejected,
+- transaction ordering is deterministic and append-only,
+- recording a transaction consumes no RNG.
+
+The transaction ID must be a stable branded domain ID supplied by orchestration or command input. It must not use platform-generated random UUIDs and must not consume gameplay RNG.
+
+### Typed transaction sources
+
+The transaction source must be a bounded typed union. It must not require an `OperationId` on every transaction.
+
+The union must be serializable and ID-based, with no direct runtime object references. It must support at minimum:
+
+- operation start cost, linked to an operation,
+- operation gross reward, linked to an operation,
+- recurring income source,
+- crew or character upkeep source,
+- business upkeep source,
+- hideout upkeep source,
+- recruitment-related cost,
+- recovery-related money flow,
+- bounded generic fallback source for prototyping.
+
+### Transaction categories
+
+The MVP ledger category set must cover at minimum:
+
+Income:
+
+- `operation-reward`,
+- `recurring-income`,
+- `recovery-income`,
+- `other-income`.
+
+Expenses:
+
+- `operation-cost`,
+- `crew-upkeep`,
+- `business-upkeep`,
+- `hideout-upkeep`,
+- `recruitment-cost`,
+- `pressure-management-cost`,
+- `recovery-cost`,
+- `other-expense`.
+
+These categories define the ledger contract and future reporting needs. They do not mean all associated gameplay systems are implemented by E5-01. Generic `other-*` categories are an escape hatch for prototyping, not the default category for planned mechanics.
+
+### Future domain API contract
+
+A future authoritative domain operation, provisionally named `recordMoneyTransaction(...)` or `applyMoneyTransaction(...)`, must be implemented later. E5-01 does not implement it.
+
+The future operation must:
+
+- accept explicit immutable runtime inputs,
+- locate or receive the affected organization,
+- receive the current ledger collection,
+- validate all data before mutation,
+- reject duplicate transaction IDs,
+- reject zero amount,
+- reject unsafe arithmetic and overflow,
+- reject expenses that exceed the available balance,
+- create the updated immutable organization state,
+- append exactly one immutable ledger entry,
+- emit one semantic money event,
+- return a typed success or typed failure,
+- consume no RNG,
+- remain independent from `packages/content`.
+
+### Money domain event
+
+The current operation-specific `OrganizationMoneyChangedEvent` contract must later be generalized or replaced.
+
+The future semantic money event should include at least:
+
+- transaction ID,
+- organization ID,
+- transaction category,
+- typed source,
+- amount,
+- previous balance,
+- current balance,
+- simulation tick.
+
+It must not require an `OperationId`, because upkeep, businesses, recruitment, and recovery are not always operation-based. The design does not require one separate event type for every expense or income category.
+
+### Upkeep contract
+
+Upkeep is a recurring expense generated by a specific runtime source.
+
+The minimal MVP upkeep source families are:
+
+- crew or character upkeep,
+- business upkeep,
+- hideout upkeep.
+
+A future upkeep obligation or schedule must contain enough information to represent:
+
+- source entity reference,
+- organization ID,
+- amount per period,
+- period in simulation ticks,
+- next due tick,
+- transaction category,
+- whether the source is currently active or eligible.
+
+Rules:
+
+- one source may produce at most one charged transaction for one due period,
+- repeated processing of the same due period must not double-charge,
+- recurring processing must be deterministic,
+- recurring processing belongs to E5-02, not E5-01,
+- E5-01 must not choose final balance values for every upkeep source,
+- authored upkeep values should eventually belong to `packages/content`,
+- authoritative application of upkeep remains in `packages/domain`.
+
+### Insufficient funds
+
+Organization money never becomes negative. An expense that exceeds the available balance does not mutate money, does not create a successful ledger entry, and returns an explicit typed failure or explicit unpaid-upkeep result.
+
+For recurring upkeep:
+
+- unpaid upkeep must not be silently ignored,
+- a future implementation must expose it as an explicit unpaid obligation, arrears, or equivalent result,
+- E5-01 does not implement the full debt, arrears, loyalty consequence, business closure, or bankruptcy system,
+- those wider consequences remain future E5-02 and E5-08 decisions.
+
+Loans, credit, interest, banking, and negative balances are not introduced.
+
+### Local Collection migration contract
+
+The future ledger migration must preserve accepted EPIC 4 behavior:
+
+- planning start cost uses amount `-20`, category `operation-cost`, and a source linked to the Local Collection operation,
+- successful gross reward uses amount `+80` and category `operation-reward`,
+- partial-success gross reward uses amount `+40` and category `operation-reward`,
+- failure and critical failure create no zero-value reward transaction,
+- start cost and reward remain exactly-once,
+- existing final organization money results remain unchanged after migration,
+- existing Local Collection deterministic seeds and outcome behavior remain unchanged,
+- operation planning and consequence records may later reference the corresponding transaction ID for traceability,
+- the migration itself is not part of E5-01.
+
+### Package ownership
+
+`packages/domain` owns transaction entry types, transaction source and category contracts, balance arithmetic, transaction validation, the future authoritative transaction-recording function, typed failures, financial invariants, and semantic money events.
+
+`packages/content` owns authored balance values such as upkeep amounts, recurring-income values, business tuning, and cadence definitions where appropriate. It must not mutate runtime money or construct authoritative ledger state.
+
+`packages/application` combines content definitions with runtime state, invokes domain transaction APIs, later coordinates recurring economy execution, and prepares financial read models. It must not independently calculate authoritative balances.
+
+`packages/presentation` displays projections such as current balance, recent transactions, income and expense breakdown, expected recurring cash flow, and upcoming upkeep. It must not own money rules.
+
+### Root `GameState` boundary
+
+E5-01 does not require immediate root `GameState` expansion.
+
+The first ledger implementation may operate on explicit immutable collections, matching the bounded EPIC 4 approach. Integration into complete campaign state should happen only when campaign creation, broader orchestration, or save/load requires it. The ledger must nevertheless be designed as serializable authoritative state suitable for later inclusion in root `GameState`.
+
+### Required future invariants and tests
+
+Future implementation must support deterministic test expectations for:
+
+- positive income changes balance correctly,
+- expense changes balance correctly,
+- before and after balances are correct,
+- successful transaction appends exactly one entry,
+- successful transaction emits exactly one money event,
+- failed transaction changes nothing,
+- duplicate transaction ID is rejected,
+- zero amount is rejected,
+- unsafe integer arithmetic is rejected,
+- insufficient funds is rejected,
+- collections remain immutable,
+- multiple organizations remain isolated,
+- identical initial state and commands produce identical ledger state and events,
+- sum of relevant transaction deltas matches the corresponding balance change,
+- Local Collection migration preserves existing final money outcomes,
+- start cost and reward remain exactly-once.
+
+### E5-01 explicit exclusions
+
+E5-01 excludes:
+
+- TypeScript implementation,
+- transaction runtime schemas in code,
+- migration of Local Collection code,
+- recurring economy execution,
+- tick-pipeline integration,
+- recurring income generation,
+- concrete business income behavior,
+- business acquisition or control,
+- recruitment implementation,
+- pressure and investigation systems,
+- rival AI,
+- campaign creation,
+- root `GameState` integration,
+- save/load,
+- UI changes,
+- personal money implementation,
+- transfers between organizations,
+- debt and loans,
+- banking,
+- interest,
+- taxes,
+- multiple currencies,
+- double-entry accounting,
+- final balance tuning,
+- bankruptcy consequences,
+- generic economy scripting framework.
 
 ---
 
@@ -907,6 +1163,6 @@ Split a task when it combines more than one of:
 
 ## 9. Immediate next step
 
-The next task is **E5-01 - Define money flow, upkeep, and transaction ledger**.
+The next roadmap item remains **E5-02 - Implement recurring income and recurring costs**.
 
-E5-01 is a `[BOTH]` planning task before implementation. It should define the minimal money-flow, upkeep, and transaction-ledger model needed to build on the accepted Local Collection vertical slice without claiming that a complete economy already exists. It must preserve the temporary EPIC 4 start-cost and gross-reward behavior while keeping recurring income, business control, recruitment gameplay, pressure systems, rival AI, save/load, and broad campaign orchestration pending until explicitly accepted.
+E5-02 must not begin automatically from this document. It requires a new PM scope decision before implementation, and may need to be delivered in bounded reviewed increments. Until that scope is accepted, do not implement recurring economy execution, recurring income generation, concrete upkeep schedules, business-control behavior, recruitment, pressure systems, rival AI, save/load, or broad campaign orchestration.
