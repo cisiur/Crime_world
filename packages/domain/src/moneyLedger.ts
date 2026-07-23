@@ -15,6 +15,14 @@ import type {
   OrganizationId,
   TransactionId,
 } from "./entityIds";
+import {
+  InvalidEntityIdError,
+  parseBusinessId,
+  parseCharacterId,
+  parseLocationId,
+  parseOperationId,
+  parseOpportunityId,
+} from "./entityIds";
 import { createOrganizationState, type OrganizationState } from "./organizationState";
 import type { SimulationTick } from "./simulationClock";
 
@@ -497,22 +505,22 @@ function normalizeMoneyTransactionSource(
   switch (sourceType) {
     case MoneyTransactionSourceType.OperationStartCost:
     case MoneyTransactionSourceType.OperationGrossReward:
-      return normalizeEntitySource(sourceType, "operationId", source);
+      return normalizeEntitySource(sourceType, "operationId", source, parseOperationId);
     case MoneyTransactionSourceType.RecurringIncome:
     case MoneyTransactionSourceType.PressureManagement:
     case MoneyTransactionSourceType.Recovery:
     case MoneyTransactionSourceType.Generic:
       return normalizeBoundedSource(sourceType, source);
     case MoneyTransactionSourceType.CrewUpkeep:
-      return normalizeEntitySource(sourceType, "characterId", source);
+      return normalizeEntitySource(sourceType, "characterId", source, parseCharacterId);
     case MoneyTransactionSourceType.BusinessUpkeep:
-      return normalizeEntitySource(sourceType, "businessId", source);
+      return normalizeEntitySource(sourceType, "businessId", source, parseBusinessId);
     case MoneyTransactionSourceType.HideoutUpkeep:
-      return normalizeEntitySource(sourceType, "locationId", source);
+      return normalizeEntitySource(sourceType, "locationId", source, parseLocationId);
     case MoneyTransactionSourceType.RecruitmentCharacterCost:
-      return normalizeEntitySource(sourceType, "characterId", source);
+      return normalizeEntitySource(sourceType, "characterId", source, parseCharacterId);
     case MoneyTransactionSourceType.RecruitmentOpportunityCost:
-      return normalizeEntitySource(sourceType, "opportunityId", source);
+      return normalizeEntitySource(sourceType, "opportunityId", source, parseOpportunityId);
   }
 }
 
@@ -615,6 +623,7 @@ function normalizeEntitySource(
   sourceType: MoneyTransactionSourceType,
   field: string,
   source: MoneyTransactionSource,
+  parseId: (value: unknown) => string,
 ): DomainResult<MoneyTransactionSource, MoneyTransactionInvalidSourceError> {
   const value = (source as unknown as Record<string, unknown>)[field];
   if (typeof value !== "string") {
@@ -628,8 +637,20 @@ function normalizeEntitySource(
     });
   }
 
+  let parsedValue: string;
+  try {
+    parsedValue = parseId(value);
+  } catch (error) {
+    return invalidSource(
+      sourceType,
+      field,
+      error instanceof InvalidEntityIdError ? error.reason : "entity ID parser rejected the value",
+      value,
+    );
+  }
+
   return success(
-    Object.freeze({ type: sourceType, [field]: value }) as unknown as MoneyTransactionSource,
+    Object.freeze({ type: sourceType, [field]: parsedValue }) as unknown as MoneyTransactionSource,
   );
 }
 
@@ -709,12 +730,12 @@ function invalidAmount(
   });
 }
 
-function invalidSource(
+function invalidSource<TValue = undefined>(
   sourceType: string,
   field: string,
   reason: string,
   value: unknown,
-): DomainResult<undefined, MoneyTransactionInvalidSourceError> {
+): DomainResult<TValue, MoneyTransactionInvalidSourceError> {
   return failure({
     code: DomainErrorCode.MoneyTransactionInvalidSource,
     message: `Money transaction source "${sourceType}" has invalid field "${field}": ${reason}.`,

@@ -468,6 +468,146 @@ describe("money ledger", () => {
     });
   });
 
+  it.each([
+    ["empty string", "", "received an empty string"],
+    ["leading whitespace", " operation:bad", "received leading whitespace"],
+    ["trailing whitespace", "operation:bad ", "received trailing whitespace"],
+    ["internal whitespace", "operation bad", "received internal whitespace"],
+    ["unsupported characters", "operation/bad", "received unsupported characters"],
+    ["excessive length", "a".repeat(129), "maximum is 128"],
+  ])("rejects entity-backed source IDs with %s", (_label, invalidId, expectedReason) => {
+    const cases: ReadonlyArray<{
+      readonly sourceType: MoneyTransactionSourceType;
+      readonly field: string;
+      readonly amount: number;
+      readonly category: MoneyTransactionCategoryType;
+      readonly source: MoneyTransactionSource;
+    }> = [
+      {
+        sourceType: MoneyTransactionSourceType.OperationGrossReward,
+        field: "operationId",
+        amount: 10,
+        category: MoneyTransactionCategory.OperationReward,
+        source: {
+          type: MoneyTransactionSourceType.OperationGrossReward,
+          operationId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.OperationStartCost,
+        field: "operationId",
+        amount: -10,
+        category: MoneyTransactionCategory.OperationCost,
+        source: {
+          type: MoneyTransactionSourceType.OperationStartCost,
+          operationId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.CrewUpkeep,
+        field: "characterId",
+        amount: -10,
+        category: MoneyTransactionCategory.CrewUpkeep,
+        source: {
+          type: MoneyTransactionSourceType.CrewUpkeep,
+          characterId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.BusinessUpkeep,
+        field: "businessId",
+        amount: -10,
+        category: MoneyTransactionCategory.BusinessUpkeep,
+        source: {
+          type: MoneyTransactionSourceType.BusinessUpkeep,
+          businessId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.HideoutUpkeep,
+        field: "locationId",
+        amount: -10,
+        category: MoneyTransactionCategory.HideoutUpkeep,
+        source: {
+          type: MoneyTransactionSourceType.HideoutUpkeep,
+          locationId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.RecruitmentCharacterCost,
+        field: "characterId",
+        amount: -10,
+        category: MoneyTransactionCategory.RecruitmentCost,
+        source: {
+          type: MoneyTransactionSourceType.RecruitmentCharacterCost,
+          characterId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+      {
+        sourceType: MoneyTransactionSourceType.RecruitmentOpportunityCost,
+        field: "opportunityId",
+        amount: -10,
+        category: MoneyTransactionCategory.RecruitmentCost,
+        source: {
+          type: MoneyTransactionSourceType.RecruitmentOpportunityCost,
+          opportunityId: invalidId,
+        } as unknown as MoneyTransactionSource,
+      },
+    ];
+
+    for (const testCase of cases) {
+      const organizations = createOrganizations();
+      const transactions = Object.freeze([existingTransaction()]);
+      const result = record({
+        amount: testCase.amount,
+        category: testCase.category,
+        source: testCase.source,
+        organizations,
+        transactions,
+      });
+
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.error).toMatchObject({
+          code: DomainErrorCode.MoneyTransactionInvalidSource,
+          sourceType: testCase.sourceType,
+          field: testCase.field,
+          reason: expect.stringContaining(expectedReason),
+          value: invalidId,
+        });
+      }
+      expect(organizations[0]?.money).toBe(100);
+      expect(transactions).toHaveLength(1);
+    }
+  });
+
+  it("converts entity ID parser failures from createMoneyTransaction into typed invalid-source results", () => {
+    const result = createMoneyTransaction({
+      transactionId: transactionId("invalid_entity_source"),
+      organizationId: organizationAId,
+      recordedAtTick: tick,
+      amount: 10,
+      balanceBefore: 100,
+      balanceAfter: 110,
+      category: MoneyTransactionCategory.OperationReward,
+      source: {
+        type: MoneyTransactionSourceType.OperationGrossReward,
+        operationId: "operation bad",
+      } as unknown as MoneyTransactionSource,
+    });
+
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.error).toMatchObject({
+        code: DomainErrorCode.MoneyTransactionInvalidSource,
+        sourceType: MoneyTransactionSourceType.OperationGrossReward,
+        field: "operationId",
+        reason: "received internal whitespace",
+        value: "operation bad",
+      });
+    }
+  });
+
   it("rejects unsupported runtime category and source discriminant values", () => {
     expectFailureLeavesInputsUnchanged({
       amount: 10,
