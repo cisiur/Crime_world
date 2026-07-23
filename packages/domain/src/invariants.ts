@@ -16,6 +16,7 @@ import {
   type OrganizationMoneyTransactionRecordedEvent,
   type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
+  type RecurringEconomyPeriodProcessedEvent,
   type SimulationResumedEvent,
   type SimulationTickAdvancedEvent,
 } from "./domainEvents";
@@ -29,6 +30,7 @@ import {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecurringEconomyScheduleId,
   parseTransactionId,
 } from "./entityIds";
 import {
@@ -217,6 +219,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     case DomainEventType.OrganizationOperationalCapacityReserved:
       assertOrganizationOperationalCapacityReservedEventInvariant(event);
+      return;
+    case DomainEventType.RecurringEconomyPeriodProcessed:
+      assertRecurringEconomyPeriodProcessedEventInvariant(event);
       return;
     case DomainEventType.SimulationResumed:
       assertSimulationResumedEventInvariant(event);
@@ -829,7 +834,7 @@ function assertOrganizationMoneyTransactionRecordedEventInvariant(
 
 function assertMoneyTransactionSourceInvariant(
   source: MoneyTransactionSource,
-  event: OrganizationMoneyTransactionRecordedEvent,
+  event: OrganizationMoneyTransactionRecordedEvent | RecurringEconomyPeriodProcessedEvent,
 ): void {
   assertObject("OrganizationMoneyTransactionRecorded.source", source);
 
@@ -887,6 +892,74 @@ function assertMoneyTransactionSourceInvariant(
         "source type must be a supported money transaction source type",
         event,
       );
+  }
+}
+
+function assertRecurringEconomyPeriodProcessedEventInvariant(
+  event: RecurringEconomyPeriodProcessedEvent,
+): void {
+  assertInvariant(
+    "RecurringEconomyPeriodProcessed.scheduleId",
+    () => parseRecurringEconomyScheduleId(event.scheduleId),
+    event,
+  );
+  assertInvariant(
+    "RecurringEconomyPeriodProcessed.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "RecurringEconomyPeriodProcessed.dueTick",
+    () => parseSimulationTick(event.dueTick),
+    event,
+  );
+  assertInvariant(
+    "RecurringEconomyPeriodProcessed.processedAtTick",
+    () => parseSimulationTick(event.processedAtTick),
+    event,
+  );
+
+  if (event.status !== "applied" && event.status !== "unpaid") {
+    throw new InvariantViolationError(
+      "RecurringEconomyPeriodProcessed.status",
+      "status must be applied or unpaid",
+      event,
+    );
+  }
+
+  if (event.status === "applied") {
+    assertInvariant(
+      "RecurringEconomyPeriodProcessed.transactionId",
+      () => parseTransactionId(event.transactionId),
+      event,
+    );
+  }
+
+  if (event.status === "unpaid" && event.transactionId !== undefined) {
+    throw new InvariantViolationError(
+      "RecurringEconomyPeriodProcessed.transactionId",
+      "unpaid processing must not reference a transaction ID",
+      event,
+    );
+  }
+
+  if (!isMoneyTransactionCategory(event.category)) {
+    throw new InvariantViolationError(
+      "RecurringEconomyPeriodProcessed.category",
+      "category must be a supported money transaction category",
+      event,
+    );
+  }
+
+  assertMoneyTransactionSourceInvariant(event.source, event);
+  assertFiniteInteger("RecurringEconomyPeriodProcessed.amount", event.amount, event);
+
+  if (event.amount === 0) {
+    throw new InvariantViolationError(
+      "RecurringEconomyPeriodProcessed.amount",
+      "amount must be non-zero",
+      event,
+    );
   }
 }
 

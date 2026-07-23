@@ -13,6 +13,7 @@ type EntityIdTypeName =
   | "OrganizationId"
   | "BusinessId"
   | "TransactionId"
+  | "RecurringEconomyScheduleId"
   | "OperationId"
   | "OperationTemplateId"
   | "InvestigationId"
@@ -28,6 +29,7 @@ export type CharacterId = EntityId<"CharacterId">;
 export type OrganizationId = EntityId<"OrganizationId">;
 export type BusinessId = EntityId<"BusinessId">;
 export type TransactionId = EntityId<"TransactionId">;
+export type RecurringEconomyScheduleId = EntityId<"RecurringEconomyScheduleId">;
 export type OperationId = EntityId<"OperationId">;
 export type OperationTemplateId = EntityId<"OperationTemplateId">;
 export type InvestigationId = EntityId<"InvestigationId">;
@@ -81,6 +83,10 @@ export function parseBusinessId(value: unknown): BusinessId {
 
 export function parseTransactionId(value: unknown): TransactionId {
   return parseEntityId("TransactionId", value);
+}
+
+export function parseRecurringEconomyScheduleId(value: unknown): RecurringEconomyScheduleId {
+  return parseEntityId("RecurringEconomyScheduleId", value);
 }
 
 export function parseOperationId(value: unknown): OperationId {

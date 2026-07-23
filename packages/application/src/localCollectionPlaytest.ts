@@ -920,6 +920,10 @@ function summarizeDomainEvent(event: DomainEvent): string {
       return `Operational capacity released: ${event.previousOperationalCapacity} -> ${event.currentOperationalCapacity}`;
     case DomainEventType.OperationConsequencesApplied:
       return `Consequences applied: ${labelOutcomeCategory(event.category)}`;
+    case DomainEventType.RecurringEconomyPeriodProcessed:
+      return `Recurring economy ${event.status}: ${formatSigned(event.amount)} at tick ${
+        event.dueTick
+      }`;
     case DomainEventType.SimulationResumed:
       return `Simulation resumed at tick ${event.tick}`;
     case DomainEventType.SimulationTickAdvanced:

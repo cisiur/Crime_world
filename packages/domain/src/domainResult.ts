@@ -45,6 +45,13 @@ export const DomainErrorCode = {
   MoneyTransactionMissingOrganization: "MONEY_TRANSACTION_MISSING_ORGANIZATION",
   MoneyTransactionUnsupportedCategory: "MONEY_TRANSACTION_UNSUPPORTED_CATEGORY",
   MoneyTransactionUnsupportedSource: "MONEY_TRANSACTION_UNSUPPORTED_SOURCE",
+  RecurringEconomyPeriodAlreadyProcessed: "RECURRING_ECONOMY_PERIOD_ALREADY_PROCESSED",
+  RecurringEconomyPeriodNotDue: "RECURRING_ECONOMY_PERIOD_NOT_DUE",
+  RecurringEconomyProcessingRecordInvalid: "RECURRING_ECONOMY_PROCESSING_RECORD_INVALID",
+  RecurringEconomyScheduleAdvanceInvalid: "RECURRING_ECONOMY_SCHEDULE_ADVANCE_INVALID",
+  RecurringEconomyScheduleInactive: "RECURRING_ECONOMY_SCHEDULE_INACTIVE",
+  RecurringEconomyScheduleInvalid: "RECURRING_ECONOMY_SCHEDULE_INVALID",
+  RecurringEconomyScheduleNotFound: "RECURRING_ECONOMY_SCHEDULE_NOT_FOUND",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:

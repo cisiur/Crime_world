@@ -12,6 +12,7 @@ import {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecurringEconomyScheduleId,
   parseRouteId,
   parseTransactionId,
   parseWorldEventId,
@@ -26,6 +27,7 @@ const parserCases = [
   ["OrganizationId", parseOrganizationId, "organization:crew-alpha"],
   ["BusinessId", parseBusinessId, "business:front_001"],
   ["TransactionId", parseTransactionId, "transaction:ledger_001"],
+  ["RecurringEconomyScheduleId", parseRecurringEconomyScheduleId, "recurring-schedule:rent_001"],
   ["OperationId", parseOperationId, "operation:0001"],
   ["OperationTemplateId", parseOperationTemplateId, "operation-template:local_extortion"],
   ["InvestigationId", parseInvestigationId, "investigation:case_001"],
@@ -100,5 +102,26 @@ describe("entity IDs", () => {
     expect(() => parseTransactionId("transaction/001")).toThrow("unsupported characters");
     expect(() => parseTransactionId("a".repeat(129))).toThrow("maximum is 128");
     expect(() => parseTransactionId(42)).toThrow(InvalidEntityIdError);
+  });
+
+  it("validates RecurringEconomyScheduleId with the shared entity ID rules", () => {
+    expect(parseRecurringEconomyScheduleId("recurring-schedule:e5_02c-001")).toBe(
+      "recurring-schedule:e5_02c-001",
+    );
+    expect(() => parseRecurringEconomyScheduleId("")).toThrow(InvalidEntityIdError);
+    expect(() => parseRecurringEconomyScheduleId(" recurring-schedule:001")).toThrow(
+      "leading whitespace",
+    );
+    expect(() => parseRecurringEconomyScheduleId("recurring-schedule:001 ")).toThrow(
+      "trailing whitespace",
+    );
+    expect(() => parseRecurringEconomyScheduleId("recurring schedule 001")).toThrow(
+      "internal whitespace",
+    );
+    expect(() => parseRecurringEconomyScheduleId("recurring-schedule/001")).toThrow(
+      "unsupported characters",
+    );
+    expect(() => parseRecurringEconomyScheduleId("a".repeat(129))).toThrow("maximum is 128");
+    expect(() => parseRecurringEconomyScheduleId(42)).toThrow(InvalidEntityIdError);
   });
 });

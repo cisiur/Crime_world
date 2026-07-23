@@ -474,6 +474,8 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.OrganizationOperationalCapacityReleased:
       return event.type;
+    case DomainEventType.RecurringEconomyPeriodProcessed:
+      return event.type;
     case DomainEventType.SimulationResumed:
       return event.type;
     case DomainEventType.SimulationTickAdvanced:

@@ -25,6 +25,7 @@ export {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecurringEconomyScheduleId,
   parseRouteId,
   parseTransactionId,
   parseWorldEventId,
@@ -41,6 +42,7 @@ export type {
   OperationTemplateId,
   OpportunityId,
   OrganizationId,
+  RecurringEconomyScheduleId,
   RouteId,
   TransactionId,
   WorldEventId,
@@ -68,3 +70,4 @@ export * from "./operationOutcomeResolver";
 export * from "./operationOutcomeClassification";
 export * from "./operationConsequences";
 export * from "./moneyLedger";
+export * from "./recurringEconomy";

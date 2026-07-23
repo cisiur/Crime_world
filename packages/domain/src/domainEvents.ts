@@ -6,6 +6,7 @@ import type {
   OperationId,
   OperationTemplateId,
   OrganizationId,
+  RecurringEconomyScheduleId,
   TransactionId,
 } from "./entityIds";
 import type { MoneyTransactionCategory, MoneyTransactionSource } from "./moneyLedger";
@@ -33,6 +34,7 @@ export const DomainEventType = {
   OrganizationMoneyTransactionRecorded: "OrganizationMoneyTransactionRecorded",
   OrganizationOperationalCapacityReleased: "OrganizationOperationalCapacityReleased",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
+  RecurringEconomyPeriodProcessed: "RecurringEconomyPeriodProcessed",
   SimulationResumed: "SimulationResumed",
   SimulationTickAdvanced: "SimulationTickAdvanced",
 } as const;
@@ -214,6 +216,20 @@ export interface OrganizationMoneyTransactionRecordedEvent {
   readonly [domainEventBrand]: "OrganizationMoneyTransactionRecordedEvent";
 }
 
+export interface RecurringEconomyPeriodProcessedEvent {
+  readonly type: typeof DomainEventType.RecurringEconomyPeriodProcessed;
+  readonly scheduleId: RecurringEconomyScheduleId;
+  readonly organizationId: OrganizationId;
+  readonly dueTick: SimulationTick;
+  readonly processedAtTick: SimulationTick;
+  readonly status: "applied" | "unpaid";
+  readonly amount: number;
+  readonly category: MoneyTransactionCategory;
+  readonly source: MoneyTransactionSource;
+  readonly transactionId?: TransactionId;
+  readonly [domainEventBrand]: "RecurringEconomyPeriodProcessedEvent";
+}
+
 export interface OperationConsequencesAppliedEvent {
   readonly type: typeof DomainEventType.OperationConsequencesApplied;
   readonly operationId: OperationId;
@@ -245,6 +261,7 @@ export type DomainEvent =
   | OrganizationMoneyTransactionRecordedEvent
   | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
+  | RecurringEconomyPeriodProcessedEvent
   | SimulationResumedEvent
   | SimulationTickAdvancedEvent;
 
@@ -383,6 +400,18 @@ export interface CreateOrganizationMoneyTransactionRecordedEventInput {
   readonly previousMoney: number;
   readonly currentMoney: number;
   readonly recordedAtTick: SimulationTick;
+}
+
+export interface CreateRecurringEconomyPeriodProcessedEventInput {
+  readonly scheduleId: RecurringEconomyScheduleId;
+  readonly organizationId: OrganizationId;
+  readonly dueTick: SimulationTick;
+  readonly processedAtTick: SimulationTick;
+  readonly status: "applied" | "unpaid";
+  readonly amount: number;
+  readonly category: MoneyTransactionCategory;
+  readonly source: MoneyTransactionSource;
+  readonly transactionId?: TransactionId;
 }
 
 export interface CreateOperationConsequencesAppliedEventInput {
@@ -630,6 +659,23 @@ export function createOrganizationMoneyTransactionRecordedEvent(
     currentMoney: input.currentMoney,
     recordedAtTick: input.recordedAtTick,
   }) as OrganizationMoneyTransactionRecordedEvent;
+}
+
+export function createRecurringEconomyPeriodProcessedEvent(
+  input: CreateRecurringEconomyPeriodProcessedEventInput,
+): RecurringEconomyPeriodProcessedEvent {
+  return Object.freeze({
+    type: DomainEventType.RecurringEconomyPeriodProcessed,
+    scheduleId: input.scheduleId,
+    organizationId: input.organizationId,
+    dueTick: input.dueTick,
+    processedAtTick: input.processedAtTick,
+    status: input.status,
+    amount: input.amount,
+    category: input.category,
+    source: Object.freeze({ ...input.source }) as MoneyTransactionSource,
+    ...(input.transactionId === undefined ? {} : { transactionId: input.transactionId }),
+  }) as RecurringEconomyPeriodProcessedEvent;
 }
 
 export function createOperationConsequencesAppliedEvent(
