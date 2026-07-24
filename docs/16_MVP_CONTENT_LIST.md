@@ -199,7 +199,7 @@ E5-05 implementation status: four concrete persistent recruitable candidate seed
 - Nika Ross: cheap but exposed; `stealth` + `streetwise`; competence `50`, loyalty `50`, exposure `65`; recruitment cost `10`, minimum trust `10`, maintenance preview `5`, opportunity duration `288` ticks; located at `location:corner_store`.
 - Tomas Vek: expensive logistics specialist; `logistics` + `social`; competence `70`, loyalty `60`, exposure `15`; recruitment cost `90`, minimum trust `45`, maintenance preview `5`, opportunity duration `720` ticks; located at `location:freight_terminal`.
 
-Recruitment opportunities can now be generated and expired deterministically for concrete candidates, but recruitment cannot yet be executed. No money, membership, upkeep, role, capacity, UI, global tick integration, save/load, or campaign integration is implemented by E5-05.
+Recruitment opportunities can now be generated and expired deterministically for concrete candidates. E5-06 adds one deterministic recruitment action that uses these existing authored cost/trust values: a valid active opportunity can pay the recruitment cost through the ledger, append the candidate to the target organization, and mark the opportunity consumed. Upkeep generation, role assignment, operational-capacity growth, UI, global tick integration, save/load, and campaign integration remain unimplemented.
 
 ### Required roles
 

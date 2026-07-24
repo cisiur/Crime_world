@@ -111,6 +111,17 @@ export const DomainErrorCode = {
     "RECRUITMENT_OPPORTUNITY_GENERATION_MISSING_LOCATION",
   RecruitmentOpportunityGenerationMissingOrganization:
     "RECRUITMENT_OPPORTUNITY_GENERATION_MISSING_ORGANIZATION",
+  RecruitmentActionInvalidCurrentTick: "RECRUITMENT_ACTION_INVALID_CURRENT_TICK",
+  RecruitmentActionInvalidDefinition: "RECRUITMENT_ACTION_INVALID_DEFINITION",
+  RecruitmentActionInsufficientTrust: "RECRUITMENT_ACTION_INSUFFICIENT_TRUST",
+  RecruitmentActionIneligibleCandidate: "RECRUITMENT_ACTION_INELIGIBLE_CANDIDATE",
+  RecruitmentActionMissingCandidate: "RECRUITMENT_ACTION_MISSING_CANDIDATE",
+  RecruitmentActionMissingOpportunity: "RECRUITMENT_ACTION_MISSING_OPPORTUNITY",
+  RecruitmentActionMissingOrganization: "RECRUITMENT_ACTION_MISSING_ORGANIZATION",
+  RecruitmentActionOpportunityExpired: "RECRUITMENT_ACTION_OPPORTUNITY_EXPIRED",
+  RecruitmentActionOpportunityMismatch: "RECRUITMENT_ACTION_OPPORTUNITY_MISMATCH",
+  RecruitmentActionOpportunityNotActive: "RECRUITMENT_ACTION_OPPORTUNITY_NOT_ACTIVE",
+  RecruitmentActionRuntimeDefinitionMismatch: "RECRUITMENT_ACTION_RUNTIME_DEFINITION_MISMATCH",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:

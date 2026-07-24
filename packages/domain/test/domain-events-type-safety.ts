@@ -5,6 +5,7 @@ import {
   createCharacterAssignedToOperationEvent,
   createCharacterHealthChangedEvent,
   createCharacterPersonalExposureChangedEvent,
+  createCharacterRecruitedEvent,
   createDomainExecution,
   createInitialGameState,
   createOperationConsequencesAppliedEvent,
@@ -16,6 +17,7 @@ import {
   createOrganizationMoneyChangedEvent,
   createOrganizationOperationalCapacityReleasedEvent,
   createOrganizationOperationalCapacityReservedEvent,
+  createRecruitmentOpportunityConsumedEvent,
   createRecruitmentOpportunityExpiredEvent,
   createRecruitmentOpportunityGeneratedEvent,
   parseCharacterId,
@@ -90,6 +92,19 @@ const recruitmentOpportunityExpiredEvent = createRecruitmentOpportunityExpiredEv
   targetOrganizationId: organizationId,
   locationId: targetLocationId,
   expiredAtTick: parseSimulationTick(10),
+});
+const characterRecruitedEvent = createCharacterRecruitedEvent({
+  candidateCharacterId: characterId,
+  organizationId,
+  recruitmentOpportunityId,
+  recruitmentCost: 60,
+  recruitedAtTick: tick,
+});
+const recruitmentOpportunityConsumedEvent = createRecruitmentOpportunityConsumedEvent({
+  recruitmentOpportunityId,
+  candidateCharacterId: characterId,
+  targetOrganizationId: organizationId,
+  consumedAtTick: tick,
 });
 const operationPlannedEvent = createOperationPlannedEvent({
   operationId,
@@ -262,6 +277,8 @@ const eventUnionP: DomainEvent = operationConsequencesAppliedEvent;
 const eventUnionQ: DomainEvent = businessOwnershipTransferredEvent;
 const eventUnionR: DomainEvent = recruitmentOpportunityGeneratedEvent;
 const eventUnionS: DomainEvent = recruitmentOpportunityExpiredEvent;
+const eventUnionT: DomainEvent = characterRecruitedEvent;
+const eventUnionU: DomainEvent = recruitmentOpportunityConsumedEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -512,6 +529,8 @@ function assertDomainEventUnion(event: DomainEvent): string {
   switch (event.type) {
     case DomainEventType.BusinessOwnershipTransferred:
       return event.type;
+    case DomainEventType.CharacterRecruited:
+      return event.type;
     case DomainEventType.CharacterAssignedToOperation:
       return event.type;
     case DomainEventType.CharacterAssignmentReleased:
@@ -546,6 +565,8 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.RecruitmentOpportunityExpired:
       return event.type;
+    case DomainEventType.RecruitmentOpportunityConsumed:
+      return event.type;
     case DomainEventType.SimulationResumed:
       return event.type;
     case DomainEventType.SimulationTickAdvanced:
@@ -576,6 +597,8 @@ void eventUnionP;
 void eventUnionQ;
 void eventUnionR;
 void eventUnionS;
+void eventUnionT;
+void eventUnionU;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;

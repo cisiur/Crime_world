@@ -5,6 +5,7 @@ import {
   type CharacterAssignedToOperationEvent,
   type CharacterHealthChangedEvent,
   type CharacterPersonalExposureChangedEvent,
+  type CharacterRecruitedEvent,
   type DomainEvent,
   type DomainExecution,
   type OperationConsequencesAppliedEvent,
@@ -18,6 +19,7 @@ import {
   type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type RecurringEconomyPeriodProcessedEvent,
+  type RecruitmentOpportunityConsumedEvent,
   type RecruitmentOpportunityExpiredEvent,
   type RecruitmentOpportunityGeneratedEvent,
   type SimulationResumedEvent,
@@ -185,6 +187,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.BusinessOwnershipTransferred:
       assertBusinessOwnershipTransferredEventInvariant(event);
       return;
+    case DomainEventType.CharacterRecruited:
+      assertCharacterRecruitedEventInvariant(event);
+      return;
     case DomainEventType.CharacterAssignedToOperation:
       assertCharacterAssignedToOperationEventInvariant(event);
       return;
@@ -235,6 +240,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     case DomainEventType.RecruitmentOpportunityGenerated:
       assertRecruitmentOpportunityGeneratedEventInvariant(event);
+      return;
+    case DomainEventType.RecruitmentOpportunityConsumed:
+      assertRecruitmentOpportunityConsumedEventInvariant(event);
       return;
     case DomainEventType.SimulationResumed:
       assertSimulationResumedEventInvariant(event);
@@ -305,6 +313,63 @@ function assertRecruitmentOpportunityExpiredEventInvariant(
   assertInvariant(
     "RecruitmentOpportunityExpired.expiredAtTick",
     () => parseSimulationTick(event.expiredAtTick),
+    event,
+  );
+}
+
+function assertCharacterRecruitedEventInvariant(event: CharacterRecruitedEvent): void {
+  assertInvariant(
+    "CharacterRecruited.candidateCharacterId",
+    () => parseCharacterId(event.candidateCharacterId),
+    event,
+  );
+  assertInvariant(
+    "CharacterRecruited.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "CharacterRecruited.recruitmentOpportunityId",
+    () => parseRecruitmentOpportunityId(event.recruitmentOpportunityId),
+    event,
+  );
+  assertInvariant(
+    "CharacterRecruited.recruitedAtTick",
+    () => parseSimulationTick(event.recruitedAtTick),
+    event,
+  );
+  assertFiniteInteger("CharacterRecruited.recruitmentCost", event.recruitmentCost, event);
+
+  if (event.recruitmentCost <= 0) {
+    throw new InvariantViolationError(
+      "CharacterRecruited.recruitmentCost",
+      "recruitmentCost must be positive",
+      event,
+    );
+  }
+}
+
+function assertRecruitmentOpportunityConsumedEventInvariant(
+  event: RecruitmentOpportunityConsumedEvent,
+): void {
+  assertInvariant(
+    "RecruitmentOpportunityConsumed.recruitmentOpportunityId",
+    () => parseRecruitmentOpportunityId(event.recruitmentOpportunityId),
+    event,
+  );
+  assertInvariant(
+    "RecruitmentOpportunityConsumed.candidateCharacterId",
+    () => parseCharacterId(event.candidateCharacterId),
+    event,
+  );
+  assertInvariant(
+    "RecruitmentOpportunityConsumed.targetOrganizationId",
+    () => parseOrganizationId(event.targetOrganizationId),
+    event,
+  );
+  assertInvariant(
+    "RecruitmentOpportunityConsumed.consumedAtTick",
+    () => parseSimulationTick(event.consumedAtTick),
     event,
   );
 }
@@ -968,9 +1033,23 @@ function assertMoneyTransactionSourceInvariant(
       );
       return;
     case MoneyTransactionSourceType.RecruitmentOpportunityCost:
+      if (source.opportunityId !== undefined) {
+        assertInvariant(
+          "OrganizationMoneyTransactionRecorded.source.opportunityId",
+          () => parseOpportunityId(source.opportunityId),
+          event,
+        );
+        return;
+      }
+
       assertInvariant(
-        "OrganizationMoneyTransactionRecorded.source.opportunityId",
-        () => parseOpportunityId(source.opportunityId),
+        "OrganizationMoneyTransactionRecorded.source.recruitmentOpportunityId",
+        () => parseRecruitmentOpportunityId(source.recruitmentOpportunityId),
+        event,
+      );
+      assertInvariant(
+        "OrganizationMoneyTransactionRecorded.source.characterId",
+        () => parseCharacterId(source.characterId),
         event,
       );
       return;

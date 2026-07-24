@@ -13,6 +13,7 @@ import type {
   OperationId,
   OpportunityId,
   OrganizationId,
+  RecruitmentOpportunityId,
   TransactionId,
 } from "./entityIds";
 import {
@@ -22,6 +23,7 @@ import {
   parseLocationId,
   parseOperationId,
   parseOpportunityId,
+  parseRecruitmentOpportunityId,
 } from "./entityIds";
 import { createOrganizationState, type OrganizationState } from "./organizationState";
 import type { SimulationTick } from "./simulationClock";
@@ -111,7 +113,9 @@ export interface RecruitmentCharacterCostMoneySource {
 
 export interface RecruitmentOpportunityCostMoneySource {
   readonly type: typeof MoneyTransactionSourceType.RecruitmentOpportunityCost;
-  readonly opportunityId: OpportunityId;
+  readonly opportunityId?: OpportunityId;
+  readonly recruitmentOpportunityId?: RecruitmentOpportunityId;
+  readonly characterId?: CharacterId;
 }
 
 export interface PressureManagementMoneySource {
@@ -530,8 +534,76 @@ function normalizeMoneyTransactionSource(
     case MoneyTransactionSourceType.RecruitmentCharacterCost:
       return normalizeEntitySource(sourceType, "characterId", source, parseCharacterId);
     case MoneyTransactionSourceType.RecruitmentOpportunityCost:
-      return normalizeEntitySource(sourceType, "opportunityId", source, parseOpportunityId);
+      return normalizeRecruitmentOpportunityCostSource(source);
   }
+}
+
+function normalizeRecruitmentOpportunityCostSource(
+  source: MoneyTransactionSource,
+): DomainResult<MoneyTransactionSource, MoneyTransactionInvalidSourceError> {
+  const fields = source as unknown as Record<string, unknown>;
+  const opportunityId = fields.opportunityId;
+  const recruitmentOpportunityId = fields.recruitmentOpportunityId;
+  const characterId = fields.characterId;
+
+  if (opportunityId !== undefined) {
+    return normalizeEntitySource(
+      MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      "opportunityId",
+      source,
+      parseOpportunityId,
+    );
+  }
+
+  if (typeof recruitmentOpportunityId !== "string") {
+    return invalidSource(
+      MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      "recruitmentOpportunityId",
+      `expected an ID string, received ${describeValueType(recruitmentOpportunityId)}`,
+      recruitmentOpportunityId,
+    );
+  }
+
+  if (typeof characterId !== "string") {
+    return invalidSource(
+      MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      "characterId",
+      `expected an ID string, received ${describeValueType(characterId)}`,
+      characterId,
+    );
+  }
+
+  let parsedRecruitmentOpportunityId: RecruitmentOpportunityId;
+  try {
+    parsedRecruitmentOpportunityId = parseRecruitmentOpportunityId(recruitmentOpportunityId);
+  } catch (error) {
+    return invalidSource(
+      MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      "recruitmentOpportunityId",
+      error instanceof InvalidEntityIdError ? error.reason : "entity ID parser rejected the value",
+      recruitmentOpportunityId,
+    );
+  }
+
+  let parsedCharacterId: CharacterId;
+  try {
+    parsedCharacterId = parseCharacterId(characterId);
+  } catch (error) {
+    return invalidSource(
+      MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      "characterId",
+      error instanceof InvalidEntityIdError ? error.reason : "entity ID parser rejected the value",
+      characterId,
+    );
+  }
+
+  return success(
+    Object.freeze({
+      type: MoneyTransactionSourceType.RecruitmentOpportunityCost,
+      recruitmentOpportunityId: parsedRecruitmentOpportunityId,
+      characterId: parsedCharacterId,
+    }),
+  );
 }
 
 function validateCategorySourceAmountCompatibility(

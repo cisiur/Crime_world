@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02 is complete after the accepted E5-02A through E5-02F increments, E5-03 is complete as authored content only, and E5-04 is complete as one bounded business ownership and income vertical slice. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, canonical MVP recurring income, six canonical MVP business / location archetype definitions, a pure business ownership transition, and one-period business income execution. Recurring gameplay is not connected to the simulation update loop yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02 is complete after the accepted E5-02A through E5-02F increments, E5-03 is complete as authored content only, E5-04 is complete as one bounded business ownership and income vertical slice, E5-05 is complete as recruitment opportunity generation, and E5-06 is complete as one deterministic recruitment action. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, canonical MVP recurring income, six canonical MVP business / location archetype definitions, a pure business ownership transition, one-period business income execution, recruitment opportunity generation/expiration, and ledger-backed recruitment execution for one active opportunity. Recurring gameplay is not connected to the simulation update loop yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** EPIC 5 in progress. E5-05 is Done. E5-06 is Pending and is the immediate next roadmap task.
+> **Current phase:** EPIC 5 in progress. E5-06 is Done. E5-07 is Pending and is the immediate next roadmap task.
 
 ---
 
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: EPIC 5 is in progress and E5-05 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income runtime execution. E5-03 added six immutable authored MVP business / location archetype definitions and content-layer validation. E5-04 added authored business income definitions, one pure business ownership transition, deterministic business income schedule generation, typed business-income ledger source/category support, and a thin application wrapper for executing one explicit due business income period. E5-05 added authored concrete recruitable candidate seeds/definitions, runtime recruitment opportunity state, deterministic generation/expiration, lifecycle events, and a read-only application projection. Recurring gameplay is still not connected to the simulation update loop, and recruitment execution, money deduction, membership mutation, role/capacity changes, upkeep creation for recruits, production UI, save/load, and campaign integration do not exist yet.
+Current status: EPIC 5 is in progress and E5-06 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income execution. E5-03 added six immutable authored MVP business / location archetype definitions and content-layer validation. E5-04 added authored business income definitions, one pure business ownership transition, deterministic business income schedule generation, typed business-income ledger source/category support, and a thin application wrapper for executing one explicit due business income period. E5-05 added authored concrete recruitable candidate seeds/definitions, runtime recruitment opportunity state, deterministic generation/expiration, lifecycle events, and a read-only application projection. E5-06 adds deterministic execution for one active recruitment opportunity: trust and eligibility are validated, recruitment cost is paid through the ledger, the candidate is appended to the target organization, and the opportunity is marked consumed. Recurring gameplay is still not connected to the simulation update loop, and role/capacity changes, upkeep creation for recruits, production UI, save/load, and campaign integration do not exist yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -630,7 +630,7 @@ Current status: EPIC 5 is in progress and E5-05 is complete. E5-01 defined the a
 | E5-03 | Define six MVP business / location archetypes | `[BOTH]` | Done |
 | E5-04 | Implement basic business control and income generation | `[CODEX]` | Done |
 | E5-05 | Implement recruitment opportunity generation | `[CODEX]` | Done |
-| E5-06 | Implement recruitment operation / action | `[CODEX]` | Pending |
+| E5-06 | Implement recruitment operation / action | `[CODEX]` | Done |
 | E5-07 | Implement limited crew growth and role assignment | `[CODEX]` | Pending |
 | E5-08 | Implement bankruptcy and low-resource recovery safeguards | `[CODEX]` | Pending |
 | E5-09 | Add economy simulation and conservation tests | `[CODEX]` | Pending |
@@ -646,7 +646,7 @@ Current status: EPIC 5 is in progress and E5-05 is complete. E5-01 defined the a
 
 E5-01 is complete as a documentation/specification task only. It records the minimal future contract for organization money flow, upkeep, and the transaction ledger before any ledger implementation begins. It does not add TypeScript code, tests, runtime schemas, recurring economy execution, UI, save/load, or campaign orchestration.
 
-EPIC 5 remains in progress. E5-05 is complete, and E5-06 is the next roadmap item.
+EPIC 5 remains in progress. E5-06 is complete, and E5-07 is the next roadmap item.
 
 ### E5-02A implementation status
 
@@ -760,7 +760,7 @@ E5-03 is complete as an authored-content foundation only. It adds:
 
 E5-03 does not implement business control, ownership acquisition or transfer, business-derived income, business upkeep, hideout upkeep, concrete money amounts, operation modifiers, storage or safehouse capacity, recruitment, UI, global tick-loop integration, root `GameState` integration, save/load, or final balancing.
 
-The immediate next roadmap task is E5-06, `Implement recruitment operation / action`.
+The immediate next roadmap task is E5-07, `Implement limited crew growth and role assignment`.
 
 ### E5-04 implementation status
 
@@ -793,6 +793,21 @@ E5-05 is complete as a bounded recruitment-opportunity foundation. It adds:
 The four provisional MVP candidates are Vera Kade, experienced but unreliable (`streetwise`, `force`, competence `75`, loyalty `35`, personal exposure `30`, recruitment cost `60`, minimum trust `35`, maintenance preview `5`, duration `432` ticks); Eli Navarro, loyal but inexperienced (`social`, competence `35`, loyalty `80`, exposure `10`, cost `25`, trust `15`, maintenance `5`, duration `576`); Nika Ross, cheap but exposed (`stealth`, `streetwise`, competence `50`, loyalty `50`, exposure `65`, cost `10`, trust `10`, maintenance `5`, duration `288`); and Tomas Vek, expensive logistics specialist (`logistics`, `social`, competence `70`, loyalty `60`, exposure `15`, cost `90`, trust `45`, maintenance `5`, duration `720`).
 
 E5-05 does not implement recruitment action execution, success/failure outcomes, RNG-based recruitment, money deduction, recruitment ledger categories, membership mutation, adding candidates to organizations, crew-upkeep schedule creation for recruits, role assignment, operational-capacity growth, rival recruitment, procedural candidate generation, opportunity refresh loops, global tick integration, root `GameState` integration, campaign creation, save/load, UI, pressure or investigation effects, notifications, final balancing, or a complete recruitment system.
+
+### E5-06 implementation status
+
+E5-06 is complete as one bounded deterministic recruitment action. It adds:
+
+- pure domain-owned `executeRecruitmentAction(...)` over explicit organizations, characters, opportunities, transactions, current tick, trust value, transaction ID, and caller-supplied structural recruitment values,
+- validation for missing, inactive, consumed, expired, or mismatched opportunities; missing organizations or candidates; candidates already in any organization; dead, detained, or imprisoned candidates; insufficient trust; invalid structural values; and ledger failures,
+- recruitment payment through `recordMoneyTransaction(...)` using `recruitment-cost` and a recruitment-opportunity money source containing the `RecruitmentOpportunityId` and `CharacterId`,
+- immutable membership append to the target organization only after successful ledger payment,
+- immutable opportunity consumption from `active` to `consumed` without deleting the record,
+- semantic `CharacterRecruited` and `RecruitmentOpportunityConsumed` events emitted after the existing `OrganizationMoneyTransactionRecorded` event,
+- a thin application wrapper that resolves authored candidate definitions and delegates the authoritative action to domain,
+- focused domain, runtime, and integration-style tests.
+
+E5-06 does not implement RNG, success probability, negotiation, dialogue, relationship state, trust progression, loyalty changes, role assignment, lieutenant assignment, crew entities, operational-capacity growth, upkeep generation, recurring schedule generation, AI or rival recruitment, UI, root `GameState` integration, global tick integration, save/load, pressure effects, exposure consequences, or a complete recruitment system.
 
 ### Current balance
 
@@ -1311,6 +1326,6 @@ Split a task when it combines more than one of:
 
 The next roadmap task is:
 
-> **E5-06 - Implement recruitment operation / action**
+> **E5-07 - Implement limited crew growth and role assignment**
 
-E5-05 is complete as a bounded implementation task. EPIC 5 remains in progress. The E5-06 scope must be reviewed and accepted before implementation. Until that scope is accepted, do not implement pressure systems, rival AI, save/load, production UI, broad campaign orchestration, root `GameState` economy integration, global tick-loop economy integration, or complete recruitment execution.
+E5-06 is complete as a bounded implementation task. EPIC 5 remains in progress. The E5-07 scope must be reviewed and accepted before implementation. Until that scope is accepted, do not implement pressure systems, rival AI, save/load, production UI, broad campaign orchestration, root `GameState` economy integration, global tick-loop economy integration, role/capacity growth, or recruit upkeep generation.

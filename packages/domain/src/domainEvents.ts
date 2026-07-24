@@ -39,6 +39,8 @@ export const DomainEventType = {
   RecurringEconomyPeriodProcessed: "RecurringEconomyPeriodProcessed",
   RecruitmentOpportunityExpired: "RecruitmentOpportunityExpired",
   RecruitmentOpportunityGenerated: "RecruitmentOpportunityGenerated",
+  RecruitmentOpportunityConsumed: "RecruitmentOpportunityConsumed",
+  CharacterRecruited: "CharacterRecruited",
   SimulationResumed: "SimulationResumed",
   SimulationTickAdvanced: "SimulationTickAdvanced",
   BusinessOwnershipTransferred: "BusinessOwnershipTransferred",
@@ -90,6 +92,25 @@ export interface RecruitmentOpportunityExpiredEvent {
   readonly locationId: LocationId;
   readonly expiredAtTick: SimulationTick;
   readonly [domainEventBrand]: "RecruitmentOpportunityExpiredEvent";
+}
+
+export interface CharacterRecruitedEvent {
+  readonly type: typeof DomainEventType.CharacterRecruited;
+  readonly candidateCharacterId: CharacterId;
+  readonly organizationId: OrganizationId;
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly recruitmentCost: number;
+  readonly recruitedAtTick: SimulationTick;
+  readonly [domainEventBrand]: "CharacterRecruitedEvent";
+}
+
+export interface RecruitmentOpportunityConsumedEvent {
+  readonly type: typeof DomainEventType.RecruitmentOpportunityConsumed;
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly consumedAtTick: SimulationTick;
+  readonly [domainEventBrand]: "RecruitmentOpportunityConsumedEvent";
 }
 
 export interface OperationPlannedEvent {
@@ -283,6 +304,7 @@ export interface OperationConsequencesAppliedEvent {
 
 export type DomainEvent =
   | BusinessOwnershipTransferredEvent
+  | CharacterRecruitedEvent
   | CharacterAssignmentReleasedEvent
   | CharacterAssignedToOperationEvent
   | CharacterHealthChangedEvent
@@ -298,6 +320,7 @@ export type DomainEvent =
   | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
   | RecurringEconomyPeriodProcessedEvent
+  | RecruitmentOpportunityConsumedEvent
   | RecruitmentOpportunityExpiredEvent
   | RecruitmentOpportunityGeneratedEvent
   | SimulationResumedEvent
@@ -341,6 +364,21 @@ export interface CreateRecruitmentOpportunityExpiredEventInput {
   readonly targetOrganizationId: OrganizationId;
   readonly locationId: LocationId;
   readonly expiredAtTick: SimulationTick;
+}
+
+export interface CreateCharacterRecruitedEventInput {
+  readonly candidateCharacterId: CharacterId;
+  readonly organizationId: OrganizationId;
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly recruitmentCost: number;
+  readonly recruitedAtTick: SimulationTick;
+}
+
+export interface CreateRecruitmentOpportunityConsumedEventInput {
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly consumedAtTick: SimulationTick;
 }
 
 export interface CreateOperationPlannedEventInput {
@@ -550,6 +588,31 @@ export function createRecruitmentOpportunityExpiredEvent(
     locationId: input.locationId,
     expiredAtTick: input.expiredAtTick,
   }) as RecruitmentOpportunityExpiredEvent;
+}
+
+export function createCharacterRecruitedEvent(
+  input: CreateCharacterRecruitedEventInput,
+): CharacterRecruitedEvent {
+  return Object.freeze({
+    type: DomainEventType.CharacterRecruited,
+    candidateCharacterId: input.candidateCharacterId,
+    organizationId: input.organizationId,
+    recruitmentOpportunityId: input.recruitmentOpportunityId,
+    recruitmentCost: input.recruitmentCost,
+    recruitedAtTick: input.recruitedAtTick,
+  }) as CharacterRecruitedEvent;
+}
+
+export function createRecruitmentOpportunityConsumedEvent(
+  input: CreateRecruitmentOpportunityConsumedEventInput,
+): RecruitmentOpportunityConsumedEvent {
+  return Object.freeze({
+    type: DomainEventType.RecruitmentOpportunityConsumed,
+    recruitmentOpportunityId: input.recruitmentOpportunityId,
+    candidateCharacterId: input.candidateCharacterId,
+    targetOrganizationId: input.targetOrganizationId,
+    consumedAtTick: input.consumedAtTick,
+  }) as RecruitmentOpportunityConsumedEvent;
 }
 
 export function createOperationPlannedEvent(

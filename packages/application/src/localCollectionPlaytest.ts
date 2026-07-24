@@ -930,6 +930,10 @@ function summarizeDomainEvent(event: DomainEvent): string {
       return `Recruitment opportunity generated: ${event.candidateCharacterId}`;
     case DomainEventType.RecruitmentOpportunityExpired:
       return `Recruitment opportunity expired: ${event.candidateCharacterId}`;
+    case DomainEventType.CharacterRecruited:
+      return `Character recruited: ${event.candidateCharacterId}`;
+    case DomainEventType.RecruitmentOpportunityConsumed:
+      return `Recruitment opportunity consumed: ${event.candidateCharacterId}`;
     case DomainEventType.SimulationResumed:
       return `Simulation resumed at tick ${event.tick}`;
     case DomainEventType.SimulationTickAdvanced:

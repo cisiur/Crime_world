@@ -164,7 +164,7 @@ Examples:
 - cheap but highly visible,
 - expensive but well connected.
 
-Implementation status after E5-05: four concrete persistent candidates now have authored opportunity definitions with visible costs, trust requirements, maintenance previews, locations, and expiration durations, and the domain can generate/expire those opportunities deterministically. The player still cannot execute recruitment; money, membership, upkeep, role, capacity, UI, tick-loop, campaign, save/load, pressure, and rival behavior are still future tasks.
+Implementation status after E5-06: four concrete persistent candidates now have authored opportunity definitions with visible costs, trust requirements, maintenance previews, locations, and expiration durations; the domain can generate/expire those opportunities deterministically; and one active opportunity can be executed by paying the recruitment cost through the ledger, appending the candidate to membership, and consuming the opportunity. Upkeep generation, role assignment, operational-capacity growth, UI, tick-loop, campaign, save/load, pressure, and rival behavior are still future tasks.
 
 Recruitment should involve more than paying a fixed cost.
 The player should consider:
