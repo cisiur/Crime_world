@@ -146,6 +146,13 @@ Recurring income should:
 
 A basic recurring income source should cover part of routine costs, not eliminate economic pressure.
 
+E5-04 provisional authored business income values are initial implementation hypotheses only:
+- Small Shop or Service: `20` money every `144` simulation ticks.
+- Restaurant or Nightlife Venue: `60` money every `144` simulation ticks.
+- Workshop or Transport Business: `40` money every `144` simulation ticks.
+
+These values prove one bounded business-income flow through the recurring economy and ledger. They are not final balance and do not imply that business upkeep, hideout upkeep, pressure effects, rival disruption, production, inventory, UI, global tick integration, campaign integration, or save/load are implemented.
+
 ### Money sinks
 
 The MVP should use a small set of understandable money sinks:

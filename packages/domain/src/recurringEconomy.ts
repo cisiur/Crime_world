@@ -46,6 +46,7 @@ export interface RecurringEconomySchedule {
 
 export type RecurringEconomyScheduleCategory =
   | typeof MoneyTransactionCategory.RecurringIncome
+  | typeof MoneyTransactionCategory.BusinessIncome
   | typeof MoneyTransactionCategory.CrewUpkeep
   | typeof MoneyTransactionCategory.BusinessUpkeep
   | typeof MoneyTransactionCategory.HideoutUpkeep;
@@ -184,6 +185,7 @@ const SCHEDULE_VALIDATION_TRANSACTION_ID = parseTransactionId(
 
 const SUPPORTED_RECURRING_CATEGORIES = new Set<MoneyTransactionCategoryType>([
   MoneyTransactionCategory.RecurringIncome,
+  MoneyTransactionCategory.BusinessIncome,
   MoneyTransactionCategory.CrewUpkeep,
   MoneyTransactionCategory.BusinessUpkeep,
   MoneyTransactionCategory.HideoutUpkeep,

@@ -882,6 +882,8 @@ function createEventTimeline(
 
 function summarizeDomainEvent(event: DomainEvent): string {
   switch (event.type) {
+    case DomainEventType.BusinessOwnershipTransferred:
+      return `Business ownership transferred: ${event.businessId}`;
     case DomainEventType.OperationPlanned:
       return `Operation planned: ${localCollectionOperationTemplateDefinition.displayName} at ${getTargetDefinition().name}`;
     case DomainEventType.CharacterAssignedToOperation:

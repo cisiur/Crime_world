@@ -12,6 +12,7 @@ export * from "./cityDefinition";
 export * from "./cityDebugReport";
 export * from "./cityDefinitionValidation";
 export * from "./businessLocationArchetypeDefinition";
+export * from "./businessIncomeDefinition";
 export * from "./operationTemplateDefinition";
 export * from "./localCollectionOperationTemplateDefinition";
 export * from "./localCollectionOutcomeDefinition";

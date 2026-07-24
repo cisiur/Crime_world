@@ -1,5 +1,6 @@
 import {
   DomainEventType,
+  type BusinessOwnershipTransferredEvent,
   type CharacterAssignmentReleasedEvent,
   type CharacterAssignedToOperationEvent,
   type CharacterHealthChangedEvent,
@@ -178,6 +179,9 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
   assertObject("DomainEvent", event);
 
   switch (event.type) {
+    case DomainEventType.BusinessOwnershipTransferred:
+      assertBusinessOwnershipTransferredEventInvariant(event);
+      return;
     case DomainEventType.CharacterAssignedToOperation:
       assertCharacterAssignedToOperationEventInvariant(event);
       return;
@@ -232,6 +236,33 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     default:
       throw new InvariantViolationError("DomainEvent.type", "event type must be supported", event);
   }
+}
+
+function assertBusinessOwnershipTransferredEventInvariant(
+  event: BusinessOwnershipTransferredEvent,
+): void {
+  assertInvariant(
+    "BusinessOwnershipTransferred.businessId",
+    () => parseBusinessId(event.businessId),
+    event,
+  );
+  assertInvariant(
+    "BusinessOwnershipTransferred.locationId",
+    () => parseLocationId(event.locationId),
+    event,
+  );
+  if (event.previousOwnerOrganizationId !== null) {
+    assertInvariant(
+      "BusinessOwnershipTransferred.previousOwnerOrganizationId",
+      () => parseOrganizationId(event.previousOwnerOrganizationId),
+      event,
+    );
+  }
+  assertInvariant(
+    "BusinessOwnershipTransferred.newOwnerOrganizationId",
+    () => parseOrganizationId(event.newOwnerOrganizationId),
+    event,
+  );
 }
 
 function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolledEvent): void {
@@ -856,6 +887,7 @@ function assertMoneyTransactionSourceInvariant(
       );
       return;
     case MoneyTransactionSourceType.BusinessUpkeep:
+    case MoneyTransactionSourceType.BusinessIncome:
       assertInvariant(
         "OrganizationMoneyTransactionRecorded.source.businessId",
         () => parseBusinessId(source.businessId),

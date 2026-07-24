@@ -45,6 +45,27 @@ export const DomainErrorCode = {
   MoneyTransactionMissingOrganization: "MONEY_TRANSACTION_MISSING_ORGANIZATION",
   MoneyTransactionUnsupportedCategory: "MONEY_TRANSACTION_UNSUPPORTED_CATEGORY",
   MoneyTransactionUnsupportedSource: "MONEY_TRANSACTION_UNSUPPORTED_SOURCE",
+  BusinessIncomeRuntimeDefinitionMismatch: "BUSINESS_INCOME_RUNTIME_DEFINITION_MISMATCH",
+  BusinessIncomeRuntimeScheduleConflict: "BUSINESS_INCOME_RUNTIME_SCHEDULE_CONFLICT",
+  BusinessIncomeRuntimeScheduleMismatch: "BUSINESS_INCOME_RUNTIME_SCHEDULE_MISMATCH",
+  BusinessIncomeRuntimeScheduleNotFound: "BUSINESS_INCOME_RUNTIME_SCHEDULE_NOT_FOUND",
+  BusinessIncomeScheduleGenerationInvalidDefinition:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_INVALID_DEFINITION",
+  BusinessIncomeScheduleGenerationInvalidFirstDueTick:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_INVALID_FIRST_DUE_TICK",
+  BusinessIncomeScheduleGenerationInvalidScheduleId:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_INVALID_SCHEDULE_ID",
+  BusinessIncomeScheduleGenerationMissingBusiness:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_MISSING_BUSINESS",
+  BusinessIncomeScheduleGenerationMissingOrganization:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_MISSING_ORGANIZATION",
+  BusinessIncomeScheduleGenerationScheduleConflict:
+    "BUSINESS_INCOME_SCHEDULE_GENERATION_SCHEDULE_CONFLICT",
+  BusinessOwnershipAlreadyOwnedBySameOrganization:
+    "BUSINESS_OWNERSHIP_ALREADY_OWNED_BY_SAME_ORGANIZATION",
+  BusinessOwnershipConflictingCurrentOwner: "BUSINESS_OWNERSHIP_CONFLICTING_CURRENT_OWNER",
+  BusinessOwnershipMissingBusiness: "BUSINESS_OWNERSHIP_MISSING_BUSINESS",
+  BusinessOwnershipMissingOrganization: "BUSINESS_OWNERSHIP_MISSING_ORGANIZATION",
   RecurringEconomyPeriodAlreadyProcessed: "RECURRING_ECONOMY_PERIOD_ALREADY_PROCESSED",
   RecurringEconomyPeriodNotDue: "RECURRING_ECONOMY_PERIOD_NOT_DUE",
   RecurringEconomyProcessingRecordInvalid: "RECURRING_ECONOMY_PROCESSING_RECORD_INVALID",

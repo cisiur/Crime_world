@@ -292,9 +292,9 @@ Current roadmap phase:
 
 Current next task:
 
-> **E5-04 - Implement basic business control and income generation**
+> **E5-05 - Implement recruitment opportunity generation**
 
-EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. E5-02 is complete after accepted bounded increments E5-02A through E5-02F: money ledger -> recurring schedule domain -> due-period processing -> application runtime -> crew upkeep and MVP recurring-income flows. E5-03 is complete as authored content only: `packages/content` now has six canonical immutable MVP business / location archetype definitions, a deterministic `LocationKind` resolver, and focused validation. Business and hideout upkeep, business-derived income, business control, runtime ownership transitions, global tick integration, campaign aggregate integration, save/load, pressure system, recruitment system, rival AI, and final player-facing UI are not implemented yet.
+EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 through E4-10 are accepted: Local Collection now has canonical authored content, availability, planning, lifecycle, seeded outcome classification, bounded immediate consequences, deterministic integration coverage, and a developer playtest UI. E5-01 is complete as a documentation/specification task only: the accepted money-flow, upkeep, and transaction-ledger contract is authoritative in `docs/BUILD_ROADMAP.md`. E5-02 is complete after accepted bounded increments E5-02A through E5-02F: money ledger -> recurring schedule domain -> due-period processing -> application runtime -> crew upkeep and MVP recurring-income flows. E5-03 is complete as authored content only: `packages/content` now has six canonical immutable MVP business / location archetype definitions, a deterministic `LocationKind` resolver, and focused validation. E5-04 is complete as one bounded business ownership and income vertical slice: one runtime business can transfer to an organization, owned income-generating businesses can generate deterministic recurring schedules from caller-supplied content values, and one explicit due business-income period can execute through the recurring economy processor and money ledger. Business upkeep, hideout upkeep, global tick integration, campaign aggregate integration, save/load, pressure effects, rival behavior, recruitment, production, inventory, storage capacity, and final player-facing UI are not implemented yet.
 
 ---
 
@@ -708,7 +708,7 @@ packages/
   presentation/     React presentation components and map placeholder
 ```
 
-The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the complete EPIC 4 Local Collection domain slice, the E5-02A standalone money-ledger foundation, the E5-02B Local Collection ledger migration, the E5-02C recurring economy scheduler foundation, the E5-02E crew-upkeep schedule generation rules, and the E5-02F recurring-income schedule generation rules: runtime `OperationState`, availability, planning, lifecycle, seeded weighted outcome resolution, typed outcome classification, bounded consequence application, applied-consequence records, immutable money transactions, typed transaction categories and sources, atomic transaction recording, recurring schedules and processing records, semantic domain events, and invariants. Authored city data, rival organization seeds, the Local Collection operation template, canonical outcome bands, canonical consequence definition, canonical MVP crew-upkeep definition, canonical MVP recurring-income definition, and canonical MVP business / location archetype definitions remain in `packages/content`. The application package now contains the Local Collection developer playtest/session harness, the recurring economy runtime wrapper, controlled one-character crew-upkeep period execution, and controlled one-organization recurring-income period execution; presentation renders the Local Collection playtest in the desktop/browser shell. The repository still does not contain campaign creation, operation or ledger persistence in root `GameState`, save/load, business control, business or hideout upkeep, business-derived income, global tick-loop economy integration, pressure or investigation systems, recruitment, rival AI, a reusable operation catalogue, or a final player-facing UI.
+The current domain package contains the accepted EPIC 1 foundation, the minimal EPIC 2 runtime city shell, the EPIC 3 character, organization, business, ownership-reference, and availability foundations, the complete EPIC 4 Local Collection domain slice, the E5-02A standalone money-ledger foundation, the E5-02B Local Collection ledger migration, the E5-02C recurring economy scheduler foundation, the E5-02E crew-upkeep schedule generation rules, the E5-02F recurring-income schedule generation rules, and the E5-04 business ownership and business-income schedule rules: runtime `OperationState`, availability, planning, lifecycle, seeded weighted outcome resolution, typed outcome classification, bounded consequence application, applied-consequence records, immutable money transactions, typed transaction categories and sources, atomic transaction recording, recurring schedules and processing records, semantic domain events, and invariants. Authored city data, rival organization seeds, the Local Collection operation template, canonical outcome bands, canonical consequence definition, canonical MVP crew-upkeep definition, canonical MVP recurring-income definition, canonical MVP business / location archetype definitions, and canonical MVP business income definitions remain in `packages/content`. The canonical E5-04 business income values are Small Shop or Service `20` money every `144` ticks, Restaurant or Nightlife Venue `60` every `144` ticks, and Workshop or Transport Business `40` every `144` ticks. The application package now contains the Local Collection developer playtest/session harness, the recurring economy runtime wrapper, controlled one-character crew-upkeep period execution, controlled one-organization recurring-income period execution, and controlled one-business business-income period execution; presentation renders the Local Collection playtest in the desktop/browser shell. The repository still does not contain campaign creation, operation or ledger persistence in root `GameState`, save/load, business or hideout upkeep, global tick-loop economy integration, pressure or investigation systems, recruitment, rival AI, a reusable operation catalogue, production/inventory systems, or a final player-facing UI.
 
 ---
 
@@ -748,18 +748,19 @@ Completed:
 - E5-02F MVP recurring income generation and one-period runtime execution.
 - E5-02 recurring income and recurring costs.
 - E5-03 authored MVP business / location archetype definitions.
+- E5-04 basic business ownership and income generation.
 
 Next:
 
-> **E5-04 - Implement basic business control and income generation**
+> **E5-05 - Implement recruitment opportunity generation**
 
 Required PM output before implementation:
 
-- review and accept the E5-04 scope,
-- preserve the accepted E5-01/E5-02A through E5-02F contract and EPIC 4 Local Collection money outcomes,
+- review and accept the E5-05 scope,
+- preserve the accepted E5-01/E5-02A through E5-02F and E5-04 contracts and EPIC 4 Local Collection money outcomes,
 - preserve the E5-03 content-only archetype boundary,
 - keep any further economy integration out of scope until its explicit accepted task,
-- keep business control, recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
+- keep recruitment gameplay, pressure systems, rival AI, save/load, and broader campaign orchestration out of scope until explicitly accepted.
 
 ---
 

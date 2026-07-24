@@ -1,6 +1,7 @@
 import type { GameState } from "./gameState";
 import type { AssignmentState, CharacterHealthState } from "./characterState";
 import type {
+  BusinessId,
   CharacterId,
   LocationId,
   OperationId,
@@ -37,6 +38,7 @@ export const DomainEventType = {
   RecurringEconomyPeriodProcessed: "RecurringEconomyPeriodProcessed",
   SimulationResumed: "SimulationResumed",
   SimulationTickAdvanced: "SimulationTickAdvanced",
+  BusinessOwnershipTransferred: "BusinessOwnershipTransferred",
 } as const;
 
 export type DomainEventType = (typeof DomainEventType)[keyof typeof DomainEventType];
@@ -55,6 +57,15 @@ export interface SimulationTickAdvancedEvent {
   readonly previousMinute: SimulationMinute;
   readonly currentMinute: SimulationMinute;
   readonly [domainEventBrand]: "SimulationTickAdvancedEvent";
+}
+
+export interface BusinessOwnershipTransferredEvent {
+  readonly type: typeof DomainEventType.BusinessOwnershipTransferred;
+  readonly businessId: BusinessId;
+  readonly locationId: LocationId;
+  readonly previousOwnerOrganizationId: OrganizationId | null;
+  readonly newOwnerOrganizationId: OrganizationId;
+  readonly [domainEventBrand]: "BusinessOwnershipTransferredEvent";
 }
 
 export interface OperationPlannedEvent {
@@ -247,6 +258,7 @@ export interface OperationConsequencesAppliedEvent {
 }
 
 export type DomainEvent =
+  | BusinessOwnershipTransferredEvent
   | CharacterAssignmentReleasedEvent
   | CharacterAssignedToOperationEvent
   | CharacterHealthChangedEvent
@@ -279,6 +291,13 @@ export interface CreateSimulationTickAdvancedEventInput {
   readonly currentTick: SimulationTick;
   readonly previousMinute: SimulationMinute;
   readonly currentMinute: SimulationMinute;
+}
+
+export interface CreateBusinessOwnershipTransferredEventInput {
+  readonly businessId: BusinessId;
+  readonly locationId: LocationId;
+  readonly previousOwnerOrganizationId: OrganizationId | null;
+  readonly newOwnerOrganizationId: OrganizationId;
 }
 
 export interface CreateOperationPlannedEventInput {
@@ -449,6 +468,18 @@ export function createSimulationTickAdvancedEvent(
     previousMinute: input.previousMinute,
     currentMinute: input.currentMinute,
   }) as SimulationTickAdvancedEvent;
+}
+
+export function createBusinessOwnershipTransferredEvent(
+  input: CreateBusinessOwnershipTransferredEventInput,
+): BusinessOwnershipTransferredEvent {
+  return Object.freeze({
+    type: DomainEventType.BusinessOwnershipTransferred,
+    businessId: input.businessId,
+    locationId: input.locationId,
+    previousOwnerOrganizationId: input.previousOwnerOrganizationId,
+    newOwnerOrganizationId: input.newOwnerOrganizationId,
+  }) as BusinessOwnershipTransferredEvent;
 }
 
 export function createOperationPlannedEvent(

@@ -1,5 +1,6 @@
 import {
   DomainEventType,
+  createBusinessOwnershipTransferredEvent,
   createCharacterAssignmentReleasedEvent,
   createCharacterAssignedToOperationEvent,
   createCharacterHealthChangedEvent,
@@ -16,6 +17,7 @@ import {
   createOrganizationOperationalCapacityReleasedEvent,
   createOrganizationOperationalCapacityReservedEvent,
   parseCharacterId,
+  parseBusinessId,
   parseLocationId,
   parseOperationId,
   parseOperationTemplateId,
@@ -32,6 +34,7 @@ import {
 import type {
   CharacterAssignmentReleasedEvent,
   CharacterAssignedToOperationEvent,
+  BusinessOwnershipTransferredEvent,
   CharacterHealthChangedEvent,
   CharacterPersonalExposureChangedEvent,
   DomainEvent,
@@ -60,6 +63,13 @@ const operationId = parseOperationId("operation:local_collection_001");
 const operationTemplateId = parseOperationTemplateId("operation-template:local_collection");
 const organizationId = parseOrganizationId("organization:starter_crew");
 const targetLocationId = parseLocationId("location:corner_store");
+const businessId = parseBusinessId("business:corner_store");
+const businessOwnershipTransferredEvent = createBusinessOwnershipTransferredEvent({
+  businessId,
+  locationId: targetLocationId,
+  previousOwnerOrganizationId: null,
+  newOwnerOrganizationId: organizationId,
+});
 const operationPlannedEvent = createOperationPlannedEvent({
   operationId,
   operationTemplateId,
@@ -228,6 +238,7 @@ const eventUnionM: DomainEvent = characterHealthChangedEvent;
 const eventUnionN: DomainEvent = capacityReleasedEvent;
 const eventUnionO: DomainEvent = grossRewardMoneyChangedEvent;
 const eventUnionP: DomainEvent = operationConsequencesAppliedEvent;
+const eventUnionQ: DomainEvent = businessOwnershipTransferredEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -421,6 +432,15 @@ const invalidTickAdvancedEvent: SimulationTickAdvancedEvent = {
   currentMinute: minute,
 };
 
+// @ts-expect-error Arbitrary objects cannot be BusinessOwnershipTransferredEvent.
+const invalidBusinessOwnershipTransferredEvent: BusinessOwnershipTransferredEvent = {
+  type: DomainEventType.BusinessOwnershipTransferred,
+  businessId,
+  locationId: targetLocationId,
+  previousOwnerOrganizationId: null,
+  newOwnerOrganizationId: organizationId,
+};
+
 // @ts-expect-error Arbitrary objects cannot be DomainExecution.
 const invalidExecution: DomainExecution = {
   gameState,
@@ -446,6 +466,8 @@ execution.events.push(resumedEvent);
 
 function assertDomainEventUnion(event: DomainEvent): string {
   switch (event.type) {
+    case DomainEventType.BusinessOwnershipTransferred:
+      return event.type;
     case DomainEventType.CharacterAssignedToOperation:
       return event.type;
     case DomainEventType.CharacterAssignmentReleased:
@@ -503,6 +525,7 @@ void eventUnionM;
 void eventUnionN;
 void eventUnionO;
 void eventUnionP;
+void eventUnionQ;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;
@@ -519,5 +542,6 @@ void invalidMoneyChangedEvent;
 void invalidOperationConsequencesAppliedEvent;
 void invalidResumedEvent;
 void invalidTickAdvancedEvent;
+void invalidBusinessOwnershipTransferredEvent;
 void invalidExecution;
 void assertDomainEventUnion;

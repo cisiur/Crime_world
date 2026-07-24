@@ -1,10 +1,16 @@
 import {
+  type BusinessIncomeDefinition,
+  type BusinessLocationArchetypeId,
+} from "@crimeworld/content";
+import {
   processRecurringEconomyDuePeriod,
   failure,
   success,
   DomainErrorCode,
   MoneyTransactionCategory,
   MoneyTransactionSourceType,
+  type BusinessId,
+  type BusinessState,
   type CharacterId,
   type DomainError,
   type DomainEvent,
@@ -107,6 +113,61 @@ export type ExecuteRecurringIncomePeriodError =
 export type ExecuteRecurringIncomePeriodResult = DomainResult<
   ExecuteRecurringEconomyRuntimeSuccess,
   ExecuteRecurringIncomePeriodError
+>;
+
+export interface ExecuteBusinessIncomePeriodInput {
+  readonly currentTick: SimulationTick;
+  readonly transactionId: TransactionId;
+  readonly business: BusinessState;
+  readonly businessLocationArchetypeId: BusinessLocationArchetypeId;
+  readonly definition: BusinessIncomeDefinition;
+  readonly businesses: readonly BusinessState[];
+  readonly organizations: readonly OrganizationState[];
+  readonly transactions: readonly MoneyTransaction[];
+  readonly processingRecords: readonly RecurringEconomyProcessingRecord[];
+  readonly schedules: readonly RecurringEconomySchedule[];
+}
+
+export interface BusinessIncomeRuntimeScheduleNotFoundError extends DomainError {
+  readonly code: typeof DomainErrorCode.BusinessIncomeRuntimeScheduleNotFound;
+  readonly businessId: BusinessId;
+}
+
+export interface BusinessIncomeRuntimeScheduleConflictError extends DomainError {
+  readonly code: typeof DomainErrorCode.BusinessIncomeRuntimeScheduleConflict;
+  readonly businessId: BusinessId;
+  readonly matchingScheduleCount: number;
+}
+
+export interface BusinessIncomeRuntimeScheduleMismatchError extends DomainError {
+  readonly code: typeof DomainErrorCode.BusinessIncomeRuntimeScheduleMismatch;
+  readonly businessId: BusinessId;
+  readonly field:
+    | "business"
+    | "ownerOrganizationId"
+    | "category"
+    | "source"
+    | "amount"
+    | "periodTicks";
+}
+
+export interface BusinessIncomeRuntimeDefinitionMismatchError extends DomainError {
+  readonly code: typeof DomainErrorCode.BusinessIncomeRuntimeDefinitionMismatch;
+  readonly businessId: BusinessId;
+  readonly businessLocationArchetypeId: BusinessLocationArchetypeId;
+  readonly definitionArchetypeId: BusinessLocationArchetypeId;
+}
+
+export type ExecuteBusinessIncomePeriodError =
+  | BusinessIncomeRuntimeDefinitionMismatchError
+  | BusinessIncomeRuntimeScheduleConflictError
+  | BusinessIncomeRuntimeScheduleMismatchError
+  | BusinessIncomeRuntimeScheduleNotFoundError
+  | RecurringEconomyError;
+
+export type ExecuteBusinessIncomePeriodResult = DomainResult<
+  ExecuteRecurringEconomyRuntimeSuccess,
+  ExecuteBusinessIncomePeriodError
 >;
 
 export function executeRecurringEconomyRuntime(
@@ -233,5 +294,117 @@ export function executeRecurringIncomePeriod(
     transactions: input.transactions,
     processingRecords: input.processingRecords,
     schedules: input.schedules,
+  });
+}
+
+export function executeBusinessIncomePeriod(
+  input: ExecuteBusinessIncomePeriodInput,
+): ExecuteBusinessIncomePeriodResult {
+  if (input.definition.businessLocationArchetypeId !== input.businessLocationArchetypeId) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeDefinitionMismatch,
+      message: `Business income definition does not match archetype "${input.businessLocationArchetypeId}".`,
+      businessId: input.business.businessId,
+      businessLocationArchetypeId: input.businessLocationArchetypeId,
+      definitionArchetypeId: input.definition.businessLocationArchetypeId,
+    });
+  }
+
+  const runtimeBusiness = input.businesses.find(
+    (business) => business.businessId === input.business.businessId,
+  );
+  if (runtimeBusiness !== input.business) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeScheduleMismatch,
+      message: `Business "${input.business.businessId}" is not the explicit runtime business supplied in the business collection.`,
+      businessId: input.business.businessId,
+      field: "business",
+    });
+  }
+
+  if (input.business.ownerOrganizationId === null) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeScheduleMismatch,
+      message: `Business "${input.business.businessId}" is not owned and cannot produce income.`,
+      businessId: input.business.businessId,
+      field: "ownerOrganizationId",
+    });
+  }
+
+  const matchingSchedules = input.schedules.filter(
+    (schedule) =>
+      schedule.source.type === MoneyTransactionSourceType.BusinessIncome &&
+      schedule.source.businessId === input.business.businessId,
+  );
+
+  if (matchingSchedules.length === 0) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeScheduleNotFound,
+      message: `Business income schedule for business "${input.business.businessId}" was not found.`,
+      businessId: input.business.businessId,
+    });
+  }
+
+  if (matchingSchedules.length > 1) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeScheduleConflict,
+      message: `Expected one business income schedule for business "${input.business.businessId}", found ${matchingSchedules.length}.`,
+      businessId: input.business.businessId,
+      matchingScheduleCount: matchingSchedules.length,
+    });
+  }
+
+  const schedule = matchingSchedules[0];
+  if (schedule === undefined) {
+    return failure({
+      code: DomainErrorCode.BusinessIncomeRuntimeScheduleNotFound,
+      message: `Business income schedule for business "${input.business.businessId}" was not found.`,
+      businessId: input.business.businessId,
+    });
+  }
+
+  if (schedule.organizationId !== input.business.ownerOrganizationId) {
+    return businessIncomeScheduleMismatch(input.business.businessId, "ownerOrganizationId");
+  }
+
+  if (schedule.category !== MoneyTransactionCategory.BusinessIncome) {
+    return businessIncomeScheduleMismatch(input.business.businessId, "category");
+  }
+
+  if (
+    schedule.source.type !== MoneyTransactionSourceType.BusinessIncome ||
+    schedule.source.businessId !== input.business.businessId
+  ) {
+    return businessIncomeScheduleMismatch(input.business.businessId, "source");
+  }
+
+  if (schedule.amount !== input.definition.amount) {
+    return businessIncomeScheduleMismatch(input.business.businessId, "amount");
+  }
+
+  if (schedule.periodTicks !== input.definition.periodTicks) {
+    return businessIncomeScheduleMismatch(input.business.businessId, "periodTicks");
+  }
+
+  return executeRecurringEconomyRuntime({
+    currentTick: input.currentTick,
+    transactionId: input.transactionId,
+    scheduleId: schedule.scheduleId,
+    organizations: input.organizations,
+    transactions: input.transactions,
+    processingRecords: input.processingRecords,
+    schedules: input.schedules,
+  });
+}
+
+function businessIncomeScheduleMismatch(
+  businessId: BusinessId,
+  field: BusinessIncomeRuntimeScheduleMismatchError["field"],
+): ExecuteBusinessIncomePeriodResult {
+  return failure({
+    code: DomainErrorCode.BusinessIncomeRuntimeScheduleMismatch,
+    message: `Business income schedule for business "${businessId}" has mismatched field "${field}".`,
+    businessId,
+    field,
   });
 }

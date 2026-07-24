@@ -35,6 +35,7 @@ export type MoneySourceId = string & {
 export const MoneyTransactionCategory = {
   OperationReward: "operation-reward",
   RecurringIncome: "recurring-income",
+  BusinessIncome: "business-income",
   RecoveryIncome: "recovery-income",
   OtherIncome: "other-income",
   OperationCost: "operation-cost",
@@ -54,6 +55,7 @@ export const MoneyTransactionSourceType = {
   OperationStartCost: "operation-start-cost",
   OperationGrossReward: "operation-gross-reward",
   RecurringIncome: "recurring-income",
+  BusinessIncome: "business-income",
   CrewUpkeep: "crew-upkeep",
   BusinessUpkeep: "business-upkeep",
   HideoutUpkeep: "hideout-upkeep",
@@ -80,6 +82,11 @@ export interface OperationGrossRewardMoneySource {
 export interface RecurringIncomeMoneySource {
   readonly type: typeof MoneyTransactionSourceType.RecurringIncome;
   readonly sourceId: MoneySourceId;
+}
+
+export interface BusinessIncomeMoneySource {
+  readonly type: typeof MoneyTransactionSourceType.BusinessIncome;
+  readonly businessId: BusinessId;
 }
 
 export interface CrewUpkeepMoneySource {
@@ -123,6 +130,7 @@ export interface GenericMoneySource {
 }
 
 export type MoneyTransactionSource =
+  | BusinessIncomeMoneySource
   | BusinessUpkeepMoneySource
   | CrewUpkeepMoneySource
   | GenericMoneySource
@@ -511,6 +519,8 @@ function normalizeMoneyTransactionSource(
     case MoneyTransactionSourceType.Recovery:
     case MoneyTransactionSourceType.Generic:
       return normalizeBoundedSource(sourceType, source);
+    case MoneyTransactionSourceType.BusinessIncome:
+      return normalizeEntitySource(sourceType, "businessId", source, parseBusinessId);
     case MoneyTransactionSourceType.CrewUpkeep:
       return normalizeEntitySource(sourceType, "characterId", source, parseCharacterId);
     case MoneyTransactionSourceType.BusinessUpkeep:
@@ -778,6 +788,7 @@ function describeValueType(value: unknown): string {
 const INCOME_CATEGORIES = new Set<MoneyTransactionCategory>([
   MoneyTransactionCategory.OperationReward,
   MoneyTransactionCategory.RecurringIncome,
+  MoneyTransactionCategory.BusinessIncome,
   MoneyTransactionCategory.RecoveryIncome,
   MoneyTransactionCategory.OtherIncome,
 ]);
@@ -787,6 +798,7 @@ const CATEGORY_SOURCE_COMPATIBILITY: Readonly<
 > = {
   [MoneyTransactionCategory.OperationReward]: [MoneyTransactionSourceType.OperationGrossReward],
   [MoneyTransactionCategory.RecurringIncome]: [MoneyTransactionSourceType.RecurringIncome],
+  [MoneyTransactionCategory.BusinessIncome]: [MoneyTransactionSourceType.BusinessIncome],
   [MoneyTransactionCategory.RecoveryIncome]: [MoneyTransactionSourceType.Recovery],
   [MoneyTransactionCategory.OtherIncome]: [MoneyTransactionSourceType.Generic],
   [MoneyTransactionCategory.OperationCost]: [MoneyTransactionSourceType.OperationStartCost],

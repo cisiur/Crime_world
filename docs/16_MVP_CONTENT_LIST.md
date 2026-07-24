@@ -98,7 +98,7 @@ The map may include decorative buildings, but only strategically relevant locati
 
 ### Required strategic location archetypes
 
-Implementation status: the six MVP archetypes below now have canonical immutable authored definitions in `packages/content`. These definitions record IDs, `LocationKind` mappings, display names, business/strategic-location classification, gameplay roles, and relative economic/risk profiles only. Runtime business control, business income, business upkeep, hideout upkeep, ownership transitions, UI, tick integration, save/load, and final balancing remain unimplemented.
+Implementation status: the six MVP archetypes below now have canonical immutable authored definitions in `packages/content`. These definitions record IDs, `LocationKind` mappings, display names, business/strategic-location classification, gameplay roles, and relative economic/risk profiles. E5-04 also adds canonical provisional authored business income definitions for income-generating archetypes only: Small Shop or Service `20` money every `144` ticks, Restaurant or Nightlife Venue `60` every `144` ticks, and Workshop or Transport Business `40` every `144` ticks. Hideout, safehouse, and warehouse/storage do not have business income definitions. Business upkeep, hideout upkeep, UI, tick integration, save/load, production, inventory, storage capacity, and final balancing remain unimplemented.
 
 1. **Hideout**
    - stores crew and operational resources,
