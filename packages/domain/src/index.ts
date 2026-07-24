@@ -25,6 +25,7 @@ export {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecruitmentOpportunityId,
   parseRecurringEconomyScheduleId,
   parseRouteId,
   parseTransactionId,
@@ -42,6 +43,7 @@ export type {
   OperationTemplateId,
   OpportunityId,
   OrganizationId,
+  RecruitmentOpportunityId,
   RecurringEconomyScheduleId,
   RouteId,
   TransactionId,
@@ -75,3 +77,5 @@ export * from "./recurringEconomy";
 export * from "./crewUpkeepSchedules";
 export * from "./recurringIncomeSchedules";
 export * from "./businessIncomeSchedules";
+export * from "./recruitmentOpportunityState";
+export * from "./recruitmentOpportunities";

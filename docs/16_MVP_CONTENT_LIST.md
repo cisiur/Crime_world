@@ -192,6 +192,15 @@ The MVP does not require cartels, international syndicates, or multiple organiza
 
 The MVP should contain 10–15 named, persistent NPCs.
 
+E5-05 implementation status: four concrete persistent recruitable candidate seeds and matching opportunity definitions now exist in `packages/content`. They are provisional MVP hypotheses for opportunity generation only:
+
+- Vera Kade: experienced but unreliable; `streetwise` + `force`; competence `75`, loyalty `35`, exposure `30`; recruitment cost `60`, minimum trust `35`, maintenance preview `5`, opportunity duration `432` ticks; located at `location:bar_district`.
+- Eli Navarro: loyal but inexperienced; `social`; competence `35`, loyalty `80`, exposure `10`; recruitment cost `25`, minimum trust `15`, maintenance preview `5`, opportunity duration `576` ticks; located at `location:community_center`.
+- Nika Ross: cheap but exposed; `stealth` + `streetwise`; competence `50`, loyalty `50`, exposure `65`; recruitment cost `10`, minimum trust `10`, maintenance preview `5`, opportunity duration `288` ticks; located at `location:corner_store`.
+- Tomas Vek: expensive logistics specialist; `logistics` + `social`; competence `70`, loyalty `60`, exposure `15`; recruitment cost `90`, minimum trust `45`, maintenance preview `5`, opportunity duration `720` ticks; located at `location:freight_terminal`.
+
+Recruitment opportunities can now be generated and expired deterministically for concrete candidates, but recruitment cannot yet be executed. No money, membership, upkeep, role, capacity, UI, global tick integration, save/load, or campaign integration is implemented by E5-05.
+
 ### Required roles
 
 - player boss,

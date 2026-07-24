@@ -106,6 +106,8 @@ NPCs should have enough identity to create meaningful choices through:
 - exposure,
 - and role suitability.
 
+Implementation status after E5-05: the repository now contains four concrete persistent recruitable NPC candidates and deterministic recruitment opportunity generation/expiration for them. Recruitment execution is still not implemented: no candidate joins an organization, no money is deducted, no upkeep schedule is created, no role or operational capacity changes occur, and no UI, global tick-loop, campaign integration, save/load, pressure effect, or rival behavior is attached to this foundation yet.
+
 The MVP does not require full life simulation for every citizen.
 
 ### Rival organizations

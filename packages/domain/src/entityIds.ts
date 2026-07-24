@@ -18,6 +18,7 @@ type EntityIdTypeName =
   | "OperationTemplateId"
   | "InvestigationId"
   | "OpportunityId"
+  | "RecruitmentOpportunityId"
   | "WorldEventId"
   | "CampaignId";
 
@@ -34,6 +35,7 @@ export type OperationId = EntityId<"OperationId">;
 export type OperationTemplateId = EntityId<"OperationTemplateId">;
 export type InvestigationId = EntityId<"InvestigationId">;
 export type OpportunityId = EntityId<"OpportunityId">;
+export type RecruitmentOpportunityId = EntityId<"RecruitmentOpportunityId">;
 export type WorldEventId = EntityId<"WorldEventId">;
 export type CampaignId = EntityId<"CampaignId">;
 
@@ -103,6 +105,10 @@ export function parseInvestigationId(value: unknown): InvestigationId {
 
 export function parseOpportunityId(value: unknown): OpportunityId {
   return parseEntityId("OpportunityId", value);
+}
+
+export function parseRecruitmentOpportunityId(value: unknown): RecruitmentOpportunityId {
+  return parseEntityId("RecruitmentOpportunityId", value);
 }
 
 export function parseWorldEventId(value: unknown): WorldEventId {

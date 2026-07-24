@@ -18,6 +18,8 @@ import {
   type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type RecurringEconomyPeriodProcessedEvent,
+  type RecruitmentOpportunityExpiredEvent,
+  type RecruitmentOpportunityGeneratedEvent,
   type SimulationResumedEvent,
   type SimulationTickAdvancedEvent,
 } from "./domainEvents";
@@ -31,6 +33,7 @@ import {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecruitmentOpportunityId,
   parseRecurringEconomyScheduleId,
   parseTransactionId,
 } from "./entityIds";
@@ -227,6 +230,12 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
     case DomainEventType.RecurringEconomyPeriodProcessed:
       assertRecurringEconomyPeriodProcessedEventInvariant(event);
       return;
+    case DomainEventType.RecruitmentOpportunityExpired:
+      assertRecruitmentOpportunityExpiredEventInvariant(event);
+      return;
+    case DomainEventType.RecruitmentOpportunityGenerated:
+      assertRecruitmentOpportunityGeneratedEventInvariant(event);
+      return;
     case DomainEventType.SimulationResumed:
       assertSimulationResumedEventInvariant(event);
       return;
@@ -263,6 +272,59 @@ function assertBusinessOwnershipTransferredEventInvariant(
     () => parseOrganizationId(event.newOwnerOrganizationId),
     event,
   );
+}
+
+function assertRecruitmentOpportunityGeneratedEventInvariant(
+  event: RecruitmentOpportunityGeneratedEvent,
+): void {
+  assertRecruitmentOpportunityLifecycleEventFields("RecruitmentOpportunityGenerated", event);
+  assertInvariant(
+    "RecruitmentOpportunityGenerated.createdAtTick",
+    () => parseSimulationTick(event.createdAtTick),
+    event,
+  );
+  assertInvariant(
+    "RecruitmentOpportunityGenerated.expiresAtTick",
+    () => parseSimulationTick(event.expiresAtTick),
+    event,
+  );
+
+  if (event.expiresAtTick <= event.createdAtTick) {
+    throw new InvariantViolationError(
+      "RecruitmentOpportunityGenerated.tickOrder",
+      "expiresAtTick must be greater than createdAtTick",
+      event,
+    );
+  }
+}
+
+function assertRecruitmentOpportunityExpiredEventInvariant(
+  event: RecruitmentOpportunityExpiredEvent,
+): void {
+  assertRecruitmentOpportunityLifecycleEventFields("RecruitmentOpportunityExpired", event);
+  assertInvariant(
+    "RecruitmentOpportunityExpired.expiredAtTick",
+    () => parseSimulationTick(event.expiredAtTick),
+    event,
+  );
+}
+
+function assertRecruitmentOpportunityLifecycleEventFields(
+  eventName: "RecruitmentOpportunityGenerated" | "RecruitmentOpportunityExpired",
+  event: RecruitmentOpportunityGeneratedEvent | RecruitmentOpportunityExpiredEvent,
+): void {
+  assertInvariant(
+    `${eventName}.recruitmentOpportunityId`,
+    () => parseRecruitmentOpportunityId(event.recruitmentOpportunityId),
+    event,
+  );
+  assertInvariant(`${eventName}.candidateCharacterId`, () => parseCharacterId(event.candidateCharacterId), event);
+  assertInvariant(
+    `${eventName}.targetOrganizationId`,
+    () => parseOrganizationId(event.targetOrganizationId),
+    event,
+  );
+  assertInvariant(`${eventName}.locationId`, () => parseLocationId(event.locationId), event);
 }
 
 function assertOperationOutcomeRolledEventInvariant(event: OperationOutcomeRolledEvent): void {

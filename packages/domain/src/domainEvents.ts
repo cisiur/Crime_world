@@ -7,6 +7,7 @@ import type {
   OperationId,
   OperationTemplateId,
   OrganizationId,
+  RecruitmentOpportunityId,
   RecurringEconomyScheduleId,
   TransactionId,
 } from "./entityIds";
@@ -36,6 +37,8 @@ export const DomainEventType = {
   OrganizationOperationalCapacityReleased: "OrganizationOperationalCapacityReleased",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
   RecurringEconomyPeriodProcessed: "RecurringEconomyPeriodProcessed",
+  RecruitmentOpportunityExpired: "RecruitmentOpportunityExpired",
+  RecruitmentOpportunityGenerated: "RecruitmentOpportunityGenerated",
   SimulationResumed: "SimulationResumed",
   SimulationTickAdvanced: "SimulationTickAdvanced",
   BusinessOwnershipTransferred: "BusinessOwnershipTransferred",
@@ -66,6 +69,27 @@ export interface BusinessOwnershipTransferredEvent {
   readonly previousOwnerOrganizationId: OrganizationId | null;
   readonly newOwnerOrganizationId: OrganizationId;
   readonly [domainEventBrand]: "BusinessOwnershipTransferredEvent";
+}
+
+export interface RecruitmentOpportunityGeneratedEvent {
+  readonly type: typeof DomainEventType.RecruitmentOpportunityGenerated;
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly locationId: LocationId;
+  readonly createdAtTick: SimulationTick;
+  readonly expiresAtTick: SimulationTick;
+  readonly [domainEventBrand]: "RecruitmentOpportunityGeneratedEvent";
+}
+
+export interface RecruitmentOpportunityExpiredEvent {
+  readonly type: typeof DomainEventType.RecruitmentOpportunityExpired;
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly locationId: LocationId;
+  readonly expiredAtTick: SimulationTick;
+  readonly [domainEventBrand]: "RecruitmentOpportunityExpiredEvent";
 }
 
 export interface OperationPlannedEvent {
@@ -274,6 +298,8 @@ export type DomainEvent =
   | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
   | RecurringEconomyPeriodProcessedEvent
+  | RecruitmentOpportunityExpiredEvent
+  | RecruitmentOpportunityGeneratedEvent
   | SimulationResumedEvent
   | SimulationTickAdvancedEvent;
 
@@ -298,6 +324,23 @@ export interface CreateBusinessOwnershipTransferredEventInput {
   readonly locationId: LocationId;
   readonly previousOwnerOrganizationId: OrganizationId | null;
   readonly newOwnerOrganizationId: OrganizationId;
+}
+
+export interface CreateRecruitmentOpportunityGeneratedEventInput {
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly locationId: LocationId;
+  readonly createdAtTick: SimulationTick;
+  readonly expiresAtTick: SimulationTick;
+}
+
+export interface CreateRecruitmentOpportunityExpiredEventInput {
+  readonly recruitmentOpportunityId: RecruitmentOpportunityId;
+  readonly candidateCharacterId: CharacterId;
+  readonly targetOrganizationId: OrganizationId;
+  readonly locationId: LocationId;
+  readonly expiredAtTick: SimulationTick;
 }
 
 export interface CreateOperationPlannedEventInput {
@@ -480,6 +523,33 @@ export function createBusinessOwnershipTransferredEvent(
     previousOwnerOrganizationId: input.previousOwnerOrganizationId,
     newOwnerOrganizationId: input.newOwnerOrganizationId,
   }) as BusinessOwnershipTransferredEvent;
+}
+
+export function createRecruitmentOpportunityGeneratedEvent(
+  input: CreateRecruitmentOpportunityGeneratedEventInput,
+): RecruitmentOpportunityGeneratedEvent {
+  return Object.freeze({
+    type: DomainEventType.RecruitmentOpportunityGenerated,
+    recruitmentOpportunityId: input.recruitmentOpportunityId,
+    candidateCharacterId: input.candidateCharacterId,
+    targetOrganizationId: input.targetOrganizationId,
+    locationId: input.locationId,
+    createdAtTick: input.createdAtTick,
+    expiresAtTick: input.expiresAtTick,
+  }) as RecruitmentOpportunityGeneratedEvent;
+}
+
+export function createRecruitmentOpportunityExpiredEvent(
+  input: CreateRecruitmentOpportunityExpiredEventInput,
+): RecruitmentOpportunityExpiredEvent {
+  return Object.freeze({
+    type: DomainEventType.RecruitmentOpportunityExpired,
+    recruitmentOpportunityId: input.recruitmentOpportunityId,
+    candidateCharacterId: input.candidateCharacterId,
+    targetOrganizationId: input.targetOrganizationId,
+    locationId: input.locationId,
+    expiredAtTick: input.expiredAtTick,
+  }) as RecruitmentOpportunityExpiredEvent;
 }
 
 export function createOperationPlannedEvent(

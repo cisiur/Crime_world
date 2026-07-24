@@ -164,6 +164,8 @@ Examples:
 - cheap but highly visible,
 - expensive but well connected.
 
+Implementation status after E5-05: four concrete persistent candidates now have authored opportunity definitions with visible costs, trust requirements, maintenance previews, locations, and expiration durations, and the domain can generate/expire those opportunities deterministically. The player still cannot execute recruitment; money, membership, upkeep, role, capacity, UI, tick-loop, campaign, save/load, pressure, and rival behavior are still future tasks.
+
 Recruitment should involve more than paying a fixed cost.
 The player should consider:
 - trust,

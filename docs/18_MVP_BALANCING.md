@@ -358,6 +358,15 @@ A single high-quality recruit may significantly expand capability, but losing th
 
 Avoid generating obviously useless candidates whose only function is to waste the player's time.
 
+E5-05 records four provisional authored recruitment opportunity values as initial hypotheses, not final balance:
+
+- Vera Kade: high competence, lower loyalty; cost `60`, minimum trust `35`, maintenance preview `5`, duration `432` ticks.
+- Eli Navarro: lower competence, high loyalty; cost `25`, minimum trust `15`, maintenance preview `5`, duration `576` ticks.
+- Nika Ross: low recruitment cost, high exposure; cost `10`, minimum trust `10`, maintenance preview `5`, duration `288` ticks.
+- Tomas Vek: higher recruitment cost, strong logistics/social specialist value; cost `90`, minimum trust `45`, maintenance preview `5`, duration `720` ticks.
+
+These values currently support opportunity visibility and expiration only. Recruitment execution, money deduction, membership changes, upkeep schedule creation, role assignment, capacity growth, UI, tick integration, campaign integration, save/load, and final balancing remain unimplemented.
+
 ## Business and location balance
 
 Businesses and locations should provide combinations of:

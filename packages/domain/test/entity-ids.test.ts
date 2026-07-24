@@ -12,6 +12,7 @@ import {
   parseOperationTemplateId,
   parseOpportunityId,
   parseOrganizationId,
+  parseRecruitmentOpportunityId,
   parseRecurringEconomyScheduleId,
   parseRouteId,
   parseTransactionId,
@@ -32,6 +33,11 @@ const parserCases = [
   ["OperationTemplateId", parseOperationTemplateId, "operation-template:local_extortion"],
   ["InvestigationId", parseInvestigationId, "investigation:case_001"],
   ["OpportunityId", parseOpportunityId, "opportunity:tip_001"],
+  [
+    "RecruitmentOpportunityId",
+    parseRecruitmentOpportunityId,
+    "recruitment-opportunity:candidate_001",
+  ],
   ["WorldEventId", parseWorldEventId, "event:0001"],
 ] as const;
 

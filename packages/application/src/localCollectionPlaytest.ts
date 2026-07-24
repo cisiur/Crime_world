@@ -926,6 +926,10 @@ function summarizeDomainEvent(event: DomainEvent): string {
       return `Recurring economy ${event.status}: ${formatSigned(event.amount)} at tick ${
         event.dueTick
       }`;
+    case DomainEventType.RecruitmentOpportunityGenerated:
+      return `Recruitment opportunity generated: ${event.candidateCharacterId}`;
+    case DomainEventType.RecruitmentOpportunityExpired:
+      return `Recruitment opportunity expired: ${event.candidateCharacterId}`;
     case DomainEventType.SimulationResumed:
       return `Simulation resumed at tick ${event.tick}`;
     case DomainEventType.SimulationTickAdvanced:

@@ -16,12 +16,15 @@ import {
   createOrganizationMoneyChangedEvent,
   createOrganizationOperationalCapacityReleasedEvent,
   createOrganizationOperationalCapacityReservedEvent,
+  createRecruitmentOpportunityExpiredEvent,
+  createRecruitmentOpportunityGeneratedEvent,
   parseCharacterId,
   parseBusinessId,
   parseLocationId,
   parseOperationId,
   parseOperationTemplateId,
   parseOrganizationId,
+  parseRecruitmentOpportunityId,
   createRandomState,
   createSimulationResumedEvent,
   createSimulationTickAdvancedEvent,
@@ -48,6 +51,8 @@ import type {
   OrganizationMoneyChangedEvent,
   OrganizationOperationalCapacityReleasedEvent,
   OrganizationOperationalCapacityReservedEvent,
+  RecruitmentOpportunityExpiredEvent,
+  RecruitmentOpportunityGeneratedEvent,
   SimulationResumedEvent,
   SimulationTickAdvancedEvent,
 } from "../src/index";
@@ -64,11 +69,27 @@ const operationTemplateId = parseOperationTemplateId("operation-template:local_c
 const organizationId = parseOrganizationId("organization:starter_crew");
 const targetLocationId = parseLocationId("location:corner_store");
 const businessId = parseBusinessId("business:corner_store");
+const recruitmentOpportunityId = parseRecruitmentOpportunityId("recruitment-opportunity:vera");
 const businessOwnershipTransferredEvent = createBusinessOwnershipTransferredEvent({
   businessId,
   locationId: targetLocationId,
   previousOwnerOrganizationId: null,
   newOwnerOrganizationId: organizationId,
+});
+const recruitmentOpportunityGeneratedEvent = createRecruitmentOpportunityGeneratedEvent({
+  recruitmentOpportunityId,
+  candidateCharacterId: characterId,
+  targetOrganizationId: organizationId,
+  locationId: targetLocationId,
+  createdAtTick: tick,
+  expiresAtTick: parseSimulationTick(10),
+});
+const recruitmentOpportunityExpiredEvent = createRecruitmentOpportunityExpiredEvent({
+  recruitmentOpportunityId,
+  candidateCharacterId: characterId,
+  targetOrganizationId: organizationId,
+  locationId: targetLocationId,
+  expiredAtTick: parseSimulationTick(10),
 });
 const operationPlannedEvent = createOperationPlannedEvent({
   operationId,
@@ -239,6 +260,8 @@ const eventUnionN: DomainEvent = capacityReleasedEvent;
 const eventUnionO: DomainEvent = grossRewardMoneyChangedEvent;
 const eventUnionP: DomainEvent = operationConsequencesAppliedEvent;
 const eventUnionQ: DomainEvent = businessOwnershipTransferredEvent;
+const eventUnionR: DomainEvent = recruitmentOpportunityGeneratedEvent;
+const eventUnionS: DomainEvent = recruitmentOpportunityExpiredEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -441,6 +464,27 @@ const invalidBusinessOwnershipTransferredEvent: BusinessOwnershipTransferredEven
   newOwnerOrganizationId: organizationId,
 };
 
+// @ts-expect-error Arbitrary objects cannot be RecruitmentOpportunityGeneratedEvent.
+const invalidRecruitmentOpportunityGeneratedEvent: RecruitmentOpportunityGeneratedEvent = {
+  type: DomainEventType.RecruitmentOpportunityGenerated,
+  recruitmentOpportunityId,
+  candidateCharacterId: characterId,
+  targetOrganizationId: organizationId,
+  locationId: targetLocationId,
+  createdAtTick: tick,
+  expiresAtTick: parseSimulationTick(10),
+};
+
+// @ts-expect-error Arbitrary objects cannot be RecruitmentOpportunityExpiredEvent.
+const invalidRecruitmentOpportunityExpiredEvent: RecruitmentOpportunityExpiredEvent = {
+  type: DomainEventType.RecruitmentOpportunityExpired,
+  recruitmentOpportunityId,
+  candidateCharacterId: characterId,
+  targetOrganizationId: organizationId,
+  locationId: targetLocationId,
+  expiredAtTick: parseSimulationTick(10),
+};
+
 // @ts-expect-error Arbitrary objects cannot be DomainExecution.
 const invalidExecution: DomainExecution = {
   gameState,
@@ -498,6 +542,10 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.RecurringEconomyPeriodProcessed:
       return event.type;
+    case DomainEventType.RecruitmentOpportunityGenerated:
+      return event.type;
+    case DomainEventType.RecruitmentOpportunityExpired:
+      return event.type;
     case DomainEventType.SimulationResumed:
       return event.type;
     case DomainEventType.SimulationTickAdvanced:
@@ -526,6 +574,8 @@ void eventUnionN;
 void eventUnionO;
 void eventUnionP;
 void eventUnionQ;
+void eventUnionR;
+void eventUnionS;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;
@@ -543,5 +593,7 @@ void invalidOperationConsequencesAppliedEvent;
 void invalidResumedEvent;
 void invalidTickAdvancedEvent;
 void invalidBusinessOwnershipTransferredEvent;
+void invalidRecruitmentOpportunityGeneratedEvent;
+void invalidRecruitmentOpportunityExpiredEvent;
 void invalidExecution;
 void assertDomainEventUnion;

@@ -96,6 +96,21 @@ export const DomainErrorCode = {
     "RECURRING_INCOME_SCHEDULE_GENERATION_INVALID_SCHEDULE_ID",
   RecurringIncomeScheduleGenerationScheduleConflict:
     "RECURRING_INCOME_SCHEDULE_GENERATION_SCHEDULE_CONFLICT",
+  RecruitmentOpportunityGenerationConflict: "RECRUITMENT_OPPORTUNITY_GENERATION_CONFLICT",
+  RecruitmentOpportunityGenerationIneligibleCandidate:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_INELIGIBLE_CANDIDATE",
+  RecruitmentOpportunityGenerationInvalidCurrentTick:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_INVALID_CURRENT_TICK",
+  RecruitmentOpportunityGenerationInvalidDefinition:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_INVALID_DEFINITION",
+  RecruitmentOpportunityGenerationInvalidOpportunityId:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_INVALID_OPPORTUNITY_ID",
+  RecruitmentOpportunityGenerationMissingCharacter:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_MISSING_CHARACTER",
+  RecruitmentOpportunityGenerationMissingLocation:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_MISSING_LOCATION",
+  RecruitmentOpportunityGenerationMissingOrganization:
+    "RECRUITMENT_OPPORTUNITY_GENERATION_MISSING_ORGANIZATION",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:
