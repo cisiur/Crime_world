@@ -38,6 +38,7 @@ export interface GenerateCrewUpkeepSchedulesInput {
   readonly definition: CrewUpkeepScheduleDefinition;
   readonly firstDueTick: SimulationTick;
   readonly scheduleIdsByCharacterId: CrewUpkeepScheduleIdByCharacterId;
+  readonly targetCharacterIds?: readonly CharacterId[];
 }
 
 export interface GenerateCrewUpkeepSchedulesSuccess {
@@ -139,9 +140,15 @@ export function generateCrewUpkeepSchedules(
     return memberResult;
   }
 
+  const scheduleCharacterIdsResult = resolveScheduleCharacterIds(
+    organization,
+    input.targetCharacterIds,
+  );
+  if (!scheduleCharacterIdsResult.ok) return scheduleCharacterIdsResult;
+
   const expectedScheduleIds = new Map<CharacterId, RecurringEconomyScheduleId>();
   const seenScheduleIds = new Map<RecurringEconomyScheduleId, CharacterId>();
-  for (const characterId of organization.memberCharacterIds) {
+  for (const characterId of scheduleCharacterIdsResult.value) {
     const scheduleIdResult = parseMappedScheduleId(characterId, input.scheduleIdsByCharacterId);
     if (!scheduleIdResult.ok) {
       return scheduleIdResult;
@@ -164,6 +171,8 @@ export function generateCrewUpkeepSchedules(
   const existingResult = classifyExistingSchedules({
     organization,
     schedules: input.schedules,
+    definition: input.definition,
+    scheduleCharacterIds: scheduleCharacterIdsResult.value,
     expectedScheduleIds,
   });
   if (!existingResult.ok) {
@@ -171,7 +180,7 @@ export function generateCrewUpkeepSchedules(
   }
 
   const generatedSchedules: RecurringEconomySchedule[] = [];
-  for (const characterId of organization.memberCharacterIds) {
+  for (const characterId of scheduleCharacterIdsResult.value) {
     if (existingResult.value.reusedByCharacterId.has(characterId)) {
       continue;
     }
@@ -321,6 +330,58 @@ function validateMembers(
   return success(Object.freeze([...seenMemberIds]));
 }
 
+function resolveScheduleCharacterIds(
+  organization: OrganizationState,
+  targetCharacterIds: readonly CharacterId[] | undefined,
+): DomainResult<
+  readonly CharacterId[],
+  | CrewUpkeepScheduleGenerationDuplicateMemberError
+  | CrewUpkeepScheduleGenerationMissingCharacterError
+  | CrewUpkeepScheduleGenerationInvalidScheduleIdError
+> {
+  if (targetCharacterIds === undefined) {
+    return success(Object.freeze([...organization.memberCharacterIds]));
+  }
+
+  const seenCharacterIds = new Set<CharacterId>();
+  const resolvedCharacterIds: CharacterId[] = [];
+  for (const targetCharacterId of targetCharacterIds) {
+    let characterId: CharacterId;
+    try {
+      characterId = parseCharacterId(targetCharacterId);
+    } catch (error) {
+      return invalidScheduleId(
+        targetCharacterId as CharacterId,
+        error instanceof InvalidEntityIdError ? error.reason : "character ID parser rejected",
+        targetCharacterId,
+      );
+    }
+
+    if (seenCharacterIds.has(characterId)) {
+      return failure({
+        code: DomainErrorCode.CrewUpkeepScheduleGenerationDuplicateMember,
+        message: `Crew upkeep target members contain duplicate character "${characterId}".`,
+        organizationId: organization.organizationId,
+        characterId,
+      });
+    }
+
+    if (!organization.memberCharacterIds.includes(characterId)) {
+      return failure({
+        code: DomainErrorCode.CrewUpkeepScheduleGenerationMissingCharacter,
+        message: `Crew upkeep target character "${characterId}" is not a member of organization "${organization.organizationId}".`,
+        organizationId: organization.organizationId,
+        characterId,
+      });
+    }
+
+    seenCharacterIds.add(characterId);
+    resolvedCharacterIds.push(characterId);
+  }
+
+  return success(Object.freeze(resolvedCharacterIds));
+}
+
 function parseMappedScheduleId(
   characterId: CharacterId,
   scheduleIdsByCharacterId: CrewUpkeepScheduleIdByCharacterId,
@@ -340,6 +401,8 @@ function parseMappedScheduleId(
 function classifyExistingSchedules(input: {
   readonly organization: OrganizationState;
   readonly schedules: readonly RecurringEconomySchedule[];
+  readonly definition: CrewUpkeepScheduleDefinition;
+  readonly scheduleCharacterIds: readonly CharacterId[];
   readonly expectedScheduleIds: ReadonlyMap<CharacterId, RecurringEconomyScheduleId>;
 }): DomainResult<
   {
@@ -351,7 +414,7 @@ function classifyExistingSchedules(input: {
   const reusedSchedules: RecurringEconomySchedule[] = [];
   const reusedByCharacterId = new Set<CharacterId>();
 
-  for (const characterId of input.organization.memberCharacterIds) {
+  for (const characterId of input.scheduleCharacterIds) {
     const expectedScheduleId = input.expectedScheduleIds.get(characterId);
     const matchingSchedules = input.schedules.filter(
       (schedule) =>
@@ -384,7 +447,9 @@ function classifyExistingSchedules(input: {
       }
 
       if (
-        existingMatch.amount >= 0 ||
+        existingMatch.amount !== -input.definition.amountPerCharacter ||
+        existingMatch.periodTicks !== input.definition.periodTicks ||
+        existingMatch.active !== true ||
         existingMatch.source.type !== MoneyTransactionSourceType.CrewUpkeep
       ) {
         return scheduleConflict({

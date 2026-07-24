@@ -15,6 +15,7 @@ import type { MoneyTransactionCategory, MoneyTransactionSource } from "./moneyLe
 import type { OperationOutcomeCategory } from "./operationOutcomeClassification";
 import type { OperationOutcomeModifierContributions } from "./operationOutcomeResolver";
 import type { OperationStatus } from "./operationState";
+import type { OrganizationMemberRole } from "./organizationMemberRoles";
 import type { RandomState } from "./randomService";
 import type { SimulationMinute, SimulationTick } from "./simulationClock";
 
@@ -34,6 +35,8 @@ export const DomainEventType = {
   OperationStarted: "OperationStarted",
   OrganizationMoneyChanged: "OrganizationMoneyChanged",
   OrganizationMoneyTransactionRecorded: "OrganizationMoneyTransactionRecorded",
+  OrganizationMemberRoleAssigned: "OrganizationMemberRoleAssigned",
+  OrganizationOperationalCapacityIncreased: "OrganizationOperationalCapacityIncreased",
   OrganizationOperationalCapacityReleased: "OrganizationOperationalCapacityReleased",
   OrganizationOperationalCapacityReserved: "OrganizationOperationalCapacityReserved",
   RecurringEconomyPeriodProcessed: "RecurringEconomyPeriodProcessed",
@@ -248,6 +251,25 @@ export interface OrganizationOperationalCapacityReleasedEvent {
   readonly [domainEventBrand]: "OrganizationOperationalCapacityReleasedEvent";
 }
 
+export interface OrganizationOperationalCapacityIncreasedEvent {
+  readonly type: typeof DomainEventType.OrganizationOperationalCapacityIncreased;
+  readonly organizationId: OrganizationId;
+  readonly previousOperationalCapacity: number;
+  readonly currentOperationalCapacity: number;
+  readonly delta: number;
+  readonly sourceCharacterId: CharacterId;
+  readonly [domainEventBrand]: "OrganizationOperationalCapacityIncreasedEvent";
+}
+
+export interface OrganizationMemberRoleAssignedEvent {
+  readonly type: typeof DomainEventType.OrganizationMemberRoleAssigned;
+  readonly organizationId: OrganizationId;
+  readonly characterId: CharacterId;
+  readonly previousRole: OrganizationMemberRole | null;
+  readonly assignedRole: OrganizationMemberRole;
+  readonly [domainEventBrand]: "OrganizationMemberRoleAssignedEvent";
+}
+
 export interface OrganizationMoneyChangedEvent {
   readonly type: typeof DomainEventType.OrganizationMoneyChanged;
   readonly organizationId: OrganizationId;
@@ -317,6 +339,8 @@ export type DomainEvent =
   | OperationStartedEvent
   | OrganizationMoneyChangedEvent
   | OrganizationMoneyTransactionRecordedEvent
+  | OrganizationMemberRoleAssignedEvent
+  | OrganizationOperationalCapacityIncreasedEvent
   | OrganizationOperationalCapacityReleasedEvent
   | OrganizationOperationalCapacityReservedEvent
   | RecurringEconomyPeriodProcessedEvent
@@ -480,6 +504,21 @@ export interface CreateOrganizationOperationalCapacityReleasedEventInput {
   readonly previousOperationalCapacity: number;
   readonly currentOperationalCapacity: number;
   readonly delta: number;
+}
+
+export interface CreateOrganizationOperationalCapacityIncreasedEventInput {
+  readonly organizationId: OrganizationId;
+  readonly previousOperationalCapacity: number;
+  readonly currentOperationalCapacity: number;
+  readonly delta: number;
+  readonly sourceCharacterId: CharacterId;
+}
+
+export interface CreateOrganizationMemberRoleAssignedEventInput {
+  readonly organizationId: OrganizationId;
+  readonly characterId: CharacterId;
+  readonly previousRole: OrganizationMemberRole | null;
+  readonly assignedRole: OrganizationMemberRole;
 }
 
 export interface CreateOrganizationMoneyChangedEventInput {
@@ -793,6 +832,31 @@ export function createOrganizationOperationalCapacityReleasedEvent(
     currentOperationalCapacity: input.currentOperationalCapacity,
     delta: input.delta,
   }) as OrganizationOperationalCapacityReleasedEvent;
+}
+
+export function createOrganizationOperationalCapacityIncreasedEvent(
+  input: CreateOrganizationOperationalCapacityIncreasedEventInput,
+): OrganizationOperationalCapacityIncreasedEvent {
+  return Object.freeze({
+    type: DomainEventType.OrganizationOperationalCapacityIncreased,
+    organizationId: input.organizationId,
+    previousOperationalCapacity: input.previousOperationalCapacity,
+    currentOperationalCapacity: input.currentOperationalCapacity,
+    delta: input.delta,
+    sourceCharacterId: input.sourceCharacterId,
+  }) as OrganizationOperationalCapacityIncreasedEvent;
+}
+
+export function createOrganizationMemberRoleAssignedEvent(
+  input: CreateOrganizationMemberRoleAssignedEventInput,
+): OrganizationMemberRoleAssignedEvent {
+  return Object.freeze({
+    type: DomainEventType.OrganizationMemberRoleAssigned,
+    organizationId: input.organizationId,
+    characterId: input.characterId,
+    previousRole: input.previousRole,
+    assignedRole: input.assignedRole,
+  }) as OrganizationMemberRoleAssignedEvent;
 }
 
 export function createOrganizationMoneyChangedEvent(

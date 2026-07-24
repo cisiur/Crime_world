@@ -119,12 +119,12 @@ The project is now in:
 
 The current next task is:
 
-> **E5-03 - Define six MVP business / location archetypes**
+> **E5-08 - Implement bankruptcy and low-resource recovery safeguards**
 
 EPIC 0, EPIC 1, EPIC 2, and EPIC 3 are complete.
 EPIC 4 is complete as the first end-to-end operation vertical slice. E4-01 is complete as a documentation/specification task. E4-02 is complete as a schema-only implementation task. E4-03 is complete as an availability/prerequisite evaluation task. E4-04 is complete as a bounded deterministic planning and crew/resource reservation implementation. E4-05 is complete as bounded deterministic lifecycle transitions. E4-06 is complete as a centralized seeded percentile resolver. E4-07 is complete as typed Local Collection outcome classification with canonical authored weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`. E4-08 is complete as bounded Local Collection consequence application. E4-09 is complete as deterministic integration coverage for the full Local Collection flow. E4-10 is complete as a developer playtest runnable in the desktop/browser shell.
 
-E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. E5-02 is complete after bounded increments E5-02A through E5-02F: the standalone domain money-ledger foundation exists, Local Collection start cost and non-zero gross rewards use it, the recurring economy scheduler foundation exists, the first application recurring runtime exists, the first crew-upkeep cost flow can generate schedules and execute one due period for one explicit character, and the MVP recurring-income flow can generate one schedule per organization and execute one due period. Business and hideout upkeep, business control, recruitment, pressure system, rival AI, save/load, global tick-loop integration, and campaign aggregate integration remain unimplemented.
+E5-01 is complete as a documentation/specification task only. The accepted money-flow, upkeep, and transaction-ledger contract is recorded authoritatively in `BUILD_ROADMAP.md`. E5-02 is complete after bounded increments E5-02A through E5-02F: the standalone domain money-ledger foundation exists, Local Collection start cost and non-zero gross rewards use it, the recurring economy scheduler foundation exists, the first application recurring runtime exists, the first crew-upkeep cost flow can generate schedules and execute one due period for one explicit character, and the MVP recurring-income flow can generate one schedule per organization and execute one due period. E5-03 through E5-07 are complete: authored business/location archetypes, bounded business ownership/income, recruitment opportunity generation, one deterministic recruitment action, and limited crew growth/role assignment now exist. Business and hideout upkeep, pressure system, rival AI, save/load, global tick-loop integration, campaign aggregate integration, role removal, lieutenant replacement, and broader hierarchy remain unimplemented.
 
 The accepted first operation is **Local Collection**, with its authoritative detailed specification recorded under EPIC 4 in `BUILD_ROADMAP.md`. The implemented slice covers setup, planning, character and capacity reservation, start-cost deduction, lifecycle advance to running and resolved, seeded roll and typed classification, consequence application, assignment and capacity release, and ordered semantic events. The accepted consequence values are `success +80 money/+4 exposure/no injury`, `partial-success +40/+10/no injury`, `failure 0/+14/no injury`, and `critical-failure 0/+25/healthy -> injured`. Fixed deterministic seeds are `32 -> success roll 1`, `153 -> partial-success roll 46`, `20 -> failure roll 76`, and `64 -> critical-failure roll 96`. It passed automated integration coverage and the manual developer playtest was run and accepted. Documentation is now synchronized after the E4-08 through E4-10 batch.
 
@@ -151,9 +151,14 @@ The immediate sequence is:
 7. E5-02E crew upkeep schedule generation and one-period runtime execution is complete,
 8. E5-02F MVP recurring income generation and one-period runtime execution is complete,
 9. E5-02 recurring income and recurring costs is complete,
-10. preserve the domain/content/application/presentation boundaries proven by the slice and recorded by E5-01/E5-02A through E5-02F,
-11. review and accept E5-03 before implementation,
-12. continue to avoid premature full campaign creation, global recurring economy tick-loop integration, pressure systems, rival AI, save/load, recruitment, and broad orchestration work.
+10. E5-03 authored MVP business / location archetypes is complete,
+11. E5-04 basic business ownership and income generation is complete,
+12. E5-05 recruitment opportunity generation is complete,
+13. E5-06 recruitment operation / action is complete,
+14. E5-07 limited crew growth and role assignment is complete,
+15. preserve the domain/content/application/presentation boundaries proven by the slice and recorded by E5-01/E5-02A through E5-02F and E5-03 through E5-07,
+16. review and accept E5-08 before implementation,
+17. continue to avoid premature full campaign creation, global recurring economy tick-loop integration, pressure systems, rival AI, save/load, role removal, lieutenant replacement, broader hierarchy, and broad orchestration work.
 
 ---
 
@@ -354,15 +359,15 @@ Do not begin the next roadmap task before blocking review findings are resolved.
 
 The next task is:
 
-> **E5-03 - Define six MVP business / location archetypes**
+> **E5-08 - Implement bankruptcy and low-resource recovery safeguards**
 
-E5-02 is complete after bounded reviewed increments. E5-02A is complete as the standalone money-ledger foundation, E5-02B is complete as the Local Collection ledger migration, E5-02C is complete as the recurring economy scheduler foundation, E5-02D is complete as the recurring economy runtime wrapper, E5-02E is complete as the first crew-upkeep cost flow, and E5-02F is complete as the MVP recurring-income flow. E5-03 is Pending and has not started.
+E5-07 is complete as limited crew growth and role assignment. E5-03 through E5-06 are also complete: authored business/location archetypes, bounded business ownership/income, recruitment opportunities, and one deterministic recruitment action exist. E5-08 is Pending and has not started.
 
 - preserve the PM workflow of analysis -> proposed scope -> user acceptance -> Codex prompt -> implementation -> review,
 - build on the accepted E5-01 contract and E5-02A through E5-02F foundation without claiming that global tick integration, business gameplay, or the complete economy already exists,
 - preserve the accepted E4-04 start-cost and E4-08 gross-reward behavior during any later migration,
 - preserve the migrated Local Collection ledger behavior unless a specific accepted task changes it,
 - preserve clear package ownership and dependency boundaries,
-- explicitly exclude full campaign creation, pressure systems, rival AI, save/load, operation catalogue expansion, recruitment, and broad orchestration unless a new accepted scope says otherwise.
+- explicitly exclude full campaign creation, pressure systems, rival AI, save/load, operation catalogue expansion, role removal, lieutenant replacement, broader hierarchy, and broad orchestration unless a new accepted scope says otherwise.
 
-Do not begin E5-03 or create a Codex prompt before the project owner accepts that scope.
+Do not begin E5-08 or create a Codex prompt before the project owner accepts that scope.

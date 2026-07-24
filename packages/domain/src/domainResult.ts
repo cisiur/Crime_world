@@ -122,6 +122,22 @@ export const DomainErrorCode = {
   RecruitmentActionOpportunityMismatch: "RECRUITMENT_ACTION_OPPORTUNITY_MISMATCH",
   RecruitmentActionOpportunityNotActive: "RECRUITMENT_ACTION_OPPORTUNITY_NOT_ACTIVE",
   RecruitmentActionRuntimeDefinitionMismatch: "RECRUITMENT_ACTION_RUNTIME_DEFINITION_MISMATCH",
+  OrganizationMemberRoleAssignmentCapacityInvalid:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_CAPACITY_INVALID",
+  OrganizationMemberRoleAssignmentDuplicate: "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_DUPLICATE",
+  OrganizationMemberRoleAssignmentInvalidDefinition:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_INVALID_DEFINITION",
+  OrganizationMemberRoleAssignmentInvalidExistingState:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_INVALID_EXISTING_STATE",
+  OrganizationMemberRoleAssignmentInvalidRole: "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_INVALID_ROLE",
+  OrganizationMemberRoleAssignmentMissingCharacter:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_MISSING_CHARACTER",
+  OrganizationMemberRoleAssignmentMissingOrganization:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_MISSING_ORGANIZATION",
+  OrganizationMemberRoleAssignmentNonMember: "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_NON_MEMBER",
+  OrganizationMemberRoleAssignmentUnsupportedTransition:
+    "ORGANIZATION_MEMBER_ROLE_ASSIGNMENT_UNSUPPORTED_TRANSITION",
+  CrewGrowthRuntimeUpkeepMismatch: "CREW_GROWTH_RUNTIME_UPKEEP_MISMATCH",
   OperationOutcomeClassificationCategoryDuplicated:
     "OPERATION_OUTCOME_CLASSIFICATION_CATEGORY_DUPLICATED",
   OperationOutcomeClassificationCategoryMissing:

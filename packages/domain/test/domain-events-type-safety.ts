@@ -15,6 +15,8 @@ import {
   createOperationPlannedEvent,
   createOperationStartedEvent,
   createOrganizationMoneyChangedEvent,
+  createOrganizationMemberRoleAssignedEvent,
+  createOrganizationOperationalCapacityIncreasedEvent,
   createOrganizationOperationalCapacityReleasedEvent,
   createOrganizationOperationalCapacityReservedEvent,
   createRecruitmentOpportunityConsumedEvent,
@@ -51,6 +53,8 @@ import type {
   OperationPlannedEvent,
   OperationStartedEvent,
   OrganizationMoneyChangedEvent,
+  OrganizationMemberRoleAssignedEvent,
+  OrganizationOperationalCapacityIncreasedEvent,
   OrganizationOperationalCapacityReleasedEvent,
   OrganizationOperationalCapacityReservedEvent,
   RecruitmentOpportunityExpiredEvent,
@@ -222,6 +226,19 @@ const capacityReleasedEvent = createOrganizationOperationalCapacityReleasedEvent
   currentOperationalCapacity: 1,
   delta: 1,
 });
+const capacityIncreasedEvent = createOrganizationOperationalCapacityIncreasedEvent({
+  organizationId,
+  previousOperationalCapacity: 1,
+  currentOperationalCapacity: 2,
+  delta: 1,
+  sourceCharacterId: characterId,
+});
+const roleAssignedEvent = createOrganizationMemberRoleAssignedEvent({
+  organizationId,
+  characterId,
+  previousRole: "operator",
+  assignedRole: "lieutenant",
+});
 const moneyChangedEvent = createOrganizationMoneyChangedEvent({
   organizationId,
   operationId,
@@ -279,6 +296,8 @@ const eventUnionR: DomainEvent = recruitmentOpportunityGeneratedEvent;
 const eventUnionS: DomainEvent = recruitmentOpportunityExpiredEvent;
 const eventUnionT: DomainEvent = characterRecruitedEvent;
 const eventUnionU: DomainEvent = recruitmentOpportunityConsumedEvent;
+const eventUnionV: DomainEvent = capacityIncreasedEvent;
+const eventUnionW: DomainEvent = roleAssignedEvent;
 const execution = createDomainExecution(gameState, [resumedEvent, tickAdvancedEvent]);
 const typedExecution: DomainExecution = execution;
 
@@ -429,6 +448,25 @@ const invalidCapacityReleasedEvent: OrganizationOperationalCapacityReleasedEvent
   delta: 1,
 };
 
+// @ts-expect-error Arbitrary objects cannot be OrganizationOperationalCapacityIncreasedEvent.
+const invalidCapacityIncreasedEvent: OrganizationOperationalCapacityIncreasedEvent = {
+  type: DomainEventType.OrganizationOperationalCapacityIncreased,
+  organizationId,
+  previousOperationalCapacity: 1,
+  currentOperationalCapacity: 2,
+  delta: 1,
+  sourceCharacterId: characterId,
+};
+
+// @ts-expect-error Arbitrary objects cannot be OrganizationMemberRoleAssignedEvent.
+const invalidRoleAssignedEvent: OrganizationMemberRoleAssignedEvent = {
+  type: DomainEventType.OrganizationMemberRoleAssigned,
+  organizationId,
+  characterId,
+  previousRole: "operator",
+  assignedRole: "lieutenant",
+};
+
 // @ts-expect-error Arbitrary objects cannot be OrganizationMoneyChangedEvent.
 const invalidMoneyChangedEvent: OrganizationMoneyChangedEvent = {
   type: DomainEventType.OrganizationMoneyChanged,
@@ -555,6 +593,10 @@ function assertDomainEventUnion(event: DomainEvent): string {
       return event.type;
     case DomainEventType.OrganizationMoneyTransactionRecorded:
       return event.type;
+    case DomainEventType.OrganizationMemberRoleAssigned:
+      return event.type;
+    case DomainEventType.OrganizationOperationalCapacityIncreased:
+      return event.type;
     case DomainEventType.OrganizationOperationalCapacityReserved:
       return event.type;
     case DomainEventType.OrganizationOperationalCapacityReleased:
@@ -599,6 +641,8 @@ void eventUnionR;
 void eventUnionS;
 void eventUnionT;
 void eventUnionU;
+void eventUnionV;
+void eventUnionW;
 void typedExecution;
 void invalidOperationPlannedEvent;
 void invalidOperationStartedEvent;
@@ -611,6 +655,8 @@ void invalidCharacterPersonalExposureChangedEvent;
 void invalidCharacterHealthChangedEvent;
 void invalidCapacityReservedEvent;
 void invalidCapacityReleasedEvent;
+void invalidCapacityIncreasedEvent;
+void invalidRoleAssignedEvent;
 void invalidMoneyChangedEvent;
 void invalidOperationConsequencesAppliedEvent;
 void invalidResumedEvent;

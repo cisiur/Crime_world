@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02 is complete after the accepted E5-02A through E5-02F increments, E5-03 is complete as authored content only, E5-04 is complete as one bounded business ownership and income vertical slice, E5-05 is complete as recruitment opportunity generation, and E5-06 is complete as one deterministic recruitment action. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, canonical MVP recurring income, six canonical MVP business / location archetype definitions, a pure business ownership transition, one-period business income execution, recruitment opportunity generation/expiration, and ledger-backed recruitment execution for one active opportunity. Recurring gameplay is not connected to the simulation update loop yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02 is complete after the accepted E5-02A through E5-02F increments, E5-03 is complete as authored content only, E5-04 is complete as one bounded business ownership and income vertical slice, E5-05 is complete as recruitment opportunity generation, E5-06 is complete as one deterministic recruitment action, and E5-07 is complete as limited crew growth and role assignment. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, canonical MVP recurring income, six canonical MVP business / location archetype definitions, a pure business ownership transition, one-period business income execution, recruitment opportunity generation/expiration, ledger-backed recruitment execution for one active opportunity, explicit organization-member role assignments, recruit upkeep synchronization, and one lieutenant-based operational-capacity increase. Recurring gameplay is not connected to the simulation update loop yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** EPIC 5 in progress. E5-06 is Done. E5-07 is Pending and is the immediate next roadmap task.
+> **Current phase:** EPIC 5 in progress. E5-07 is Done. E5-08 is Pending and is the immediate next roadmap task.
 
 ---
 
@@ -621,7 +621,7 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: EPIC 5 is in progress and E5-06 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income execution. E5-03 added six immutable authored MVP business / location archetype definitions and content-layer validation. E5-04 added authored business income definitions, one pure business ownership transition, deterministic business income schedule generation, typed business-income ledger source/category support, and a thin application wrapper for executing one explicit due business income period. E5-05 added authored concrete recruitable candidate seeds/definitions, runtime recruitment opportunity state, deterministic generation/expiration, lifecycle events, and a read-only application projection. E5-06 adds deterministic execution for one active recruitment opportunity: trust and eligibility are validated, recruitment cost is paid through the ledger, the candidate is appended to the target organization, and the opportunity is marked consumed. Recurring gameplay is still not connected to the simulation update loop, and role/capacity changes, upkeep creation for recruits, production UI, save/load, and campaign integration do not exist yet.
+Current status: EPIC 5 is in progress and E5-07 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income execution. E5-03 added six immutable authored MVP business / location archetype definitions and content-layer validation. E5-04 added authored business income definitions, one pure business ownership transition, deterministic business income schedule generation, typed business-income ledger source/category support, and a thin application wrapper for executing one explicit due business income period. E5-05 added authored concrete recruitable candidate seeds/definitions, runtime recruitment opportunity state, deterministic generation/expiration, lifecycle events, and a read-only application projection. E5-06 added deterministic execution for one active recruitment opportunity: trust and eligibility are validated, recruitment cost is paid through the ledger, the candidate is appended to the target organization, and the opportunity is marked consumed. E5-07 adds explicit organization-member role assignments for `boss`, `operator`, and `lieutenant`, role assignment events, one bounded lieutenant capacity increase, and an application finalizer that assigns recruits as operators while creating or reusing one canonical crew-upkeep schedule. Recurring gameplay is still not connected to the simulation update loop, and role removal, lieutenant replacement, global tick integration, production UI, save/load, and campaign integration do not exist yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
@@ -631,7 +631,7 @@ Current status: EPIC 5 is in progress and E5-06 is complete. E5-01 defined the a
 | E5-04 | Implement basic business control and income generation | `[CODEX]` | Done |
 | E5-05 | Implement recruitment opportunity generation | `[CODEX]` | Done |
 | E5-06 | Implement recruitment operation / action | `[CODEX]` | Done |
-| E5-07 | Implement limited crew growth and role assignment | `[CODEX]` | Pending |
+| E5-07 | Implement limited crew growth and role assignment | `[CODEX]` | Done |
 | E5-08 | Implement bankruptcy and low-resource recovery safeguards | `[CODEX]` | Pending |
 | E5-09 | Add economy simulation and conservation tests | `[CODEX]` | Pending |
 
@@ -646,7 +646,7 @@ Current status: EPIC 5 is in progress and E5-06 is complete. E5-01 defined the a
 
 E5-01 is complete as a documentation/specification task only. It records the minimal future contract for organization money flow, upkeep, and the transaction ledger before any ledger implementation begins. It does not add TypeScript code, tests, runtime schemas, recurring economy execution, UI, save/load, or campaign orchestration.
 
-EPIC 5 remains in progress. E5-06 is complete, and E5-07 is the next roadmap item.
+EPIC 5 remains in progress. E5-07 is complete, and E5-08 is the next roadmap item.
 
 ### E5-02A implementation status
 
@@ -760,7 +760,7 @@ E5-03 is complete as an authored-content foundation only. It adds:
 
 E5-03 does not implement business control, ownership acquisition or transfer, business-derived income, business upkeep, hideout upkeep, concrete money amounts, operation modifiers, storage or safehouse capacity, recruitment, UI, global tick-loop integration, root `GameState` integration, save/load, or final balancing.
 
-The immediate next roadmap task is E5-07, `Implement limited crew growth and role assignment`.
+E5-03 is followed by the completed E5-04 through E5-07 increments. The immediate next roadmap task is E5-08, `Implement bankruptcy and low-resource recovery safeguards`.
 
 ### E5-04 implementation status
 
@@ -808,6 +808,23 @@ E5-06 is complete as one bounded deterministic recruitment action. It adds:
 - focused domain, runtime, and integration-style tests.
 
 E5-06 does not implement RNG, success probability, negotiation, dialogue, relationship state, trust progression, loyalty changes, role assignment, lieutenant assignment, crew entities, operational-capacity growth, upkeep generation, recurring schedule generation, AI or rival recruitment, UI, root `GameState` integration, global tick integration, save/load, pressure effects, exposure consequences, or a complete recruitment system.
+
+### E5-07 implementation status
+
+E5-07 is complete as limited crew growth and role assignment. It adds:
+
+- domain-owned immutable `OrganizationMemberRoleAssignment` records keyed by organization and character ID,
+- the closed runtime role set `boss`, `operator`, and `lieutenant`,
+- pure deterministic `assignOrganizationMemberRole(...)` over explicit immutable organizations, characters, role assignments, and structural role-capacity definition values,
+- validation for missing organizations or characters, non-members, leader/boss consistency, duplicate or malformed existing role assignments, unsupported transitions, the one-lieutenant limit, and safe operational-capacity arithmetic,
+- semantic `OrganizationMemberRoleAssigned` and `OrganizationOperationalCapacityIncreased` events, with lieutenant promotion emitting role assignment before capacity increase,
+- content-owned canonical MVP role-capacity values: operator `0`, lieutenant `1`, maximum lieutenants `1`,
+- an application finalizer for post-recruit growth that assigns the recruited character as `operator` and creates or reuses exactly one canonical crew-upkeep schedule for that character,
+- an application wrapper for assigning the lieutenant role through content-backed domain delegation,
+- exact crew-upkeep schedule reuse checks for amount, period, active state, category, and source,
+- focused domain/content/application/integration tests covering role validation, lieutenant capacity, recruit upkeep synchronization, and deterministic composition with E5-05/E5-06 recruitment.
+
+E5-07 does not implement role removal, demotion, lieutenant replacement, multiple lieutenants, leadership replacement or succession, hierarchy trees, role families beyond boss/operator/lieutenant, capability-based role effects, global tick-loop integration, campaign/root `GameState` integration, save/load, UI, pressure systems, rival behavior, business upkeep, hideout upkeep, morale, desertion, loyalty progression, production, inventory, storage capacity, or a complete recruitment or organization hierarchy system.
 
 ### Current balance
 
@@ -1326,6 +1343,6 @@ Split a task when it combines more than one of:
 
 The next roadmap task is:
 
-> **E5-07 - Implement limited crew growth and role assignment**
+> **E5-08 - Implement bankruptcy and low-resource recovery safeguards**
 
-E5-06 is complete as a bounded implementation task. EPIC 5 remains in progress. The E5-07 scope must be reviewed and accepted before implementation. Until that scope is accepted, do not implement pressure systems, rival AI, save/load, production UI, broad campaign orchestration, root `GameState` economy integration, global tick-loop economy integration, role/capacity growth, or recruit upkeep generation.
+E5-07 is complete as a bounded implementation task. EPIC 5 remains in progress. The E5-08 scope must be reviewed and accepted before implementation. Until that scope is accepted, do not implement pressure systems, rival AI, save/load, production UI, broad campaign orchestration, root `GameState` economy integration, global tick-loop economy integration, role removal, lieutenant replacement, or broader hierarchy systems.

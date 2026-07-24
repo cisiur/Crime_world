@@ -273,6 +273,26 @@ describe("crew upkeep schedule generation", () => {
       DomainErrorCode.CrewUpkeepScheduleGenerationScheduleConflict,
     );
 
+    const wrongAmount = makeCrewSchedule({
+      id: scheduleId("member-a"),
+      characterId: memberAId,
+      amount: -6,
+    });
+    expectFailureLeavesSchedulesUnchanged(
+      { schedules: Object.freeze([wrongAmount]) },
+      DomainErrorCode.CrewUpkeepScheduleGenerationScheduleConflict,
+    );
+
+    const inactive = makeCrewSchedule({
+      id: scheduleId("member-a"),
+      characterId: memberAId,
+      active: false,
+    });
+    expectFailureLeavesSchedulesUnchanged(
+      { schedules: Object.freeze([inactive]) },
+      DomainErrorCode.CrewUpkeepScheduleGenerationScheduleConflict,
+    );
+
     const duplicateA = makeCrewSchedule({ id: scheduleId("member-a"), characterId: memberAId });
     const duplicateB = makeCrewSchedule({
       id: scheduleId("member-a-copy"),

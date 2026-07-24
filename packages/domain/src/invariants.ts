@@ -16,6 +16,8 @@ import {
   type OperationStartedEvent,
   type OrganizationMoneyChangedEvent,
   type OrganizationMoneyTransactionRecordedEvent,
+  type OrganizationMemberRoleAssignedEvent,
+  type OrganizationOperationalCapacityIncreasedEvent,
   type OrganizationOperationalCapacityReleasedEvent,
   type OrganizationOperationalCapacityReservedEvent,
   type RecurringEconomyPeriodProcessedEvent,
@@ -51,6 +53,7 @@ import {
   isOperationOutcomeCategory,
 } from "./operationOutcomeClassification";
 import { OperationStatus } from "./operationState";
+import { isOrganizationMemberRole } from "./organizationMemberRoles";
 import { parseRandomState, type RandomState } from "./randomService";
 import {
   MINUTES_PER_TICK,
@@ -225,6 +228,12 @@ export function assertDomainEventInvariant(event: DomainEvent): void {
       return;
     case DomainEventType.OrganizationMoneyTransactionRecorded:
       assertOrganizationMoneyTransactionRecordedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationMemberRoleAssigned:
+      assertOrganizationMemberRoleAssignedEventInvariant(event);
+      return;
+    case DomainEventType.OrganizationOperationalCapacityIncreased:
+      assertOrganizationOperationalCapacityIncreasedEventInvariant(event);
       return;
     case DomainEventType.OrganizationOperationalCapacityReleased:
       assertOrganizationOperationalCapacityReleasedEventInvariant(event);
@@ -897,6 +906,79 @@ function assertOrganizationOperationalCapacityReleasedEventInvariant(
     throw new InvariantViolationError(
       "OrganizationOperationalCapacityReleased.delta",
       "currentOperationalCapacity must equal previousOperationalCapacity + delta",
+      event,
+    );
+  }
+}
+
+function assertOrganizationOperationalCapacityIncreasedEventInvariant(
+  event: OrganizationOperationalCapacityIncreasedEvent,
+): void {
+  assertInvariant(
+    "OrganizationOperationalCapacityIncreased.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationOperationalCapacityIncreased.sourceCharacterId",
+    () => parseCharacterId(event.sourceCharacterId),
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityIncreased.previousOperationalCapacity",
+    event.previousOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger(
+    "OrganizationOperationalCapacityIncreased.currentOperationalCapacity",
+    event.currentOperationalCapacity,
+    event,
+  );
+  assertFiniteInteger("OrganizationOperationalCapacityIncreased.delta", event.delta, event);
+
+  if (event.delta <= 0) {
+    throw new InvariantViolationError(
+      "OrganizationOperationalCapacityIncreased.delta",
+      "delta must be positive",
+      event,
+    );
+  }
+
+  if (event.currentOperationalCapacity !== event.previousOperationalCapacity + event.delta) {
+    throw new InvariantViolationError(
+      "OrganizationOperationalCapacityIncreased.delta",
+      "currentOperationalCapacity must equal previousOperationalCapacity + delta",
+      event,
+    );
+  }
+}
+
+function assertOrganizationMemberRoleAssignedEventInvariant(
+  event: OrganizationMemberRoleAssignedEvent,
+): void {
+  assertInvariant(
+    "OrganizationMemberRoleAssigned.organizationId",
+    () => parseOrganizationId(event.organizationId),
+    event,
+  );
+  assertInvariant(
+    "OrganizationMemberRoleAssigned.characterId",
+    () => parseCharacterId(event.characterId),
+    event,
+  );
+
+  if (event.previousRole !== null && !isOrganizationMemberRole(event.previousRole)) {
+    throw new InvariantViolationError(
+      "OrganizationMemberRoleAssigned.previousRole",
+      "previousRole must be null or a supported organization member role",
+      event,
+    );
+  }
+
+  if (!isOrganizationMemberRole(event.assignedRole)) {
+    throw new InvariantViolationError(
+      "OrganizationMemberRoleAssigned.assignedRole",
+      "assignedRole must be a supported organization member role",
       event,
     );
   }

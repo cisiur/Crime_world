@@ -902,6 +902,10 @@ function summarizeDomainEvent(event: DomainEvent): string {
       return `Money transaction recorded: ${event.previousMoney} -> ${event.currentMoney} (${formatSigned(
         event.amount,
       )})`;
+    case DomainEventType.OrganizationMemberRoleAssigned:
+      return `Organization role assigned: ${event.characterId} -> ${event.assignedRole}`;
+    case DomainEventType.OrganizationOperationalCapacityIncreased:
+      return `Operational capacity increased: ${event.previousOperationalCapacity} -> ${event.currentOperationalCapacity}`;
     case DomainEventType.OperationStarted:
       return `Operation started at tick ${event.transitionTick}`;
     case DomainEventType.OperationLifecycleCompleted:
