@@ -318,7 +318,11 @@ function assertRecruitmentOpportunityLifecycleEventFields(
     () => parseRecruitmentOpportunityId(event.recruitmentOpportunityId),
     event,
   );
-  assertInvariant(`${eventName}.candidateCharacterId`, () => parseCharacterId(event.candidateCharacterId), event);
+  assertInvariant(
+    `${eventName}.candidateCharacterId`,
+    () => parseCharacterId(event.candidateCharacterId),
+    event,
+  );
   assertInvariant(
     `${eventName}.targetOrganizationId`,
     () => parseOrganizationId(event.targetOrganizationId),

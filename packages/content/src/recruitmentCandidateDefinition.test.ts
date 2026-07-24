@@ -66,18 +66,25 @@ describe("recruitment candidate definitions", () => {
     });
 
     expect(result).toEqual({ valid: true, errors: [] });
-    expect(new Set(canonicalMvpRecruitmentCandidateDefinitions.map((item) => item.candidateCharacterId)).size).toBe(4);
-    expect(canonicalMvpRecruitmentCandidateCharacterSeeds.map((seed) => seed.capabilityTags)).toEqual([
+    expect(
+      new Set(canonicalMvpRecruitmentCandidateDefinitions.map((item) => item.candidateCharacterId))
+        .size,
+    ).toBe(4);
+    expect(
+      canonicalMvpRecruitmentCandidateCharacterSeeds.map((seed) => seed.capabilityTags),
+    ).toEqual([
       ["streetwise", "force"],
       ["social"],
       ["stealth", "streetwise"],
       ["logistics", "social"],
     ]);
-    expect(canonicalMvpRecruitmentCandidateCharacterSeeds.map((seed) => [
-      seed.competence,
-      seed.loyalty,
-      seed.personalExposure,
-    ])).toEqual([
+    expect(
+      canonicalMvpRecruitmentCandidateCharacterSeeds.map((seed) => [
+        seed.competence,
+        seed.loyalty,
+        seed.personalExposure,
+      ]),
+    ).toEqual([
       [75, 35, 30],
       [35, 80, 10],
       [50, 50, 65],
@@ -98,7 +105,12 @@ describe("recruitment candidate definitions", () => {
     ],
     [
       "invalid cost",
-      [{ ...definitionAt(0), recruitmentCost: 0 }, definitionAt(1), definitionAt(2), definitionAt(3)],
+      [
+        { ...definitionAt(0), recruitmentCost: 0 },
+        definitionAt(1),
+        definitionAt(2),
+        definitionAt(3),
+      ],
       "INVALID_COST",
     ],
     [
@@ -177,8 +189,7 @@ function definitionAt(index: number): RecruitmentCandidateDefinition {
 function expectValidationCode(
   definitions: readonly RecruitmentCandidateDefinition[],
   expectedCode: RecruitmentCandidateDefinitionValidationErrorCode,
-  characterSeeds: readonly RecruitmentCandidateCharacterSeed[] =
-    canonicalMvpRecruitmentCandidateCharacterSeeds,
+  characterSeeds: readonly RecruitmentCandidateCharacterSeed[] = canonicalMvpRecruitmentCandidateCharacterSeeds,
   locations: readonly LocationDefinition[] = canonicalMvpLocationDefinitions,
 ): void {
   const result = validateRecruitmentCandidateDefinitions({

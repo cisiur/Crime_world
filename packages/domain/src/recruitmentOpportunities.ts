@@ -17,10 +17,7 @@ import type {
   OrganizationId,
   RecruitmentOpportunityId,
 } from "./entityIds";
-import {
-  InvalidEntityIdError,
-  parseRecruitmentOpportunityId,
-} from "./entityIds";
+import { InvalidEntityIdError, parseRecruitmentOpportunityId } from "./entityIds";
 import type { LocationState } from "./cityState";
 import type { OrganizationState } from "./organizationState";
 import {
@@ -328,7 +325,8 @@ function validateCandidateDefinitions(
   definitions: readonly RecruitmentOpportunityCandidateDefinition[],
 ): DomainResult<
   undefined,
-  RecruitmentOpportunityGenerationConflictError | RecruitmentOpportunityGenerationInvalidDefinitionError
+  | RecruitmentOpportunityGenerationConflictError
+  | RecruitmentOpportunityGenerationInvalidDefinitionError
 > {
   const seenCandidateIds = new Set<CharacterId>();
 
@@ -604,7 +602,12 @@ function validateBoundedSafeInteger(
   if (!result.ok) return result;
 
   if (typeof value === "number" && (value < 0 || value > 100)) {
-    return invalidDefinition(field, "expected a value between 0 and 100", value, candidateCharacterId);
+    return invalidDefinition(
+      field,
+      "expected a value between 0 and 100",
+      value,
+      candidateCharacterId,
+    );
   }
 
   return success(undefined);

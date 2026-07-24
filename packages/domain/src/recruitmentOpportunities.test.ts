@@ -60,7 +60,9 @@ describe("recruitment opportunity generation", () => {
       DomainEventType.RecruitmentOpportunityGenerated,
       DomainEventType.RecruitmentOpportunityGenerated,
     ]);
-    result.value.events.forEach((event) => expect(() => assertDomainEventInvariant(event)).not.toThrow());
+    result.value.events.forEach((event) =>
+      expect(() => assertDomainEventInvariant(event)).not.toThrow(),
+    );
   });
 
   it("reuses an exact matching active opportunity", () => {
@@ -78,27 +80,73 @@ describe("recruitment opportunity generation", () => {
   });
 
   const rejectionCases: readonly RecruitmentOpportunityRejectionCase[] = [
-    ["missing candidate", { characters: [character(candidateB)] }, DomainErrorCode.RecruitmentOpportunityGenerationMissingCharacter],
-    ["missing organization", { organizations: [organization(orgB, leaderB)] }, DomainErrorCode.RecruitmentOpportunityGenerationMissingOrganization],
-    ["missing location", { locations: [location(locationB)] }, DomainErrorCode.RecruitmentOpportunityGenerationMissingLocation],
+    [
+      "missing candidate",
+      { characters: [character(candidateB)] },
+      DomainErrorCode.RecruitmentOpportunityGenerationMissingCharacter,
+    ],
+    [
+      "missing organization",
+      { organizations: [organization(orgB, leaderB)] },
+      DomainErrorCode.RecruitmentOpportunityGenerationMissingOrganization,
+    ],
+    [
+      "missing location",
+      { locations: [location(locationB)] },
+      DomainErrorCode.RecruitmentOpportunityGenerationMissingLocation,
+    ],
     [
       "target member",
-      { organizations: [organization(orgA, leaderA, [leaderA, candidateA]), organization(orgB, leaderB)] },
+      {
+        organizations: [
+          organization(orgA, leaderA, [leaderA, candidateA]),
+          organization(orgB, leaderB),
+        ],
+      },
       DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate,
     ],
     [
       "other member",
-      { organizations: [organization(orgA, leaderA), organization(orgB, leaderB, [leaderB, candidateA])] },
+      {
+        organizations: [
+          organization(orgA, leaderA),
+          organization(orgB, leaderB, [leaderB, candidateA]),
+        ],
+      },
       DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate,
     ],
-    ["dead", { characters: [character(candidateA, { healthState: "dead" })] }, DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate],
-    ["detained", { characters: [character(candidateA, { legalState: "detained" })] }, DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate],
-    ["imprisoned", { characters: [character(candidateA, { legalState: "imprisoned" })] }, DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate],
-    ["duplicate candidate definition", { candidateDefinitions: [definition(candidateA, locationA, 10, 288), definition(candidateA, locationB, 25, 576)] }, DomainErrorCode.RecruitmentOpportunityGenerationConflict],
+    [
+      "dead",
+      { characters: [character(candidateA, { healthState: "dead" })] },
+      DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate,
+    ],
+    [
+      "detained",
+      { characters: [character(candidateA, { legalState: "detained" })] },
+      DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate,
+    ],
+    [
+      "imprisoned",
+      { characters: [character(candidateA, { legalState: "imprisoned" })] },
+      DomainErrorCode.RecruitmentOpportunityGenerationIneligibleCandidate,
+    ],
+    [
+      "duplicate candidate definition",
+      {
+        candidateDefinitions: [
+          definition(candidateA, locationA, 10, 288),
+          definition(candidateA, locationB, 25, 576),
+        ],
+      },
+      DomainErrorCode.RecruitmentOpportunityGenerationConflict,
+    ],
     [
       "duplicate opportunity id",
       {
-        candidateDefinitions: [definition(candidateA, locationA, 10, 288), definition(candidateB, locationB, 25, 576)],
+        candidateDefinitions: [
+          definition(candidateA, locationA, 10, 288),
+          definition(candidateB, locationB, 25, 576),
+        ],
         opportunityIdsByCandidateId: {
           [candidateA]: opportunityId("same"),
           [candidateB]: opportunityId("same"),
@@ -106,42 +154,76 @@ describe("recruitment opportunity generation", () => {
       },
       DomainErrorCode.RecruitmentOpportunityGenerationConflict,
     ],
-    ["invalid cost", { candidateDefinitions: [{ ...definition(candidateA, locationA, 0, 288), recruitmentCost: 0 }] }, DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition],
-    ["invalid trust", { candidateDefinitions: [{ ...definition(candidateA, locationA, 10, 288), minimumTrustRequirement: -1 }] }, DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition],
-    ["invalid maintenance", { candidateDefinitions: [{ ...definition(candidateA, locationA, 10, 288), maintenanceCostPreview: -1 }] }, DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition],
-    ["invalid duration", { candidateDefinitions: [definition(candidateA, locationA, 10, 0)] }, DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition],
+    [
+      "invalid cost",
+      {
+        candidateDefinitions: [
+          { ...definition(candidateA, locationA, 0, 288), recruitmentCost: 0 },
+        ],
+      },
+      DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition,
+    ],
+    [
+      "invalid trust",
+      {
+        candidateDefinitions: [
+          { ...definition(candidateA, locationA, 10, 288), minimumTrustRequirement: -1 },
+        ],
+      },
+      DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition,
+    ],
+    [
+      "invalid maintenance",
+      {
+        candidateDefinitions: [
+          { ...definition(candidateA, locationA, 10, 288), maintenanceCostPreview: -1 },
+        ],
+      },
+      DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition,
+    ],
+    [
+      "invalid duration",
+      { candidateDefinitions: [definition(candidateA, locationA, 10, 0)] },
+      DomainErrorCode.RecruitmentOpportunityGenerationInvalidDefinition,
+    ],
   ];
 
   it.each(rejectionCases)("rejects %s atomically", (_caseName, overrides, expectedCode) => {
-    const characters = Object.freeze(overrides.characters ?? [character(candidateA), character(candidateB)]);
-    const organizations = Object.freeze(overrides.organizations ?? [organization(orgA, leaderA), organization(orgB, leaderB)]);
+    const characters = Object.freeze(
+      overrides.characters ?? [character(candidateA), character(candidateB)],
+    );
+    const organizations = Object.freeze(
+      overrides.organizations ?? [organization(orgA, leaderA), organization(orgB, leaderB)],
+    );
     const result = generate({
       ...overrides,
       characters,
       organizations,
-      candidateDefinitions: overrides.candidateDefinitions ?? [definition(candidateA, locationA, 10, 288)],
+      candidateDefinitions: overrides.candidateDefinitions ?? [
+        definition(candidateA, locationA, 10, 288),
+      ],
     });
 
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error.code).toBe(expectedCode);
-    expect(characters).toEqual(overrides.characters ?? [character(candidateA), character(candidateB)]);
-    expect(organizations).toEqual(overrides.organizations ?? [organization(orgA, leaderA), organization(orgB, leaderB)]);
+    expect(characters).toEqual(
+      overrides.characters ?? [character(candidateA), character(candidateB)],
+    );
+    expect(organizations).toEqual(
+      overrides.organizations ?? [organization(orgA, leaderA), organization(orgB, leaderB)],
+    );
   });
 
   it("rejects conflicting active opportunities and reused IDs", () => {
     expect(
       generate({
-        existingOpportunities: [
-          opportunity("wrong", candidateA, orgA, locationA, tick, 388),
-        ],
+        existingOpportunities: [opportunity("wrong", candidateA, orgA, locationA, tick, 388)],
         candidateDefinitions: [definition(candidateA, locationA, 10, 288)],
       }).ok,
     ).toBe(false);
     expect(
       generate({
-        existingOpportunities: [
-          opportunity("a", candidateB, orgA, locationB, tick, 676),
-        ],
+        existingOpportunities: [opportunity("a", candidateB, orgA, locationB, tick, 676)],
         candidateDefinitions: [definition(candidateA, locationA, 10, 288)],
       }).ok,
     ).toBe(false);
@@ -208,9 +290,7 @@ type RecruitmentOpportunityRejectionCase = readonly [
   DomainErrorCode,
 ];
 
-function generate(
-  overrides: Partial<Parameters<typeof generateRecruitmentOpportunities>[0]> = {},
-) {
+function generate(overrides: Partial<Parameters<typeof generateRecruitmentOpportunities>[0]> = {}) {
   return generateRecruitmentOpportunities({
     currentTick: tick,
     targetOrganizationId: orgA,

@@ -1,4 +1,9 @@
-import type { CharacterId, LocationId, OrganizationId, RecruitmentOpportunityId } from "./entityIds";
+import type {
+  CharacterId,
+  LocationId,
+  OrganizationId,
+  RecruitmentOpportunityId,
+} from "./entityIds";
 import {
   parseCharacterId,
   parseLocationId,
@@ -63,9 +68,7 @@ export function createRecruitmentOpportunityState(
     parseRecruitmentOpportunityId(input.recruitmentOpportunityId),
   );
   assertValidField("candidateCharacterId", () => parseCharacterId(input.candidateCharacterId));
-  assertValidField("targetOrganizationId", () =>
-    parseOrganizationId(input.targetOrganizationId),
-  );
+  assertValidField("targetOrganizationId", () => parseOrganizationId(input.targetOrganizationId));
   assertValidField("locationId", () => parseLocationId(input.locationId));
   assertValidField("createdAtTick", () => parseSimulationTick(input.createdAtTick));
   assertValidField("expiresAtTick", () => parseSimulationTick(input.expiresAtTick));

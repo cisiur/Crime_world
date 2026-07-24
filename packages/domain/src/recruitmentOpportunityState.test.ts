@@ -38,12 +38,12 @@ describe("recruitment opportunity state", () => {
   });
 
   it("rejects invalid status and invalid tick ordering", () => {
-    expect(() =>
-      createState({ status: "available" as RecruitmentOpportunityStatus }),
-    ).toThrow(InvalidRecruitmentOpportunityStateError);
-    expect(() =>
-      createState({ expiresAtTick: parseSimulationTick(10) }),
-    ).toThrow(InvalidRecruitmentOpportunityStateError);
+    expect(() => createState({ status: "available" as RecruitmentOpportunityStatus })).toThrow(
+      InvalidRecruitmentOpportunityStateError,
+    );
+    expect(() => createState({ expiresAtTick: parseSimulationTick(10) })).toThrow(
+      InvalidRecruitmentOpportunityStateError,
+    );
   });
 });
 
