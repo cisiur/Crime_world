@@ -98,6 +98,8 @@ The map may include decorative buildings, but only strategically relevant locati
 
 ### Required strategic location archetypes
 
+Implementation status: the six MVP archetypes below now have canonical immutable authored definitions in `packages/content`. These definitions record IDs, `LocationKind` mappings, display names, business/strategic-location classification, gameplay roles, and relative economic/risk profiles only. Runtime business control, business income, business upkeep, hideout upkeep, ownership transitions, UI, tick integration, save/load, and final balancing remain unimplemented.
+
 1. **Hideout**
    - stores crew and operational resources,
    - provides local presence,

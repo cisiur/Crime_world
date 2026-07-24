@@ -186,6 +186,7 @@ Current implementation:
 - The content package owns the immutable canonical Local Collection outcome-band definition in `localCollectionOutcomeDefinition.ts`, with ordered category weights `success 45`, `partial-success 30`, `failure 20`, and `critical-failure 5`.
 - The content package exports the canonical Local Collection consequence definition as `localCollectionConsequenceDefinition`, with gross rewards `80/40/0/0`, exposure deltas `4/10/14/25`, critical-failure health consequence `injured`, and one operational-capacity release for each category.
 - The content package owns the canonical provisional MVP crew-upkeep definition of `5` money per character every `144` simulation ticks and the canonical provisional MVP recurring-income definition of `15` money every `144` simulation ticks.
+- The content package owns six immutable canonical MVP business / location archetype definitions with stable authored IDs, matching `LocationKind` mappings, display names, classifications, gameplay roles, and relative economic/risk profiles. It also owns the pure resolver from supported `LocationKind` values to archetype definitions and validation for the authored collection.
 - The content package exports the canonical MVP city definition as `canonicalMvpCityDefinition`.
 - City validation is structural and headless; it checks schema version, required collections, duplicate IDs, route validity, orphan locations, and district graph connectivity.
 - The content package owns authored immutable definitions, not runtime operation instances or already-applied consequences. It may use branded ID parsers and shared pure types from `packages/domain`, but it must not own mutable campaign state. This dependency direction is allowed; `packages/domain` must not import `packages/content`.
@@ -778,7 +779,7 @@ The repository now contains the selected TypeScript / React / Tauri / Vite scaff
 
 The architecture review after EPIC 4 and the bounded E5-02 increments found the package boundaries intact:
 - domain remains pure and renderer/platform independent,
-- content owns immutable authored city data, rival organization seeds, operation template, outcome bands, consequence definition, canonical crew-upkeep definition, canonical recurring-income definition, and structural validation,
+- content owns immutable authored city data, rival organization seeds, operation template, outcome bands, consequence definition, canonical crew-upkeep definition, canonical recurring-income definition, canonical business / location archetype definitions, and structural validation,
 - application owns the developer playtest/session orchestration, recurring economy runtime wrapper, one-character crew-upkeep period execution, and one-organization recurring-income period execution, and imports both domain and content,
 - presentation owns the React playtest shell and displays application read models,
 - infrastructure remains a thin scaffold,
@@ -787,7 +788,7 @@ The architecture review after EPIC 4 and the bounded E5-02 increments found the 
 
 The E4-03 availability evaluator, E4-04 planning function, E4-05 lifecycle function, E4-06 resolver, E4-07 classifier, and E4-08 consequence application preserve the domain/content boundary: authored operation templates, canonical Local Collection outcome bands, and canonical consequence definitions remain in `packages/content`, while `packages/domain` owns pure prerequisite, planning, lifecycle, seeded resolution, classification, and consequence rules over explicit runtime state and structural authored inputs. The E4-10 application harness is an external composition layer, not a domain dependency.
 
-E5-02 is complete, EPIC 5 remains in progress, and E5-03 is Pending as the next architecture-sensitive roadmap task. Future work must preserve the accepted E5-01/E5-02A through E5-02F contract, the accepted Local Collection outcomes, and the crew-upkeep and recurring-income semantics, while avoiding claims that a complete economy, business gameplay, global tick-loop integration, save/load, pressure system, recruitment system, rival AI, or full campaign service already exists.
+E5-03 is complete as a content-only archetype foundation, EPIC 5 remains in progress, and E5-04 is Pending as the next architecture-sensitive roadmap task. Future work must preserve the accepted E5-01/E5-02A through E5-02F contract, the accepted Local Collection outcomes, the crew-upkeep and recurring-income semantics, and the new content/domain boundary for business archetypes, while avoiding claims that a complete economy, business gameplay, global tick-loop integration, save/load, pressure system, recruitment system, rival AI, or full campaign service already exists.
 
 ## Technical debt and postponed work
 

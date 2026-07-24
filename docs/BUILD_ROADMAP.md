@@ -1,9 +1,9 @@
 # Build Roadmap — CrimeWorld
 
-> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, and E5-02 is complete after the accepted E5-02A through E5-02F increments. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, and canonical MVP recurring income. Recurring gameplay is not connected to the simulation update loop yet.
+> **Status:** EPIC 0, EPIC 1, EPIC 2, EPIC 3, and EPIC 4 complete. EPIC 5 is in progress. E5-01 is complete as a documentation/specification task, E5-02 is complete after the accepted E5-02A through E5-02F increments, and E5-03 is complete as authored content only. The repository now has the standalone money ledger, migrated Local Collection start cost and non-zero gross rewards, recurring economy schedules and one-period due processing, application runtime orchestration, canonical MVP crew upkeep, canonical MVP recurring income, and six canonical MVP business / location archetype definitions. Recurring gameplay is not connected to the simulation update loop yet.
 > **Active branch:** `main`  
 > **Workflow:** project owner decides, ChatGPT acts as PM / Technical Lead, Codex implements, ChatGPT reviews every pushed task.  
-> **Current phase:** EPIC 5 in progress. E5-02 is Done. E5-03 is Pending and is the immediate next roadmap task.
+> **Current phase:** EPIC 5 in progress. E5-03 is Done. E5-04 is Pending and is the immediate next roadmap task.
 
 ---
 
@@ -621,13 +621,13 @@ E4-01 must not specify or implement the full operation catalogue, generic operat
 
 Turn the first operation into a repeatable growth loop with recurring costs, recurring income, recruits, and simple business control.
 
-Current status: EPIC 5 is in progress and E5-02 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income runtime execution. Recurring gameplay is still not connected to the simulation update loop, and no business-control, recruitment, or production UI implementation exists yet.
+Current status: EPIC 5 is in progress and E5-03 is complete. E5-01 defined the accepted money-flow, upkeep, and transaction-ledger contract. E5-02A implemented the standalone `packages/domain` money-ledger foundation. E5-02B migrated the accepted Local Collection start cost and non-zero gross rewards to the ledger. E5-02C implemented the deterministic standalone recurring economy scheduler foundation for processing one due period through the ledger. E5-02D added the first `packages/application` runtime orchestration wrapper for executing one explicit recurring economy period. E5-02E added the first real recurring cost flow: canonical MVP crew-upkeep content, deterministic crew-upkeep schedule generation, and controlled one-period crew-upkeep runtime execution. E5-02F added the first real recurring-income flow: canonical MVP recurring-income content, deterministic one-schedule-per-organization generation, and controlled one-period recurring-income runtime execution. E5-03 added six immutable authored MVP business / location archetype definitions and content-layer validation. Recurring gameplay is still not connected to the simulation update loop, and no business-control, recruitment, or production UI implementation exists yet.
 
 | ID | Task | Who | Status |
 |---|---|---|---|
 | E5-01 | Define money flow, upkeep, and transaction ledger | `[BOTH]` | Done |
 | E5-02 | Implement recurring income and recurring costs | `[CODEX]` | Done |
-| E5-03 | Define six MVP business / location archetypes | `[BOTH]` | Pending |
+| E5-03 | Define six MVP business / location archetypes | `[BOTH]` | Done |
 | E5-04 | Implement basic business control and income generation | `[CODEX]` | Pending |
 | E5-05 | Implement recruitment opportunity generation | `[CODEX]` | Pending |
 | E5-06 | Implement recruitment operation / action | `[CODEX]` | Pending |
@@ -646,7 +646,7 @@ Current status: EPIC 5 is in progress and E5-02 is complete. E5-01 defined the a
 
 E5-01 is complete as a documentation/specification task only. It records the minimal future contract for organization money flow, upkeep, and the transaction ledger before any ledger implementation begins. It does not add TypeScript code, tests, runtime schemas, recurring economy execution, UI, save/load, or campaign orchestration.
 
-EPIC 5 remains in progress. E5-02 is complete, and E5-03 is the next roadmap item.
+EPIC 5 remains in progress. E5-03 is complete, and E5-04 is the next roadmap item.
 
 ### E5-02A implementation status
 
@@ -747,7 +747,20 @@ E5-02 is Done as the first bounded implementation of recurring income and recurr
 
 Completing E5-02 does not mean the project has automatic global tick-loop integration, campaign creation schedule generation, automatic membership synchronization, batch processing for every due schedule, root `GameState` integration, save/load, production UI, business-derived income, business control, recruitment, bankruptcy recovery, or a broader economy simulation.
 
-The immediate next roadmap task is E5-03, `Define six MVP business / location archetypes`. E5-03 is Pending and has not started.
+### E5-03 implementation status
+
+E5-03 is complete as an authored-content foundation only. It adds:
+
+- `packages/content/src/businessLocationArchetypeDefinition.ts` with closed typed unions for the six MVP archetype IDs, gameplay roles, classifications, and relative profiles,
+- exactly six immutable canonical definitions for hideout, safehouse, small shop/service, nightlife venue, warehouse/storage, and workshop/transport,
+- a deterministic content-layer resolver from supported `LocationKind` values to canonical archetype definitions,
+- `null` resolution for police, medical/recovery, municipal/legal, and landmark location kinds,
+- focused content validation for duplicate IDs, duplicate kind mappings, missing required archetypes, unsupported location kinds, empty role collections, invalid profile values, and the accepted income invariants,
+- compatibility tests proving all 29 canonical MVP locations can be evaluated without changing canonical city data.
+
+E5-03 does not implement business control, ownership acquisition or transfer, business-derived income, business upkeep, hideout upkeep, concrete money amounts, operation modifiers, storage or safehouse capacity, recruitment, UI, global tick-loop integration, root `GameState` integration, save/load, or final balancing.
+
+The immediate next roadmap task is E5-04, `Implement basic business control and income generation`.
 
 ### Current balance
 
